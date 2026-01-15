@@ -30,7 +30,6 @@ return new class extends Migration
 
     $table->unique(['running_number', 'tahun', 'kode_jenis']);
 });
-
     }
 
     /**

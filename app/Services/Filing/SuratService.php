@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Filing;
 
 use App\Models\Surat;
 use App\Services\NomorSuratGenerator;

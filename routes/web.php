@@ -1,11 +1,35 @@
 <?php
 
-use App\Http\Controllers\SuratController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Filing\SuratController;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::post('/surat', [SuratController::class, 'store'])
-    ->name('surat.store');
 Route::get('/', function () {
-    return Inertia::render('Dashboard');
+    return Inertia::render('Welcome', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+        'laravelVersion' => Application::VERSION,
+        'phpVersion' => PHP_VERSION,
+    ]);
 });
+
+Route::get('/dashboard', function () {
+    return Inertia::render('Dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware(['auth'])->prefix('filing')->name('filing.')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::resource('surat', SuratController::class);
+
+    Route::post('/surat/{surat}', [SuratController::class, 'uploadFile'])->name('surat.upload-file');
+    Route::post('/surat/{surat}/upload-pdf', [SuratController::class, 'uploadPdf'])->name('surat.upload-pdf');
+    
+    
+});
+
+require __DIR__.'/auth.php';

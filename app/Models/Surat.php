@@ -3,12 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\NomorSuratLog;
 use App\Models\SuratCap;
 use App\Models\SuratTtd;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Surat extends Model
+class Surat extends Model implements HasMedia
 {
+
+    use InteractsWithMedia;
+    use SoftDeletes;
+
     protected $table = 'surat';
 
     protected $fillable = [
@@ -20,6 +27,18 @@ class Surat extends Model
         'isi_surat',
         'status',
     ];
+
+    /**
+     * Koleksi khusus untuk pdf surat
+     */
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('pdf')
+            ->useDisk('public')
+            ->acceptsMimeTypes(['application/pdf'])
+            ->singleFile();
+        }
 
     /*
     |--------------------------------------------------------------------------
@@ -42,11 +61,10 @@ public function ttds()
     return $this->hasMany(SuratTtd::class);
 }
 
-/* ini komen
+
 public function files()
 {
     return $this->hasMany(FileUpload::class);
 }
-samapi sini */ 
-
+ 
 }
