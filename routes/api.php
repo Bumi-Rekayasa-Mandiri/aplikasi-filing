@@ -9,4 +9,4 @@ Route::prefix('surat')->group(function () {
     Route::get('/{surat}', [SuratController::class, 'show']);
     Route::put('/{surat}', [SuratController::class, 'update']);
     Route::post('/{surat}/upload', [SuratController::class, 'uploadFile']);
-});
+ }); 

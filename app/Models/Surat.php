@@ -12,9 +12,12 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Surat extends Model implements HasMedia
 {
+    use InteractsWithMedia, SoftDeletes;
 
-    use InteractsWithMedia;
-    use SoftDeletes;
+    const STATUS_DRAFT = 'draft';
+    const STATUS_SUBMITTED = 'submitted';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_REJECTED = 'rejected';
 
     protected $table = 'surat';
 
@@ -28,43 +31,29 @@ class Surat extends Model implements HasMedia
         'status',
     ];
 
-    /**
-     * Koleksi khusus untuk pdf surat
-     */
-
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('pdf')
-            ->useDisk('public')
-            ->acceptsMimeTypes(['application/pdf'])
             ->singleFile();
-        }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Relationships
-    |--------------------------------------------------------------------------
-    */
+        $this->addMediaCollection('cap')
+            ->singleFile();
 
-public function nomorSuratLogs()
-{
-    return $this->hasMany(NomorSuratLog::class);
-}
+        $this->addMediaCollection('ttd');
+    }
 
-public function cap()
-{
-    return $this->hasOne(SuratCap::class);
-}
+    public function nomorSuratLogs()
+    {
+        return $this->hasMany (NomorSuratLog::class);
+    }
 
-public function ttds()
-{
-    return $this->hasMany(SuratTtd::class);
-}
+    public function cap ()
+    {
+        return $this->hasOne(SuratCap::class);
+    }
 
-
-public function files()
-{
-    return $this->hasMany(FileUpload::class);
-}
- 
+    public function ttds()
+    {
+        return $this->hasMany(SuratTtd::class);
+    }
 }

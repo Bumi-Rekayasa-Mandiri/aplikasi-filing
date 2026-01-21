@@ -19,37 +19,31 @@ class SuratController extends Controller
     public function index(Request $request)
     {
 
-    //dd(auth()->check(), auth()->user());
+        //dd(auth()->check(), auth()->user());
 
-    $this->authorize('viewAny', Surat::class);
+        $this->authorize('viewAny', Surat::class);
 
-    return Inertia::render('filing/surat/Index', [
-        'surat' => Surat::paginate(10),
-    ]);
+        $query = Surat::query();
 
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('judul', 'like', "%{$request->search}%")
+                ->orWhere('nomor_surat', 'like', "%{$request->search}%");
+            });
+        }
+        
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+            
+        return Inertia::render('filing/surat/Index', [
+            'surat' => $query
 
-    $query = Surat::query();
-
-    if ($request->filled('search')) {
-        $query->where(function ($q) use ($request) {
-            $q->where('judul', 'like', "%{$request->search}%")
-              ->orWhere('nomor_surat', 'like', "%{$request->search}%");
-        });
-    }
-
-    if ($request->filled('status')) {
-        $query->where('status', $request->status);
-    }
-
-    $surat = $query
-        ->orderByDesc('tanggal_surat')
-        ->paginate(10)
-        ->withQueryString();
-
-    return Inertia::render('filing/surat/Index', [
-        'surat'   => $surat,
-        'filters' => $request->only(['search', 'status']),
-    ]);
+            ->orderByDesc('tanggal_surat')
+            ->paginate(10)
+            ->withQueryString(),
+        
+        ]);
     }
 
     public function show(Surat $surat)
@@ -57,16 +51,25 @@ class SuratController extends Controller
 
         $this->authorize('view', $surat);
 
-    $surat->load([
-        'nomorSuratLogs' => fn ($q) => $q->latest(),
-        'cap.file',
-        'ttds.file',
-        'files'
-    ]);
+            $surat->load([
+            'nomorSuratLogs' => fn ($q) => $q->latest(),
+            'ttds.media',
+            'cap.media',
+        ]);
 
-    return Inertia::render('filing/surat/Show', [
-        'surat' => [...$surat->toArray(), 'pdf_url' => $surat->getFirstMediaUrl('pdf')],
-    ]);
+        return Inertia::render('filing/surat/Show', [
+        'surat' => [
+                ...$surat->toArray(),
+                'pdf_url' => $surat->getFirstMediaUrl('pdf'),
+                'cap_url' => $surat->getFirstMediaUrl('cap'),
+                'ttds' => $surat->ttds->map(fn ($t) => [
+                    'id' => $t->id,
+                    'nama' => $t->nama_penandatangan,
+                    'jabatan' => $t->jabatan,
+                    'url' => $t->getFirstMediaUrl('ttd'),
+                ]),
+            ],
+        ]);    
     }
 
     /**
@@ -74,10 +77,9 @@ class SuratController extends Controller
      */
     public function store(Request $request)
     {
+            $this->authorize('create', Surat::class);
 
-        $this->authorize('create', Surat::class);
-
-        $validated = $request->validate([
+            $validated = $request->validate([
             'judul'      => 'required|string|max:255',
             'perihal'    => 'required|string|max:255',
             'tujuan'     => 'required|string|max:255',
@@ -86,34 +88,12 @@ class SuratController extends Controller
             'tanggal_surat' => 'required|date',
         ]);
 
-        return DB::transaction(function () use ($validated) {
-
-            $generator = app(NomorSuratGenerator::class);
-            $nomor = $generator->generate($validated['kode_jenis']);
-
-            $surat = Surat::create([
-                'judul'         => $validated['judul'],
-                'perihal'       => $validated['perihal'],
-                'tujuan'        => $validated['tujuan'],
-                'isi_surat'     => $validated['isi_surat'],
-                'tanggal_surat' => $validated['tanggal_surat'],
-                'nomor_surat'   => $nomor['nomor_surat'],
-                'status'        => 'draft',
-            ]);
-
-            NomorSuratLog::create([
-                'surat_id'       => $surat->id,
-                'running_number' => $nomor['running_number'],
-                'nomor_surat'    => $nomor['nomor_surat'],
-                'tahun'          => $nomor['tahun'],
-                'bulan'          => $nomor['bulan'],
-                'kode_jenis'     => $nomor['kode_jenis'],
-            ]);
+            $surat = app(\App\Services\Filing\SuratService::class)->create($validated);
 
             return redirect ()->route('filing.surat.show', $surat->id)
-                ->with('success', 'Surat berhasil dibuat dengan nomor surat: ' . $nomor['nomor_surat']);
-        });
+                ->with('success', 'Surat berhasil dibuat dengan nomor surat');
     }
+    
 
     public function create()
     {
@@ -125,7 +105,8 @@ class SuratController extends Controller
                 'GRS-BRM' => 'Surat Pengajuan Garansi Material',
                 'SPD-BRM' => 'Surat Pengembalian Dana',
                 'SK-BRM' => 'Surat Permohonan Keringanan Denda',
-                'IEI-BRM' => 'Surat Garansi Pemasangan',
+                'IEI-BRM' => 'Surat Garansi Pekerjaan',
+                'SPI-BRM' => 'Surat Permohonan Investasi',
                 'BRM' => 'Surat Pelepasan Hak / Surat Izin Kerja dan LK3',
             ],
         ]);
@@ -136,62 +117,77 @@ class SuratController extends Controller
   
         $this->authorize('update', $surat);
 
-    $validated = $request->validate([
+        $validated = $request->validate([
         'judul'      => 'required|string|max:255',
         'perihal'    => 'required|string|max:255',
         'tujuan'     => 'required|string|max:255',
         'isi_surat'  => 'required|string',
         'kode_jenis' => 'required|string|max:10',
         'tanggal_surat' => 'required|date',
-    ]);
+        ]);
 
         $surat->update($validated);
 
-    DB::transaction(function () use ($surat, $validated) {
-        // logic nomor surat tetap
-    });
-
-    return redirect()
+        return redirect()
         ->route('filing.surat.show', $surat->id)
         ->with('success', 'Surat berhasil diperbarui');
     }
 
     public function edit(Surat $surat)
-{
-    $this->authorize('update', $surat);
+    {
+        $this->authorize('update', $surat);
 
-    return Inertia::render('filing/surat/Edit', [
-        'surat' => $surat,
-        'kodeJenis' => [
-            'SPK-BRM' => 'Surat Pemberitahuan atau PHK',
-                'GRS-BRM' => 'Surat Pengajuan Garansi Material',
-                'SPD-BRM' => 'Surat Pengembalian Dana',
-                'SK-BRM' => 'Surat Permohonan Keringanan Denda',
-                'IEI-BRM' => 'Surat Garansi Pemasangan',
-                'BRM' => 'Surat Pelepasan Hak / Surat Izin Kerja dan LK3',
-        ],
-    ]);
-}
-
+        return Inertia::render('filing/surat/Edit', [
+            'surat' => $surat,
+            'kodeJenis' => [
+                'SPK-BRM' => 'Surat Pemberitahuan atau PHK',
+                    'GRS-BRM' => 'Surat Pengajuan Garansi Material',
+                    'SPD-BRM' => 'Surat Pengembalian Dana',
+                    'SK-BRM' => 'Surat Permohonan Keringanan Denda',
+                    'IEI-BRM' => 'Surat Garansi Pekerjaan',
+                    'SPI-BRM' => 'Surat Permohonan Investasi',
+                    'BRM' => 'Surat Pelepasan Hak / Surat Izin Kerja dan LK3',
+            ],
+        ]);
+    }
 
     /**
      * UPLOAD CAP / TTD
      */
-    public function uploadFile(Request $request, Surat $surat)
+    public function uploadCap(Request $request, Surat $surat)
     {
+        $this->authorize('update', $surat);
 
-    $request->validate([
-        'file' => 'required|file|mimes:png,jpg,jpeg,pdf|max:10240',
-        'type' => 'required|in:cap,ttd',
-    ]);
+        $request->validate([
+            'cap' => ['required', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
+        ]);
 
-    DB::transaction(function () use ($request, $surat) {
-        // upload & relasi file
-    });
+        $cap = $surat->cap ?: $surat->cap()->create();
 
-    return redirect()
-        ->back()
-        ->with('success', 'File berhasil diupload');
+        $cap->clearMediaCollection('cap');
+        $cap->addMediaFromRequest('cap')->toMediaCollection('cap');
+
+        return back()->with('success', 'Cap perusahaan berhasil diupload');
+    }
+
+    public function uploadTtd(Request $request, Surat $surat)
+    {
+        $this->authorize('update', $surat);
+
+        $request->validate([
+            'ttd' => ['required', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
+            'nama_penandatangan' => ['required', 'string'],
+            'jabatan' => ['required', 'string'],
+        ]);
+
+        $ttd = $surat->ttds()->create([
+            'nama_penandatangan' => $request->nama_penandatangan,
+            'jabatan' => $request->jabatan,
+        ]);
+
+        $ttd->addMediaFromRequest('ttd')->toMediaCollection('ttd');
+
+        return back()->with('success', 'Tanda tangan berhasil ditambahkan');
     }
 
     /**
@@ -199,24 +195,32 @@ class SuratController extends Controller
      */
 
     public function uploadPdf(Request $request, Surat $surat)
-{
+    {
 
-    $this->authorize('uploadPdf', $surat);
+        $this->authorize('uploadPdf', $surat);
 
-    $request->validate([
-        'pdf' => ['required', 'file', 'mimes:pdf', 'max:10240'],
-    ]);
+        $request->validate([
+            'pdf' => ['required', 'file', 'mimes:pdf', 'max:10240'],
+        ]);
 
-    // Hapus PDF lama (jika ada)
-    $surat->clearMediaCollection('pdf');
+        // Hapus PDF lama (jika ada)
+        $surat->clearMediaCollection('pdf');
 
-    // Simpan PDF baru
-    $surat
-        ->addMediaFromRequest('pdf')
-        ->usingName('surat-' . $surat->id)
-        ->toMediaCollection('pdf');
+        // Simpan PDF baru
+        $surat
+            ->addMediaFromRequest('pdf')
+            ->usingName('surat-' . $surat->id)
+            ->toMediaCollection('pdf');
 
-    return redirect()->back()->with('success', 'PDF surat berhasil diupload.');
-}
+        return redirect()->back()->with('success', 'PDF surat berhasil diupload.');
+    }
 
+    public function destroy(Surat $surat)
+    {
+        $this->authorize('delete', $surat);
+
+        $surat->delete();
+
+        return Inertia::render('filing/surat/Index')->with('success', 'Surat berhasil dihapus');
+    }
 }

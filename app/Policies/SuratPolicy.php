@@ -38,7 +38,7 @@ class SuratPolicy
      */
     public function update(User $user, Surat $surat): bool
     {
-        return $surat->status ==='draft';
+        return $surat->status !== Surat::STATUS_APPROVED;
     }
 
     public function uploadPdf(User $user, Surat $surat): bool
@@ -69,4 +69,15 @@ class SuratPolicy
     {
         return true;
     }
+
+    public function approve(User $user, Surat $surat):bool
+    {
+        return $user->hasRole('admin') && $surat->status === Surat::STATUS_SUBMITTED;
+    }
+
+    public function reject(User $user, Surat $surat):bool
+    {
+        return $user->hasRole('admin') && $surat->status === Surat::STATUS_SUBMITTED;
+    }
+
 }

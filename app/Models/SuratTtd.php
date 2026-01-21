@@ -3,17 +3,18 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class SuratTtd extends Model
+class SuratTtd extends Model implements HasMedia
 {
-    protected $table = 'surat_ttd';
 
+    use InteractsWithMedia;
+    
     protected $fillable = [
         'surat_id',
-        'file_upload_id',
         'nama_penandatangan',
-        'jabatan_penandatangan',
-        'urutan',
+        'jabatan',
     ];
 
     public function surat()
@@ -21,9 +22,8 @@ class SuratTtd extends Model
         return $this->belongsTo(Surat::class);
     }
 
-  public function file()
+    public function getUrlAttribute()
     {
-        return $this->belongsTo(FileUpload::class, 'file_upload_id');
+        return $this->getFirstMediaUrl('ttd');
     }
-
 }

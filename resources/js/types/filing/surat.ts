@@ -20,6 +20,6 @@ export interface Surat {
   isi_surat: string
   nomor_surat: string
   tanggal_surat: string
-  status: 'draft' | 'final'
+  status: 'draft' | 'submitted' | 'approved' | 'rejected'
   nomor_surat_logs?: NomorSuratLog[]
 }

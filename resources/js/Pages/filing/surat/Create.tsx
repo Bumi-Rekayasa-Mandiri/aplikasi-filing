@@ -1,7 +1,9 @@
 import { useForm, Head } from '@inertiajs/react'
 import AppLayout from '@/layouts/AppLayout'
 
-export default function SuratCreate() {
+type Props = {kodeJenis: Record<string, string>}
+
+export default function Create({kodeJenis}: Props) {
   const { data, setData, post, processing, errors } = useForm({
     judul: '',
     tanggal_surat: '',
