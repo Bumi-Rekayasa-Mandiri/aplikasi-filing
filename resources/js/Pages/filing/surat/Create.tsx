@@ -48,17 +48,6 @@ export default function Create({kodeJenis}: Props) {
           onChange={e => setData('tujuan', e.target.value)}
         />
 
-        <select
-            className="select select-bordered w-full"
-            onChange={e => setData('kode_jenis', e.target.value)}
-            >
-                <option value="">Pilih Jenis Surat</option>
-                
-                {Object.entries(kodeJenis).map(([key, label]) => (
-                    <option key={key} value={key}>{label}</option>
-                    ))}
-        </select>
-
         <textarea
           className="textarea textarea-bordered w-full"
           placeholder="Isi Surat"

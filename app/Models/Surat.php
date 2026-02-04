@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\NomorSuratLog;
 use App\Models\SuratCap;
 use App\Models\SuratTtd;
+use App\Enums\SuratStatus;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -21,6 +22,10 @@ class Surat extends Model implements HasMedia
 
     protected $table = 'surat';
 
+     protected $casts = [
+        'status' => SuratStatus::class,
+    ];
+
     protected $fillable = [
         'judul',
         'nomor_surat',
@@ -33,9 +38,6 @@ class Surat extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('pdf')
-            ->singleFile();
-
         $this->addMediaCollection('cap')
             ->singleFile();
 

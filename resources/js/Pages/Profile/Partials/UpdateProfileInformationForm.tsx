@@ -1,28 +1,49 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import { Transition } from '@headlessui/react';
-import { Link, useForm, usePage } from '@inertiajs/react';
+import InputError from '@/components/InputError'
+import InputLabel from '@/components/InputLabel'
+import PrimaryButton from '@/components/PrimaryButton'
+import TextInput from '@/components/TextInput'
+import { Transition } from '@headlessui/react'
+import { Link, useForm, usePage } from '@inertiajs/react'
+import { PageProps } from '@inertiajs/core'
 
-export default function UpdateProfileInformation({
+interface ProfileForm {
+    name: string
+    email: string
+}
+
+interface Props {
+    mustVerifyEmail: boolean
+    status?: string
+    className?: string
+}
+
+export default function UpdateProfileInformationForm({
     mustVerifyEmail,
     status,
     className = '',
-}) {
-    const user = usePage().props.auth.user;
+}: Props) {
+    const { auth } = usePage<PageProps>().props
+    const user = auth.user
 
-    const { data, setData, patch, errors, processing, recentlySuccessful } =
-        useForm({
-            name: user.name,
-            email: user.email,
-        });
+    const {
+        data,
+        setData,
+        patch,
+        errors,
+        processing,
+        recentlySuccessful,
+    } = useForm<ProfileForm>({
+        name: user.name,
+        email: user.email,
+    })
 
-    const submit = (e) => {
-        e.preventDefault();
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault()
 
-        patch(route('profile.update'));
-    };
+        patch(route('filing.profile.update'), {
+            preserveScroll: true,
+        })
+    }
 
     return (
         <section className={className}>
@@ -32,7 +53,8 @@ export default function UpdateProfileInformation({
                 </h2>
 
                 <p className="mt-1 text-sm text-gray-600">
-                    Update your account's profile information and email address.
+                    Update your account&apos;s profile information and email
+                    address.
                 </p>
             </header>
 
@@ -44,13 +66,18 @@ export default function UpdateProfileInformation({
                         id="name"
                         className="mt-1 block w-full"
                         value={data.name}
-                        onChange={(e) => setData('name', e.target.value)}
+                        onChange={(e) =>
+                            setData('name', e.target.value)
+                        }
                         required
-                        isFocused
+                        autoFocus
                         autoComplete="name"
                     />
 
-                    <InputError className="mt-2" message={errors.name} />
+                    <InputError
+                        className="mt-2"
+                        message={errors.name}
+                    />
                 </div>
 
                 <div>
@@ -61,18 +88,23 @@ export default function UpdateProfileInformation({
                         type="email"
                         className="mt-1 block w-full"
                         value={data.email}
-                        onChange={(e) => setData('email', e.target.value)}
+                        onChange={(e) =>
+                            setData('email', e.target.value)
+                        }
                         required
                         autoComplete="username"
                     />
 
-                    <InputError className="mt-2" message={errors.email} />
+                    <InputError
+                        className="mt-2"
+                        message={errors.email}
+                    />
                 </div>
 
                 {mustVerifyEmail && user.email_verified_at === null && (
                     <div>
                         <p className="mt-2 text-sm text-gray-800">
-                            Your email address is unverified.
+                            Your email address is unverified.&nbsp;
                             <Link
                                 href={route('verification.send')}
                                 method="post"
@@ -93,7 +125,9 @@ export default function UpdateProfileInformation({
                 )}
 
                 <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>Save</PrimaryButton>
+                    <PrimaryButton disabled={processing}>
+                        Save
+                    </PrimaryButton>
 
                     <Transition
                         show={recentlySuccessful}
@@ -109,5 +143,5 @@ export default function UpdateProfileInformation({
                 </div>
             </form>
         </section>
-    );
+    )
 }

@@ -35,10 +35,11 @@
     31 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     32 => 'Termwind\\Laravel\\TermwindServiceProvider',
     33 => 'Spatie\\MediaLibrary\\MediaLibraryServiceProvider',
-    34 => 'Tighten\\Ziggy\\ZiggyServiceProvider',
-    35 => 'App\\Providers\\AppServiceProvider',
-    36 => 'App\\Providers\\RouteServiceProvider',
-    37 => 'App\\Providers\\AuthServiceProvider',
+    34 => 'Spatie\\Permission\\PermissionServiceProvider',
+    35 => 'Tighten\\Ziggy\\ZiggyServiceProvider',
+    36 => 'App\\Providers\\AppServiceProvider',
+    37 => 'App\\Providers\\RouteServiceProvider',
+    38 => 'App\\Providers\\AuthServiceProvider',
   ),
   'eager' => 
   array (
@@ -60,10 +61,11 @@
     15 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     16 => 'Termwind\\Laravel\\TermwindServiceProvider',
     17 => 'Spatie\\MediaLibrary\\MediaLibraryServiceProvider',
-    18 => 'Tighten\\Ziggy\\ZiggyServiceProvider',
-    19 => 'App\\Providers\\AppServiceProvider',
-    20 => 'App\\Providers\\RouteServiceProvider',
-    21 => 'App\\Providers\\AuthServiceProvider',
+    18 => 'Spatie\\Permission\\PermissionServiceProvider',
+    19 => 'Tighten\\Ziggy\\ZiggyServiceProvider',
+    20 => 'App\\Providers\\AppServiceProvider',
+    21 => 'App\\Providers\\RouteServiceProvider',
+    22 => 'App\\Providers\\AuthServiceProvider',
   ),
   'deferred' => 
   array (

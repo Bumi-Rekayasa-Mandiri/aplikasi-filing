@@ -19,7 +19,7 @@ return new class extends Migration
     $table->string('perihal');
     $table->string('tujuan');
     $table->text('isi_surat');
-    $table->string('status')->default('draft');
+    $table->index('status')->default(\App\Enums\SuratStatus::DRAFT->value);
     $table->timestamps();
 });
     }

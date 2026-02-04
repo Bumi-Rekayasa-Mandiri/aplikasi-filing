@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/AppLayout'
-import { Head, useForm } from '@inertiajs/react'
+import { Head, router, useForm } from '@inertiajs/react'
 import UploadPdfForm from '@/Pages/filing/surat/UploadPdfForm'
 
 type Props = {
@@ -63,7 +63,7 @@ export default function Show({ surat }: Props) {
 
   return (
     <AppLayout title="Detail Surat">
-      <Head title="Detail Surat" />
+      <Head title="Detail Surat"/>
 
       <div className="space-y-6 max-w-3xl">
 
@@ -76,13 +76,6 @@ export default function Show({ surat }: Props) {
           <p><strong>Tujuan:</strong> {surat.tujuan}</p>
           <p><strong>Status:</strong> {surat.status}</p>
         </div>
-
-        <hr />
-
-        {/* =======================
-            UPLOAD PDF
-        ======================= */}
-        <UploadPdfForm surat={surat} />
 
         <hr />
 
@@ -115,8 +108,6 @@ export default function Show({ surat }: Props) {
           </button>
         </form>
 
-        <hr />
-
         {/* =======================
             UPLOAD TTD
         ======================= */}
@@ -148,6 +139,35 @@ export default function Show({ surat }: Props) {
           <button className="btn btn-primary btn-sm" disabled={ttdForm.processing}>
             Tambah TTD
           </button>
+
+
+          <div className="flex flex-wrap gap-4">
+            {(surat.ttds ?? []).map((ttd) => (
+              <div key={ttd.id} className="relative">
+                <img
+                  src={ttd.url}
+                  className="w-32 border rounded"
+                />
+                <p>{ttd.nama}</p>
+                <p className="text-xs text-gray-500">{ttd.jabatan}</p>
+
+                <button
+                  type="button"
+                  className="btn btn-xs btn-error absolute top-1 right-1"
+                  onClick={() => {
+                    if (confirm('Hapus TTD ini?')) {
+                      router.delete(
+                        route('filing.surat.delete-ttd', ttd.id),
+                        { preserveScroll: true }
+                      )
+                    }
+                  }}
+                >
+                  Hapus
+                </button>
+              </div>
+            ))}
+          </div>
         </form>
 
         {/* =======================
@@ -155,7 +175,7 @@ export default function Show({ surat }: Props) {
         ======================= */}
         {surat.ttds && surat.ttds.length > 0 && (
           <div className="grid grid-cols-2 gap-4">
-            {surat.ttds.map(ttd => (
+            {(surat.ttds ?? []).map(ttd => (
               <div key={ttd.id} className="border p-2">
                 <img src={ttd.url} className="w-full" />
                 <p className="text-sm font-semibold">{ttd.nama}</p>
@@ -164,13 +184,6 @@ export default function Show({ surat }: Props) {
             ))}
           </div>
         )}
-
-          {surat.status === 'submitted' && user.isAdmin && (
-            <div className="flex gap-2">
-              <Button onClick={approve}>Approve</Button>
-              <Button variant="danger" onClick={reject}>Reject</Button>
-            </div>
-          )}
 
       </div>
 

@@ -1,10 +1,18 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
-import DeleteUserForm from './Partials/DeleteUserForm';
-import UpdatePasswordForm from './Partials/UpdatePasswordForm';
-import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
+import AuthenticatedLayout from '@/layouts/AuthenticatedLayout'
+import { Head } from '@inertiajs/react'
+import DeleteUserForm from './Partials/DeleteUserForm'
+import UpdatePasswordForm from './Partials/UpdatePasswordForm'
+import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm'
 
-export default function Edit({ mustVerifyEmail, status }) {
+interface Props {
+    mustVerifyEmail: boolean
+    status?: string
+}
+
+export default function Edit({
+    mustVerifyEmail,
+    status,
+}: Props) {
     return (
         <AuthenticatedLayout
             header={
@@ -35,5 +43,5 @@ export default function Edit({ mustVerifyEmail, status }) {
                 </div>
             </div>
         </AuthenticatedLayout>
-    );
+    )
 }

@@ -8,7 +8,6 @@ type Props = {
     perihal: string
     tujuan: string
     isi_surat: string
-    kode_jenis: string
     tanggal_surat: string
   }
   kodeJenis: Record<string, string>
@@ -16,17 +15,16 @@ type Props = {
 
 export default function Edit({ surat, kodeJenis }: Props) {
   const { data, setData, put, processing, errors } = useForm({
-    judul: surat.judul,
-    tanggal_surat: surat.tanggal_surat,
-    perihal: surat.perihal,
-    tujuan: surat.tujuan,
-    kode_jenis: surat.kode_jenis,
-    isi_surat: surat.isi_surat,
+    judul: surat?.judul ?? '',
+    tanggal_surat: surat?.tanggal_surat ?? '',
+    perihal: surat?.perihal ?? '',
+    tujuan: surat?.tujuan ?? '',
+    isi_surat: surat?.isi_surat ?? '',
   })
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
-    router.put(`/filing/surat/${surat.id}`, data)
+    router.put(route('filing.surat.update', {surat: surat.id}), data)
   }
 
   return (
@@ -59,16 +57,6 @@ export default function Edit({ surat, kodeJenis }: Props) {
           value={data.tujuan}
           onChange={e => setData('tujuan', e.target.value)}
         />
-
-        <select
-          className="select select-bordered w-full"
-          value={data.kode_jenis}
-          onChange={e => setData('kode_jenis', e.target.value)}
-        >
-          {Object.entries(kodeJenis).map(([key, label]) => (
-            <option key={key} value={key}>{label}</option>
-          ))}
-        </select>
 
         <textarea
           className="textarea textarea-bordered w-full"

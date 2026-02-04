@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Filing;
 
 use App\Http\Controllers\Controller;
 use App\Models\Surat;
+use App\Enums\SuratStatus;
 
 class SuratApprovalController extends Controller
 {
@@ -21,7 +22,15 @@ class SuratApprovalController extends Controller
     {
         $this->authorize('approve', $surat);
 
-        app(\App\Services\Filing\SuratApprovalService::class)->approve($surat);
+        DB::transaction(function () use ($surat) {
+            $surat->update(['status' => SuratStatus::APPROVED]);
+        });
+
+        SuratApprovalLog::create([
+            'surat_id' => $surat->id,
+            'action' => 'approved',
+            'user_id' => auth()->id(),
+        ]);
 
         return back()->with('success', 'Surat disetujui');
     }
@@ -30,8 +39,16 @@ class SuratApprovalController extends Controller
     {
         $this->authorize('reject', $surat);
         
-        app(\App\Services\Filing\SuratApprovalService::class)->reject($surat);
+        DB::transaction(function () use ($surat) {
+            $surat->update(['status' => SuratStatus::REJECTED]);
+        });
 
+        SuratApprovalLog::create([
+            'surat_id' => $surat->id,
+            'action' => 'rejected',
+            'user_id' => auth()->id(),
+        ]);
+        
         return back()->with('success', 'Surat ditolak');
     }
 

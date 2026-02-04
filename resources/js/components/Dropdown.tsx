@@ -1,107 +1,99 @@
-import { Transition } from '@headlessui/react';
-import { Link } from '@inertiajs/react';
-import { createContext, useContext, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react'
+import { Link } from '@inertiajs/react'
 
-const DropDownContext = createContext();
+interface DropdownProps {
+    align?: 'left' | 'right'
+    width?: '48'
+    trigger: ReactNode
+    children: ReactNode
+}
 
-const Dropdown = ({ children }) => {
-    const [open, setOpen] = useState(false);
+export default function Dropdown({
+    align = 'right',
+    width = '48',
+    trigger,
+    children,
+}: DropdownProps) {
+    const [open, setOpen] = useState(false)
+    const dropdownRef = useRef<HTMLDivElement>(null)
 
-    const toggleOpen = () => {
-        setOpen((previousState) => !previousState);
-    };
+    useEffect(() => {
+        const closeOnEscape = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setOpen(false)
+        }
+
+        document.addEventListener('keydown', closeOnEscape)
+        return () => document.removeEventListener('keydown', closeOnEscape)
+    }, [])
+
+    useEffect(() => {
+        const closeOnClickOutside = (e: MouseEvent) => {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(e.target as Node)
+            ) {
+                setOpen(false)
+            }
+        }
+
+        document.addEventListener('mousedown', closeOnClickOutside)
+        return () =>
+            document.removeEventListener('mousedown', closeOnClickOutside)
+    }, [])
+
+    let alignmentClasses = 'origin-top-right right-0'
+    if (align === 'left') {
+        alignmentClasses = 'origin-top-left left-0'
+    }
+
+    let widthClasses = 'w-48'
+    if (width === '48') {
+        widthClasses = 'w-48'
+    }
 
     return (
-        <DropDownContext.Provider value={{ open, setOpen, toggleOpen }}>
-            <div className="relative">{children}</div>
-        </DropDownContext.Provider>
-    );
-};
-
-const Trigger = ({ children }) => {
-    const { open, setOpen, toggleOpen } = useContext(DropDownContext);
-
-    return (
-        <>
-            <div onClick={toggleOpen}>{children}</div>
+        <div className="relative" ref={dropdownRef}>
+            <div onClick={() => setOpen((prev) => !prev)}>
+                {trigger}
+            </div>
 
             {open && (
                 <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setOpen(false)}
-                ></div>
-            )}
-        </>
-    );
-};
-
-const Content = ({
-    align = 'right',
-    width = '48',
-    contentClasses = 'py-1 bg-white',
-    children,
-}) => {
-    const { open, setOpen } = useContext(DropDownContext);
-
-    let alignmentClasses = 'origin-top';
-
-    if (align === 'left') {
-        alignmentClasses = 'ltr:origin-top-left rtl:origin-top-right start-0';
-    } else if (align === 'right') {
-        alignmentClasses = 'ltr:origin-top-right rtl:origin-top-left end-0';
-    }
-
-    let widthClasses = '';
-
-    if (width === '48') {
-        widthClasses = 'w-48';
-    }
-
-    return (
-        <>
-            <Transition
-                show={open}
-                enter="transition ease-out duration-200"
-                enterFrom="opacity-0 scale-95"
-                enterTo="opacity-100 scale-100"
-                leave="transition ease-in duration-75"
-                leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95"
-            >
-                <div
                     className={`absolute z-50 mt-2 rounded-md shadow-lg ${alignmentClasses} ${widthClasses}`}
-                    onClick={() => setOpen(false)}
                 >
-                    <div
-                        className={
-                            `rounded-md ring-1 ring-black ring-opacity-5 ` +
-                            contentClasses
-                        }
-                    >
+                    <div className="rounded-md ring-1 ring-black ring-opacity-5 bg-white py-1">
                         {children}
                     </div>
                 </div>
-            </Transition>
-        </>
-    );
-};
+            )}
+        </div>
+    )
+}
 
-const DropdownLink = ({ className = '', children, ...props }) => {
+/**
+ * Dropdown Link
+ */
+interface DropdownLinkProps {
+    href: string
+    method?: 'get' | 'post' | 'put' | 'patch' | 'delete'
+    as?: 'a' | 'button'
+    children: ReactNode
+}
+
+Dropdown.Link = function DropdownLink({
+    href,
+    method = 'get',
+    as = 'a',
+    children,
+}: DropdownLinkProps) {
     return (
         <Link
-            {...props}
-            className={
-                'block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none ' +
-                className
-            }
+            href={href}
+            method={method}
+            as={as}
+            className="block w-full px-4 py-2 text-start text-sm text-gray-700 hover:bg-gray-100 focus:outline-none transition"
         >
             {children}
         </Link>
-    );
-};
-
-Dropdown.Trigger = Trigger;
-Dropdown.Content = Content;
-Dropdown.Link = DropdownLink;
-
-export default Dropdown;
+    )
+}

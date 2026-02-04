@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Surat;
 use App\Models\User;
+use App\Enums\SuratStatus;
 use Illuminate\Auth\Access\Response;
 
 class SuratPolicy
@@ -43,7 +44,7 @@ class SuratPolicy
 
     public function uploadPdf(User $user, Surat $surat): bool
     {
-        return $surat->status ==='draft';
+        return $surat->status === SuratStatus::DRAFT;
     }
 
     /**
@@ -72,12 +73,16 @@ class SuratPolicy
 
     public function approve(User $user, Surat $surat):bool
     {
-        return $user->hasRole('admin') && $surat->status === Surat::STATUS_SUBMITTED;
+        return $surat->status === SuratStatus::SUBMITTED;
     }
 
     public function reject(User $user, Surat $surat):bool
     {
-        return $user->hasRole('admin') && $surat->status === Surat::STATUS_SUBMITTED;
+        return $surat->status === SuratStatus::SUBMITTED;
     }
 
+    public function submit(User $user, Surat $surat):bool
+    {
+        return $surat->status === SuratStatus::DRAFT;
+    }
 }

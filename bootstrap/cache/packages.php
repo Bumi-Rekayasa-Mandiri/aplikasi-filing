@@ -81,6 +81,13 @@
       0 => 'Spatie\\MediaLibrary\\MediaLibraryServiceProvider',
     ),
   ),
+  'spatie/laravel-permission' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Spatie\\Permission\\PermissionServiceProvider',
+    ),
+  ),
   'tightenco/ziggy' => 
   array (
     'providers' => 

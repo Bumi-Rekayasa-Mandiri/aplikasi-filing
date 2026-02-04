@@ -1,14 +1,24 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import { Transition } from '@headlessui/react';
-import { useForm } from '@inertiajs/react';
-import { useRef } from 'react';
+import InputError from '@/components/InputError'
+import InputLabel from '@/components/InputLabel'
+import PrimaryButton from '@/components/PrimaryButton'
+import TextInput from '@/components/TextInput'
+import { Transition } from '@headlessui/react'
+import { useForm } from '@inertiajs/react'
+import { FormEventHandler, useRef } from 'react'
 
-export default function UpdatePasswordForm({ className = '' }) {
-    const passwordInput = useRef();
-    const currentPasswordInput = useRef();
+interface Props {
+    className?: string
+}
+
+interface FormData {
+    current_password: string
+    password: string
+    password_confirmation: string
+}
+
+export default function UpdatePasswordForm({ className = '' }: Props) {
+    const passwordInput = useRef<HTMLInputElement>(null)
+    const currentPasswordInput = useRef<HTMLInputElement>(null)
 
     const {
         data,
@@ -18,31 +28,31 @@ export default function UpdatePasswordForm({ className = '' }) {
         reset,
         processing,
         recentlySuccessful,
-    } = useForm({
+    } = useForm<FormData>({
         current_password: '',
         password: '',
         password_confirmation: '',
-    });
+    })
 
-    const updatePassword = (e) => {
-        e.preventDefault();
+    const updatePassword: FormEventHandler = (e) => {
+        e.preventDefault()
 
         put(route('password.update'), {
             preserveScroll: true,
             onSuccess: () => reset(),
-            onError: (errors) => {
-                if (errors.password) {
-                    reset('password', 'password_confirmation');
-                    passwordInput.current.focus();
+            onError: (formErrors) => {
+                if (formErrors.password) {
+                    reset('password', 'password_confirmation')
+                    passwordInput.current?.focus()
                 }
 
-                if (errors.current_password) {
-                    reset('current_password');
-                    currentPasswordInput.current.focus();
+                if (formErrors.current_password) {
+                    reset('current_password')
+                    currentPasswordInput.current?.focus()
                 }
             },
-        });
-    };
+        })
+    }
 
     return (
         <section className={className}>
@@ -122,7 +132,9 @@ export default function UpdatePasswordForm({ className = '' }) {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>Save</PrimaryButton>
+                    <PrimaryButton disabled={processing}>
+                        Save
+                    </PrimaryButton>
 
                     <Transition
                         show={recentlySuccessful}
@@ -138,5 +150,5 @@ export default function UpdatePasswordForm({ className = '' }) {
                 </div>
             </form>
         </section>
-    );
+    )
 }

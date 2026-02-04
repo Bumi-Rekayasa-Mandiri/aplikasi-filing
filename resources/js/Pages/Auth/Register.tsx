@@ -1,25 +1,35 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
+import InputError from '@/components/InputError'
+import InputLabel from '@/components/InputLabel'
+import PrimaryButton from '@/components/PrimaryButton'
+import TextInput from '@/components/TextInput'
+import GuestLayout from '@/layouts/GuestLayout'
+import { Head, Link, useForm } from '@inertiajs/react'
+import React from 'react'
+
+interface RegisterForm {
+    name: string
+    email: string
+    password: string
+    password_confirmation: string
+}
 
 export default function Register() {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        name: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
-    });
+    const { data, setData, post, processing, errors, reset } =
+        useForm<RegisterForm>({
+            name: '',
+            email: '',
+            password: '',
+            password_confirmation: '',
+        })
 
-    const submit = (e) => {
-        e.preventDefault();
+    const submit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
 
         post(route('register'), {
-            onFinish: () => reset('password', 'password_confirmation'),
-        });
-    };
+            onFinish: () =>
+                reset('password', 'password_confirmation'),
+        })
+    }
 
     return (
         <GuestLayout>
@@ -35,8 +45,10 @@ export default function Register() {
                         value={data.name}
                         className="mt-1 block w-full"
                         autoComplete="name"
-                        isFocused={true}
-                        onChange={(e) => setData('name', e.target.value)}
+                        isFocused
+                        onChange={(e) =>
+                            setData('name', e.target.value)
+                        }
                         required
                     />
 
@@ -53,7 +65,9 @@ export default function Register() {
                         value={data.email}
                         className="mt-1 block w-full"
                         autoComplete="username"
-                        onChange={(e) => setData('email', e.target.value)}
+                        onChange={(e) =>
+                            setData('email', e.target.value)
+                        }
                         required
                     />
 
@@ -70,7 +84,9 @@ export default function Register() {
                         value={data.password}
                         className="mt-1 block w-full"
                         autoComplete="new-password"
-                        onChange={(e) => setData('password', e.target.value)}
+                        onChange={(e) =>
+                            setData('password', e.target.value)
+                        }
                         required
                     />
 
@@ -91,7 +107,10 @@ export default function Register() {
                         className="mt-1 block w-full"
                         autoComplete="new-password"
                         onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
+                            setData(
+                                'password_confirmation',
+                                e.target.value,
+                            )
                         }
                         required
                     />
@@ -102,19 +121,25 @@ export default function Register() {
                     />
                 </div>
 
-                <div className="mt-4 flex items-center justify-end">
+                <div className="flex justify-center">
+                    <button
+                    type="submit"
+                    className="bg-green-700 mt-6 text-sm text-white w-full max-w-sm object-contain py-2 rounded-full font-semibold"
+                    disabled={processing}
+                    >
+                        Register
+                    </button>
+                </div>
+
+                <div className="mt-3 flex justify-center text-sm">
                     <Link
                         href={route('login')}
                         className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     >
                         Already registered?
                     </Link>
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Register
-                    </PrimaryButton>
                 </div>
             </form>
         </GuestLayout>
-    );
+    )
 }

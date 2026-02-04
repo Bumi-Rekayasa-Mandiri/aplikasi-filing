@@ -1,22 +1,28 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, useForm } from '@inertiajs/react';
+import InputError from '@/components/InputError'
+import InputLabel from '@/components/InputLabel'
+import PrimaryButton from '@/components/PrimaryButton'
+import TextInput from '@/components/TextInput'
+import GuestLayout from '@/layouts/GuestLayout'
+import { Head, useForm } from '@inertiajs/react'
+import React from 'react'
+
+interface ConfirmPasswordForm {
+    password: string
+}
 
 export default function ConfirmPassword() {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        password: '',
-    });
+    const { data, setData, post, processing, errors, reset } =
+        useForm<ConfirmPasswordForm>({
+            password: '',
+        })
 
-    const submit = (e) => {
-        e.preventDefault();
+    const submit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
 
         post(route('password.confirm'), {
             onFinish: () => reset('password'),
-        });
-    };
+        })
+    }
 
     return (
         <GuestLayout>
@@ -37,8 +43,10 @@ export default function ConfirmPassword() {
                         name="password"
                         value={data.password}
                         className="mt-1 block w-full"
-                        isFocused={true}
-                        onChange={(e) => setData('password', e.target.value)}
+                        isFocused
+                        onChange={(e) =>
+                            setData('password', e.target.value)
+                        }
                     />
 
                     <InputError message={errors.password} className="mt-2" />
@@ -51,5 +59,5 @@ export default function ConfirmPassword() {
                 </div>
             </form>
         </GuestLayout>
-    );
+    )
 }

@@ -21,5 +21,12 @@ export interface Surat {
   nomor_surat: string
   tanggal_surat: string
   status: 'draft' | 'submitted' | 'approved' | 'rejected'
+  has_file: boolean
   nomor_surat_logs?: NomorSuratLog[]
 }
+
+export type SuratStatus =
+  | 'draft'
+  | 'submitted'
+  | 'approved'
+  | 'rejected'

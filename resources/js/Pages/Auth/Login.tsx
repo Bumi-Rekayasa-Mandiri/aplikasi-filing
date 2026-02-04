@@ -1,25 +1,41 @@
-import Checkbox from '@/Components/Checkbox';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
+import Checkbox from '@/components/Checkbox'
+import InputError from '@/components/InputError'
+import InputLabel from '@/components/InputLabel'
+import PrimaryButton from '@/components/PrimaryButton'
+import TextInput from '@/components/TextInput'
+import GuestLayout from '@/layouts/GuestLayout'
+import { Head, Link, useForm } from '@inertiajs/react'
+import React from 'react'
 
-export default function Login({ status, canResetPassword }) {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        email: '',
-        password: '',
-        remember: false,
-    });
+interface LoginProps {
+    status?: string | null
+    canResetPassword: boolean
+}
 
-    const submit = (e) => {
-        e.preventDefault();
+interface LoginForm {
+    email: string
+    password: string
+    remember: boolean
+}
+
+export default function Login({
+    status,
+    canResetPassword,
+}: LoginProps) {
+    const { data, setData, post, processing, errors, reset } =
+        useForm<LoginForm>({
+            email: '',
+            password: '',
+            remember: false,
+        })
+
+    const submit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
 
         post(route('login'), {
             onFinish: () => reset('password'),
-        });
-    };
+        })
+    }
 
     return (
         <GuestLayout>
@@ -42,8 +58,10 @@ export default function Login({ status, canResetPassword }) {
                         value={data.email}
                         className="mt-1 block w-full"
                         autoComplete="username"
-                        isFocused={true}
-                        onChange={(e) => setData('email', e.target.value)}
+                        isFocused
+                        onChange={(e) =>
+                            setData('email', e.target.value)
+                        }
                     />
 
                     <InputError message={errors.email} className="mt-2" />
@@ -59,7 +77,9 @@ export default function Login({ status, canResetPassword }) {
                         value={data.password}
                         className="mt-1 block w-full"
                         autoComplete="current-password"
-                        onChange={(e) => setData('password', e.target.value)}
+                        onChange={(e) =>
+                            setData('password', e.target.value)
+                        }
                     />
 
                     <InputError message={errors.password} className="mt-2" />
@@ -80,7 +100,18 @@ export default function Login({ status, canResetPassword }) {
                     </label>
                 </div>
 
-                <div className="mt-4 flex items-center justify-end">
+                <div className="flex justify-center">
+                    <button
+                    type="submit"
+                    className="bg-green-700 mt-4 text-sm text-white w-full max-w-sm object-contain py-2 rounded-full font-semibold"
+                    disabled={processing}
+                            >
+                        Login
+                    </button>
+                </div>
+            
+
+                <div className="mt-2 flex justify-between text-sm">
                     {canResetPassword && (
                         <Link
                             href={route('password.request')}
@@ -90,11 +121,14 @@ export default function Login({ status, canResetPassword }) {
                         </Link>
                     )}
 
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Log in
-                    </PrimaryButton>
+                        <Link
+                            href={route('register')}
+                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        >
+                            Don't have an account?
+                        </Link>
                 </div>
             </form>
         </GuestLayout>
-    );
+    )
 }

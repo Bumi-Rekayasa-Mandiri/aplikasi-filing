@@ -48,3 +48,7 @@ return (
     </>
 );
 }
+
+function route(arg0: string, id: any): string {
+    throw new Error('Function not implemented.');
+}

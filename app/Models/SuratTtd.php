@@ -22,6 +22,8 @@ class SuratTtd extends Model implements HasMedia
         return $this->belongsTo(Surat::class);
     }
 
+    protected $appends = ['url'];
+
     public function getUrlAttribute()
     {
         return $this->getFirstMediaUrl('ttd');

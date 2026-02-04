@@ -1,25 +1,43 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, useForm } from '@inertiajs/react';
+import InputError from '@/components/InputError'
+import InputLabel from '@/components/InputLabel'
+import PrimaryButton from '@/components/PrimaryButton'
+import TextInput from '@/components/TextInput'
+import GuestLayout from '@/layouts/GuestLayout'
+import { Head, useForm } from '@inertiajs/react'
+import React from 'react'
 
-export default function ResetPassword({ token, email }) {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        token: token,
-        email: email,
-        password: '',
-        password_confirmation: '',
-    });
+interface ResetPasswordProps {
+    token: string
+    email: string
+}
 
-    const submit = (e) => {
-        e.preventDefault();
+interface ResetPasswordForm {
+    token: string
+    email: string
+    password: string
+    password_confirmation: string
+}
+
+export default function ResetPassword({
+    token,
+    email,
+}: ResetPasswordProps) {
+    const { data, setData, post, processing, errors, reset } =
+        useForm<ResetPasswordForm>({
+            token,
+            email,
+            password: '',
+            password_confirmation: '',
+        })
+
+    const submit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
 
         post(route('password.store'), {
-            onFinish: () => reset('password', 'password_confirmation'),
-        });
-    };
+            onFinish: () =>
+                reset('password', 'password_confirmation'),
+        })
+    }
 
     return (
         <GuestLayout>
@@ -36,10 +54,15 @@ export default function ResetPassword({ token, email }) {
                         value={data.email}
                         className="mt-1 block w-full"
                         autoComplete="username"
-                        onChange={(e) => setData('email', e.target.value)}
+                        onChange={(e) =>
+                            setData('email', e.target.value)
+                        }
                     />
 
-                    <InputError message={errors.email} className="mt-2" />
+                    <InputError
+                        message={errors.email}
+                        className="mt-2"
+                    />
                 </div>
 
                 <div className="mt-4">
@@ -52,11 +75,16 @@ export default function ResetPassword({ token, email }) {
                         value={data.password}
                         className="mt-1 block w-full"
                         autoComplete="new-password"
-                        isFocused={true}
-                        onChange={(e) => setData('password', e.target.value)}
+                        isFocused
+                        onChange={(e) =>
+                            setData('password', e.target.value)
+                        }
                     />
 
-                    <InputError message={errors.password} className="mt-2" />
+                    <InputError
+                        message={errors.password}
+                        className="mt-2"
+                    />
                 </div>
 
                 <div className="mt-4">
@@ -66,14 +94,17 @@ export default function ResetPassword({ token, email }) {
                     />
 
                     <TextInput
-                        type="password"
                         id="password_confirmation"
+                        type="password"
                         name="password_confirmation"
                         value={data.password_confirmation}
                         className="mt-1 block w-full"
                         autoComplete="new-password"
                         onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
+                            setData(
+                                'password_confirmation',
+                                e.target.value,
+                            )
                         }
                     />
 
@@ -84,11 +115,14 @@ export default function ResetPassword({ token, email }) {
                 </div>
 
                 <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
+                    <PrimaryButton
+                        className="ms-4"
+                        disabled={processing}
+                    >
                         Reset Password
                     </PrimaryButton>
                 </div>
             </form>
         </GuestLayout>
-    );
+    )
 }

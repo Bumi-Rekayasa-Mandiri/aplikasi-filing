@@ -1,15 +1,20 @@
-import PrimaryButton from '@/Components/PrimaryButton';
-import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
+import PrimaryButton from '@/components/PrimaryButton'
+import GuestLayout from '@/layouts/GuestLayout'
+import { Head, Link, useForm } from '@inertiajs/react'
+import React from 'react'
 
-export default function VerifyEmail({ status }) {
-    const { post, processing } = useForm({});
+interface VerifyEmailProps {
+    status?: string
+}
 
-    const submit = (e) => {
-        e.preventDefault();
+export default function VerifyEmail({ status }: VerifyEmailProps) {
+    const { post, processing } = useForm<Record<string, never>>({})
 
-        post(route('verification.send'));
-    };
+    const submit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+
+        post(route('verification.send'))
+    }
 
     return (
         <GuestLayout>
@@ -46,5 +51,5 @@ export default function VerifyEmail({ status }) {
                 </div>
             </form>
         </GuestLayout>
-    );
+    )
 }
