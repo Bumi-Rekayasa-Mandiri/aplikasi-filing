@@ -35,6 +35,8 @@ Route::middleware(['auth'])->prefix('filing')->name('filing.')->group(function (
     Route::delete('/surat/{surat}/destroy', [SuratController::class, 'destroy'])->name('surat.destroy');
     Route::post('/surat/{surat}/generate-nomor-surat', [SuratController::class, 'generateNomorSurat'])->name('surat.generate-nomor-surat');
     Route::post('/surat/{surat}/generate-pdf', [SuratController::class, 'generatePdf'])->name('surat.generate-pdf');
+    Route::get('/surat/{surat}/preview', [SuratController::class, 'preview'])->name('surat.preview');
+
 
     Route::post('/surat/{surat}/upload-cap', [SuratController::class, 'uploadCap'])->name('surat.upload-cap');
     Route::post('/surat/{surat}/upload-ttd', [SuratController::class, 'uploadTtd'])->name('surat.upload-ttd');

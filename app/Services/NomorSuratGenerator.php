@@ -44,10 +44,10 @@ class NomorSuratGenerator
             return [
                 'log_id'         => $log->id,     // ← INI YANG HILANG
                 'nomor_surat'    => $nomorSurat,
-                'running_number' => $running,
-                'tahun'          => $tahun,
-                'bulan'          => $bulan,
-                'kode_jenis'     => $kodeJenis,
+                // 'running_number' => $running,
+                // 'tahun'          => $tahun,
+                // 'bulan'          => $bulan,
+                // 'kode_jenis'     => $kodeJenis,
             ];
         });
     }

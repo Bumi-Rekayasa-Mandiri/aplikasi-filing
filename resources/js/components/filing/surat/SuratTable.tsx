@@ -84,7 +84,7 @@ export default function SuratTable({ data, sortField, sortDirection, onSort }: P
             <td className="px-4 py-3 text-center text-sm">
               <div className="flex justify-center gap-2">
                 <button
-                  className="btn btn-sm"
+                  className="btn btn-sm bg-green-700 px-4 py-2 rounded-full text-white font-semibold"
                   onClick={() =>
                     router.visit(route('filing.surat.show', s.id))
                   }
@@ -92,10 +92,19 @@ export default function SuratTable({ data, sortField, sortDirection, onSort }: P
                   Detail
                 </button>
 
+                <button
+                  className="btn btn-sm bg-blue-700 px-4 py-2 rounded-full text-white font-semibold"
+                  onClick={() =>
+                    router.visit(route('filing.surat.preview', s.id))
+                  }
+                >
+                  Preview
+                </button>
+
                 {s.status === 'draft' && (
                   <>
                     <button
-                      className="btn btn-sm btn-warning"
+                      className="btn btn-sm bg-yellow-600 px-4 py-2 rounded-full text-white font-semibold"
                       onClick={() =>
                         router.visit(route('filing.surat.edit', s.id))
                       }
@@ -104,7 +113,7 @@ export default function SuratTable({ data, sortField, sortDirection, onSort }: P
                     </button>
 
                     <button
-                      className="btn btn-sm btn-error"
+                      className="btn btn-sm bg-red-600 px-4 py-2 rounded-full text-white font-semibold"
                       onClick={() => destroy(s.id)}
                     >
                       Hapus

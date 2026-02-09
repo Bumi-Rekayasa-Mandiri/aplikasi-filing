@@ -7,7 +7,8 @@ type Props = {
     nomor_surat: string
     judul: string
     tujuan: string
-    status: string
+    status
+    : string
     cap_url?: string
     ttds?: {
       id: number
@@ -21,6 +22,8 @@ type Props = {
 export default function CreateSPK({ surat }: Props) {
   const { data, setData, post, processing, errors } = useForm({
     judul: '',
+    perihal: '',
+    tujuan: '',
     tanggal_surat: '',
     nama: '',
     jabatan_terakhir: '',
@@ -28,25 +31,42 @@ export default function CreateSPK({ surat }: Props) {
     isi_surat: '',
   })
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault()
-    post(route('filing.surat.generate-pdf', surat.id), {
-      preserveScroll: true,
-    })
-  }
+    const submit = (e: React.FormEvent) => {
+      e.preventDefault()
 
+      if (!surat?.id) {
+        console.error('SURAT ID MISSING', surat)
+        return
+      }
+
+      post(
+        route('filing.surat.generate-pdf', { surat: surat.id }),
+        { 
+          preserveScroll: true, 
+         }
+      )
+    }
 
   const capForm = useForm<{ cap: File | null }>({
     cap: null,
   })
 
-  const submitCap = (e: React.FormEvent) => {
-    e.preventDefault()
-    capForm.post(
-      route('filing.surat.upload-cap', surat.id),
-      { forceFormData: true }
-    )
-  }
+    const submitCap = (e: React.FormEvent) => {
+      e.preventDefault()
+
+      if (!surat?.id) {
+        console.error('SURAT ID MISSING', surat)
+        return
+      }
+
+      capForm.post(
+        route('filing.surat.upload-cap', { surat: surat.id }),
+        { 
+          forceFormData: true, 
+          preserveScroll: true,
+        }
+      )
+    }
 
   const ttdForm = useForm<{
     nama_penandatangan: string
@@ -58,13 +78,30 @@ export default function CreateSPK({ surat }: Props) {
     ttd: null,
   })
 
-  const submitTtd = (e: React.FormEvent) => {
-    e.preventDefault()
-    ttdForm.post(
-      route('filing.surat.upload-ttd', surat.id),
-      { forceFormData: true }
-    )
-  }
+    const submitTtd = (e: React.FormEvent) => {
+      e.preventDefault()
+
+      if (!surat?.id) {
+        console.error('SURAT ID MISSING', surat)
+        return
+      }
+
+      ttdForm.post(
+        route('filing.surat.upload-ttd', { surat: surat.id }),
+        { 
+          forceFormData: true, 
+          preserveScroll: true,
+         }
+      )
+    }
+
+    if (!surat?.id) {
+      return (
+        <AppLayout title="Loading">
+          <p className="text-gray-500">Menyiapkan draft surat…</p>
+        </AppLayout>
+      )
+    }
 
   return (
     <AppLayout title="Buat Surat Pemberitahuan PHK">
@@ -80,6 +117,20 @@ export default function CreateSPK({ surat }: Props) {
           onChange={e => setData('judul', e.target.value)}
         />
         {errors.judul && <div className="text-red-500">{errors.judul}</div>}
+
+        <input
+          className="input input-bordered w-full"
+          placeholder="Perihal"
+          onChange={e => setData('perihal', e.target.value)}
+        />
+        {errors.perihal && <div className="text-red-500">{errors.perihal}</div>}
+
+        <input
+          className="input input-bordered w-full"
+          placeholder="Tujuan"
+          onChange={e => setData('tujuan', e.target.value)}
+        />
+        {errors.tujuan && <div className="text-red-500">{errors.tujuan}</div>}
 
         <input
           type="date"

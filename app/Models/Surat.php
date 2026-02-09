@@ -34,6 +34,9 @@ class Surat extends Model implements HasMedia
         'tujuan',
         'isi_surat',
         'status',
+        'created_by',
+        'jenis',
+        'pdf_path',
     ];
 
     public function registerMediaCollections(): void
@@ -58,4 +61,21 @@ class Surat extends Model implements HasMedia
     {
         return $this->hasMany(SuratTtd::class);
     }
+
+    public function finalize(): void
+    {
+        if ($this->status !== 'draft') {
+            return;
+        }
+
+        // generate nomor surat jika belum ada
+        if (!$this->nomor_surat) {
+            $this->nomor_surat = app(\App\Services\NomorSuratGenerator::class)
+                ->generate($this);
+        }
+
+        $this->status = 'final';
+        $this->save();
+    }
+
 }
