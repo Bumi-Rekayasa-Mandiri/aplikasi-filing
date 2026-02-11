@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Filing\SuratController;
 use App\Http\Controllers\Filing\SuratApprovalController;
 use App\Http\Controllers\Filing\ArsipSuratController;
+use App\Http\Controllers\Filing\ArsipSertifikatController;
 use App\Http\Controllers\RolePermissionController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -52,6 +53,11 @@ Route::middleware(['auth'])->prefix('filing')->name('filing.')->group(function (
     Route::post('arsip/{arsip}/upload', [ArsipSuratController::class, 'uploadFile'])->name('arsip.upload');
 
     Route::get('arsip/{arsip}/download', [ArsipSuratController::class, 'download'])->name('arsip.download');
+
+    Route::resource('sertifikat', ArsipSertifikatController::class);
+    Route::post('sertifikat/{sertifikat}/upload', [ArsipSertifikatController::class, 'uploadFile'])->name('sertifikat.upload');
+
+    Route::get('sertifikat/{sertifikat}/download', [ArsipSertifikatController::class, 'download'])->name('sertifikat.download');
 
     Route::get('filing/surat/{surat}/download', [\App\Http\Controllers\Filing\SuratDownloadController::class, 'download'])->name('filing.surat.download');
 });

@@ -1,25 +1,25 @@
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout'
 import { Link } from '@inertiajs/react'
-import { ArsipSurat } from '@/types/filing/arsip'
+import { ArsipSertifikat } from '@/types/filing/sertifikat'
 import Pagination from '@/components/Pagination'
 import { Head, router, usePage } from '@inertiajs/react'
 import { useEffect, useState } from 'react'
 import { AppPageProps } from '@/types/filing/inertia'
 import SortIcon from '@/components/SortIcon'
 
-interface Arsip {
+interface Sertifikat {
   id: number
-  nomor_surat: string
-  judul: string
-  tujuan: string
-  jenis_surat: string
+  nama_sertifikat: string
+  nomor_sertifikat:string
+  jenis_sertifikat: string
+  instansi: string
   file_url: string | null
   file_name: string | null
 }
 
 interface PageProps {
-  arsip: {
-    data: Arsip[]
+  sertifikat: {
+    data: Sertifikat[]
     links: any[]
   }
   filters: {
@@ -31,7 +31,7 @@ interface PageProps {
 }
 
 export default function Index() {
-  const { arsip, filters, sort, direction } =
+  const { sertifikat, filters, sort, direction } =
     usePage<PageProps>().props
 
   const [search, setSearch] = useState(filters.search ?? '')
@@ -42,7 +42,7 @@ export default function Index() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       router.get(
-        route('filing.arsip.index'),
+        route('filing.sertifikat.index'),
         {
           search,
           sortField: sort,
@@ -66,7 +66,7 @@ export default function Index() {
       sort === field && direction === 'asc' ? 'desc' : 'asc'
 
     router.get(
-      route('filing.arsip.index'),
+      route('filing.sertifikat.index'),
       {
         search,
         sortField: field,
@@ -86,8 +86,8 @@ export default function Index() {
   }
 
   const handleDelete = (id: number) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus arsip ini?')) 
-      return router.delete(route('filing.arsip.destroy', id), {
+    if (!confirm('Apakah Anda yakin ingin menghapus sertifikat ini?')) 
+      return router.delete(route('filing.sertifikat.destroy', id), {
         preserveScroll: true,
       })
     }
@@ -97,22 +97,21 @@ export default function Index() {
     return (
         <AuthenticatedLayout
       header={<div className="inline-flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Arsip Surat</h2>
+        <h2 className="text-xl font-semibold">Sertifikat</h2>
             </div>
               }
               >
-            <Head title="Arsip Surat" />
-
+            <Head title="Arsip Sertifikat" />
             
             <div className="flex flex-col items-end gap-2">
-                    <Link href={route('filing.arsip.create')}
+                    <Link href={route('filing.sertifikat.create')}
                         className="bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700">
-                            Upload Arsip
+                            Upload Sertifikat
                     </Link>
                             <input
                                 type="text"
                                 className="input input-bordered w-64"
-                                placeholder="Cari judul / nomor surat..."
+                                placeholder="Cari nama / nomor sertifikat..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
@@ -120,82 +119,81 @@ export default function Index() {
 
         {/* TABLE */}
           <table className="table table-zebra w-full text sm mt-4">
-            <thead className="bg-green-700 border-black-100 text-white">
+            <thead className="bg-green-700 text-white border-b border-black-300">
               <tr>
-                <th
-                  className="px-4 py-3 text-center w-[180px] font-semibold"
-                  onClick={() => toggleSort('nomor_surat')}
-                >
-                    <span className="inline-flex items-center gap-1">
-                        Nomor{sortIcon('nomor_surat')}
-                    </span>
-                </th>
                     
                 <th className="px-3 py-2 font-semibold"
-                  onClick={() => toggleSort('judul')}
+                  onClick={() => toggleSort('nama_sertifikat')}
                 >
                     <span className="inline-flex items-center gap-1">
-                        Judul{sortIcon('judul')}
-                    </span>
-                </th>
-                    
-                <th
-                  className="px-4 py-3 text-center w-[140px] font-semibold"
-                  onClick={() => toggleSort('jenis_surat')}
-                >
-                    <span className="inline-flex items-center gap-1">
-                        Jenis Surat{sortIcon('jenis_surat')}
+                        Nama Sertifikat {sortIcon('nama_sertifikat')}
                     </span>
                 </th>
 
-                <th
-                  className="px-3 py-2 text-center font-semibold"
-                  onClick={() => toggleSort('tujuan')}
+                <th className="px-3 py-2 font-semibold"
+                  onClick={() => toggleSort('nomor_sertifikat')}
                 >
                     <span className="inline-flex items-center gap-1">
-                        Tujuan{sortIcon('tujuan')}
+                        Nomor Sertifikat{sortIcon('nomor_sertifikat')}
                     </span>
                 </th>
                 
-                <th className="px-4 py-3 text-center w-[140px] font-semibold">
+                <th className="px-3 py-2 font-semibold"
+                  onClick={() => toggleSort('jenis_sertifikat')}
+                >
+                    <span className="inline-flex items-center gap-1">
+                        Jenis Sertifikat{sortIcon('jenis_sertifikat')}
+                    </span>
+                </th>
+
+                <th className="px-3 py-2 font-semibold"
+                  onClick={() => toggleSort('instansi')}
+                >
+                    <span className="inline-flex items-center gap-1">
+                        Instansi{sortIcon('instansi')}
+                    </span>
+                </th>
+
+                <th className="px-4 py-3 text-center w-[100px] font-semibold">
                   Aksi
                 </th>
               </tr>
             </thead>
 
-            <tbody className="bg-gray-100">
-              {arsip.data.length === 0 && (
+            <tbody>
+              {sertifikat.data.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="text-center py-6 text-gray-500 border">
-                    Data arsip tidak ditemukan
+                  <td colSpan={5} className="text-center py-6 text-gray-500">
+                    Data sertifikat tidak ditemukan
                   </td>
                 </tr>
               )}
 
-              {arsip.data.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50 border-b border-gray-200">
-                  <td className="px-4 py-3 text-center whitespace-nowrap">
-                    {item.nomor_surat}
+              {sertifikat.data.map((item) => (
+                <tr key={item.id} className="hover:bg-gray-50">
+
+                  <td className="px-3 py-2 text-center">
+                    {item.nama_sertifikat}
                   </td>
 
-                  <td className="px-4 py-3 text-center">
-                    {item.judul}
+                  <td className="px-3 py-2 text-center">
+                    {item.nomor_sertifikat}
                   </td>
 
-                  <td className="px-4 py-3 text-center">
-                    {item.jenis_surat || '-'}
+                  <td className="px-3 py-2 text-center">
+                    {item.jenis_sertifikat}
                   </td>
-
-                  <td className="px-4 py-3 text-center capitalize">
-                    {item.tujuan || '-'}
+                  
+                  <td className="px-3 py-2 text-center">
+                    {item.instansi}
                   </td>
 
                   {/* KOLOM AKSI */}
-                  <td className="px-4 py-3 text-center text-sm">
+                  <td className="px-3 py-2 text-center">
                     <div className="flex justify-center gap-2">
                       {item.file_url && (
                         <a
-                          href={route('filing.arsip.download', item.id)}
+                          href={route('filing.sertifikat.download', item.id)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="btn btn-sm bg-green-700 px-4 py-2 rounded-full text-white font-semibold"
@@ -207,9 +205,9 @@ export default function Index() {
                      <button
                         className="btn btn-sm bg-red-600 px-4 py-2 rounded-full text-white font-semibold"
                         onClick={() => {
-                          if (confirm('Yakin ingin menghapus arsip ini?')) {
+                          if (confirm('Yakin ingin menghapus sertifikat ini?')) {
                             router.delete(
-                              route('filing.arsip.destroy', item.id),
+                              route('filing.sertifikat.destroy', item.id),
                               {
                                 preserveScroll: true,
                               }
@@ -232,7 +230,7 @@ export default function Index() {
           </table>
 
         {/* PAGINATION */}
-        <Pagination links={arsip.links} />
+        <Pagination links={sertifikat.links} />
 
         </AuthenticatedLayout>
     )

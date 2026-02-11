@@ -266,6 +266,6 @@ export default function CreateSPK({ surat }: Props) {
           ))}
         </div>
       </form>
-    </AppLayout>
+    </AppLayout> 
   )
 }

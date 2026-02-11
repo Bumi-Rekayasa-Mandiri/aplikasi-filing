@@ -29,9 +29,9 @@ export default function SuratTable({ data, sortField, sortDirection, onSort }: P
   }
 
   return (
-    <table className="table w-full">
-      <thead>
-        <tr className='bg-gray-100'>
+    <table className="table w-full border-t border-b border-black">
+      <thead className="bg-green-700 text-white">
+        <tr>
           <th className="px-4 py-3 text-center text-sm font-semibold" onClick={() => onSort('nomor_surat')}>
             <span className="inline-flex items-center gap-1">
             Nomor
@@ -70,9 +70,10 @@ export default function SuratTable({ data, sortField, sortDirection, onSort }: P
           <th className="px-4 py-3 text-center text-sm font-semibold">Aksi</th>
         </tr>
       </thead>
-      <tbody>
+
+      <tbody className="bg-gray-100 text-black">
         {data.map((s) => (
-          <tr key={s.id} className="border-t">
+          <tr key={s.id} className="border-b border-gray-200">
             <td className="px-4 py-3 text-center text-sm">{s.nomor_surat}</td>
             <td className="px-4 py-3 text-center text-sm">{s.judul}</td>
             <td className="px-4 py-3 text-center text-sm">{s.tujuan}</td>

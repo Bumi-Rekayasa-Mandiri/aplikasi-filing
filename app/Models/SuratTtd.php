@@ -17,6 +17,11 @@ class SuratTtd extends Model implements HasMedia
         'jabatan',
     ];
 
+    public function registerMediaCollections():void
+    {
+        $this->addMediaCollection('ttd')->singleFile();
+    }
+
     public function surat()
     {
         return $this->belongsTo(Surat::class);

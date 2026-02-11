@@ -82,13 +82,13 @@ export default function Create() {
                 <div className="flex gap-3">
                     <button
                         type="submit"
-                        className="btn btn-primary"
+                        className="btn btn-sm bg-green-700 px-4 py-2 rounded-full text-white font-semibold"
                         disabled={form.processing}
                     >
                         Simpan
                     </button>
 
-                    <Link href={route('roles.index')} className="btn btn-ghost">
+                    <Link href={route('roles.index')} className="btn btn-sm bg-red-700 px-4 py-2 rounded-full text-white font-semibold">
                         Batal
                     </Link>
                 </div>

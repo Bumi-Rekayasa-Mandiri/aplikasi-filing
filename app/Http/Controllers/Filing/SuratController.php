@@ -178,6 +178,18 @@ class SuratController extends Controller
     }
 
     /**
+     * DELETE SURAT
+     */
+    public function destroy(Surat $surat)
+    {
+        $this->authorize('delete', $surat);
+
+        $surat->delete();
+
+        return Inertia::render('filing/surat/Index')->with('success', 'Surat berhasil dihapus');
+    }
+
+    /**
      * UPLOAD CAP / TTD
      */
     public function uploadCap(Request $request, Surat $surat)
@@ -191,6 +203,8 @@ class SuratController extends Controller
         $surat->clearMediaCollection('cap');
          
         $surat->addMediaFromRequest('cap')->toMediaCollection('cap');
+
+        $this->regeneratePdf($surat);
 
         return redirect()
             ->back()
@@ -214,6 +228,8 @@ class SuratController extends Controller
 
         $ttd->addMediaFromRequest('ttd')->toMediaCollection('ttd');
 
+        $this->regeneratePdf($surat);
+
         return redirect()
             ->back()
             ->with('success', 'Tanda tangan berhasil ditambahkan');
@@ -227,6 +243,8 @@ class SuratController extends Controller
 
         $ttd->clearMediaCollection('ttd');
         $ttd->delete();
+
+        $this->regeneratePdf($surat);
 
         return back()->with('success', 'TTD berhasil dihapus');
     }
@@ -256,58 +274,50 @@ class SuratController extends Controller
         return redirect()->back()->with('success', 'PDF surat berhasil diupload.');
     }
 
-    public function destroy(Surat $surat)
+    private function regeneratePdf(Surat $surat): void
     {
-        $this->authorize('delete', $surat);
-
-        $surat->delete();
-
-        return Inertia::render('filing/surat/Index')->with('success', 'Surat berhasil dihapus');
+        $surat->fresh()->load([
+                'ttds.media',
+                'media',
+        ]);
+        
+        app(\App\Services\Surat\SPK\GenerateSpkPdf::class)
+        ->handle($surat);
     }
 
     public function generatePdf(Request $request, Surat $surat)
     {
         $this->authorize('update', $surat);
 
-        // if ($surat->status !== 'draft') {
-        //     abort(409, 'Surat sudah difinalisasi');
-        // }
-
         $validated = $request->validate([
-            'judul'             => 'required|string|max:255',
-            'perihal'           => 'required|string|max:255',
-            'tujuan'            => 'required|string|max:255',
-            'isi_surat'         => 'required|string',
-            'tanggal_surat'     => 'required|date',
-            'nama'              => 'required|string|max:255',
-            'jabatan_terakhir'  => 'required|string|max:255',
-            'departemen'        => 'required|string|max:255',
+            'judul' => 'required|string|max:255',
+            'perihal' => 'required|string|max:255',
+            'tujuan' => 'required|string|max:255',
+            'isi_surat' => 'required|string',
+            'tanggal_surat' => 'required|date',
+            'nama' => 'required|string|max:255',
+            'jabatan_terakhir' => 'required|string|max:255',
+            'departemen' => 'required|string|max:255',
         ]);
 
         DB::transaction(function () use ($surat, $validated) {
-        $surat->update($validated);
+            $surat->update($validated);
 
-        if (!$surat->nomor_surat) {
+            if (!$surat->nomor_surat) {
+                $result = app(NomorSuratGenerator::class)
+                    ->generate($surat->jenis);
 
-            $result = app(NomorSuratGenerator::class)
-                ->generate($surat->jenis);
+                // $surat->update([
+                //     'nomor_surat' => $result['nomor_surat'],
+                //     'status' => Surat::STATUS_APPROVED,
+                // ]);
 
-            $surat->nomor_surat = $result['nomor_surat'];
-            $surat->save();
+                \App\Models\NomorSuratLog::where('id', $result['log_id'])
+                    ->update(['surat_id' => $surat->id]);
+            }
 
-            // OPTIONAL tapi sangat disarankan:
-            // kaitkan log ke surat
-            \App\Models\NomorSuratLog::where('id', $result['log_id'])
-                ->update(['surat_id' => $surat->id]);
-        }
-
-        // generate PDF
-        app(GenerateSpkPdf::class)->handle($surat);
-
-        // finalize
-        $surat->status = 'approved';
-        $surat->save();
-    });
+            $this->regeneratePdf($surat);
+        });
 
         return redirect()->route('filing.surat.preview', $surat);
     }
@@ -326,5 +336,17 @@ class SuratController extends Controller
                 'pdf_url' => $surat->getFirstMediaUrl('pdf'),
             ],
         ]);
+    }
+
+    public function approve(Surat $surat)
+    {
+        $this->authorize('approve', $surat);
+
+        abort_if(!$surat->hasMedia('pdf'), 409, 'Surat belum memiliki PDF.');
+        abort_if($surat->ttds()->count() === 0, 409, 'Surat belum memiliki tanda tangan.');
+
+        $surat->update(['status' => Surat::STATUS_APPROVED]);
+
+        return redirect()->back()->with('success', 'Surat berhasil disetujui');
     }
 }

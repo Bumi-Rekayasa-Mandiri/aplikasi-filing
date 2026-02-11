@@ -37,6 +37,9 @@ class Surat extends Model implements HasMedia
         'created_by',
         'jenis',
         'pdf_path',
+        'nama',
+        'jabatan_terakhir',
+        'departemen',
     ];
 
     public function registerMediaCollections(): void
@@ -44,7 +47,7 @@ class Surat extends Model implements HasMedia
         $this->addMediaCollection('cap')
             ->singleFile();
 
-        $this->addMediaCollection('ttd');
+        // $this->addMediaCollection('ttd');
     }
 
     public function nomorSuratLogs()
@@ -52,7 +55,7 @@ class Surat extends Model implements HasMedia
         return $this->hasMany (NomorSuratLog::class);
     }
 
-    public function cap ()
+    public function cap()
     {
         return $this->hasOne(SuratCap::class);
     }
@@ -77,5 +80,4 @@ class Surat extends Model implements HasMedia
         $this->status = 'final';
         $this->save();
     }
-
 }

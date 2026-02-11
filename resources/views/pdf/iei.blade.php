@@ -248,28 +248,27 @@
     
         <div class="signature-wrapper">
 
-                    {{-- CAP --}}
-            @if($surat->hasMedia('cap'))
-                <img src="{{ $surat->getFirstMedia('cap')->getPath() }}" class="cap">
+            {{-- CAP --}}
+            @if($surat->getFirstMediaUrl('cap'))
+                <img
+                    src="{{ public_path($surat->getFirstMedia('cap')->getPath()) }}"
+                    class="cap"
+                >
             @endif
 
             {{-- TTD --}}
-            <div class="ttd-list">
-                @foreach($surat->ttds as $ttd)
-                    <div class="ttd-item">
-                        @if($ttd->hasMedia('ttd'))
-                            <img
-                                src="{{ $ttd->getFirstMedia('ttd')->getPath() }}"
-                                class="ttd"
-                            >
-                        @endif
+            @if($surat->ttds->count())
+                <img
+                    src="{{ public_path($surat->ttds->first()->getFirstMedia('ttd')->getPath()) }}"
+                    class="ttd"
+                >
+            @endif
 
-                        <div class="signature-name">
-                            {{ $ttd->nama_penandatangan }}<br>
-                            {{ $ttd->jabatan }}
-                        </div>
-                    </div>
-                @endforeach
+            {{-- NAMA --}}
+            <div class="signature-name">
+                Hormat Kami<br><br><br><br>
+                {{ $surat->ttds->first()->nama_penandatangan ?? 'Ilman Sunaryo' }}<br>
+                {{ $surat->ttds->first()->jabatan ?? 'Direktur' }}
             </div>
         </div>
     

@@ -77,7 +77,6 @@ class ArsipSuratController extends Controller
             'tujuan' => $data['tujuan'],
             'jenis_surat' => $data['jenis_surat'],
         ]);
-
         
             $arsip->addMediaFromRequest('file')
             ->toMediaCollection('arsip_surat_files');

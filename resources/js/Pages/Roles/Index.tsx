@@ -33,27 +33,34 @@ export default function Index() {
 
                     <Link
                         href={route('roles.create')}
-                        className="btn btn-primary btn-sm"
+                        className="btn btn-sm bg-green-700 px-4 py-2 rounded-full text-white font-semibold"
                     >
                         + Create Role
                     </Link>
                 </div>
 
                 {/* TABLE */}
-                <div className="overflow-x-auto rounded-xl border bg-white">
-                    <table className="table">
-                        <thead className="bg-gray-100">
+                    <table className="table table-zebra w-full border text sm mt-4">
+                        <thead className="bg-green-700 text-white">
                             <tr>
-                                <th className="w-1/4">Role</th>
-                                <th>Permissions</th>
+                                <th className="px-4 py-3 text-center w-[180px] font-semibold">No</th>
+                                <th className="px-4 py-3 text-center font-semibold">Role</th>
+                                <th className="px-4 py-3 text-center font-semibold">Permissions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="text-center px-4 py-3 font-semibold">
+                            <tr>
+                                <td>
+
+
+                                </td>
+                            </tr>
+
                             {roles.length === 0 && (
                                 <tr>
                                     <td
                                         colSpan={2}
-                                        className="text-center text-gray-500 py-6"
+                                        className="text-center px-4 py-3 text-gray-500 py-6"
                                     >
                                         No roles found.
                                     </td>
@@ -66,7 +73,7 @@ export default function Index() {
                                         {role.name}
                                     </td>
 
-                                    <td>
+                                    <td className='text-center px-4 py-3'>
                                         <div className="flex flex-wrap gap-2">
                                             {role.permissions.length === 0 ? (
                                                 <span className="text-sm text-gray-400">
@@ -89,7 +96,7 @@ export default function Index() {
                         </tbody>
                     </table>
                 </div>
-            </div>
+                
         </AuthenticatedLayout>
     );
 }

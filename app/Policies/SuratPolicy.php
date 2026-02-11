@@ -39,7 +39,7 @@ class SuratPolicy
      */
     public function update(User $user, Surat $surat): bool
     {
-        return $surat->status !== Surat::STATUS_APPROVED;
+        return in_array($surat->status, [SuratStatus::DRAFT, SuratStatus::SUBMITTED]);
     }
 
     public function uploadPdf(User $user, Surat $surat): bool
