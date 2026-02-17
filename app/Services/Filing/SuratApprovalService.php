@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service\Filing;
+namespace App\Services\Filing;
 
 use App\Models\Surat;
 use Illuminate\Support\Facades\DB;

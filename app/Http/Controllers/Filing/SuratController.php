@@ -8,6 +8,7 @@ use App\Models\SuratCap;
 use App\Models\SuratTtd;
 use App\Models\FileUpload;
 use App\Models\NomorSuratLog;
+use App\Models\SuratRecentView;
 use App\Services\NomorSuratGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\Surat\SPK\GenerateSpkPdf;
 use Inertia\Inertia;
+use Carbon\Carbon;
 
 class SuratController extends Controller
 {
@@ -325,6 +327,16 @@ class SuratController extends Controller
     public function preview(Surat $surat)
     {
         $this->authorize('view', $surat);
+
+        SuratRecentView::updateOrCreate(
+            [
+                'user_id' => auth()->id(),
+                'surat_id' => $surat->id,
+            ],
+            [
+                'last_viewed_at' => Carbon::now(),
+            ]
+        );
 
         abort_if(!$surat->hasMedia('pdf'), 404);
 

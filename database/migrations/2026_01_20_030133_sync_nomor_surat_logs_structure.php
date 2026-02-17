@@ -22,7 +22,6 @@ public function up(): void
         $table->unsignedTinyInteger('bulan')->change();
 
         // 3. Perbaiki unique index
-        $table->dropUnique('nomor_surat_logs_tahun_running_unique');
 
         $table->unique(
             ['tahun', 'bulan', 'kode_jenis', 'running_number'],

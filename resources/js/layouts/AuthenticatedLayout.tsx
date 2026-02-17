@@ -74,17 +74,10 @@ export default function AuthenticatedLayout({
       <div className={`flex-1 flex flex-col transition-all duration-300`}>
         {/* TOPBAR */}
         <header className="bg-gradient-to-r from-red-900 to-red-700 text-white px-8 py-5 flex justify-between items-center">
-          <div>
-            <span>
-              <Link href="/">
-                    <AppLogo className="h-20 w-30 object-contain text-gray-500" />
-              </Link>
-            </span>
-            <h1 className="text-2xl font-bold">PT. Bumi Rekayasa Mandiri</h1>
-            <p className="text-sm opacity-90">
-              Precision Building. Sustainable Value.
-            </p>
-          </div>
+        <div className="flex flex-col">
+          <AppLogo />
+        </div>
+
 
           {/* USER DROPDOWN */}
           <Dropdown

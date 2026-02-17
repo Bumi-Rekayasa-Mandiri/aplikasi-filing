@@ -77,7 +77,6 @@ class ArsipSertifikatController extends Controller
             'instansi' => $data['instansi'],
             'jenis_sertifikat' => $data['jenis_sertifikat'],
         ]);
-
         
             $sertifikat->addMediaFromRequest('file')
             ->toMediaCollection('arsip_sertifikat_files');

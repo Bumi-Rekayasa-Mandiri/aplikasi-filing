@@ -2,6 +2,11 @@ import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { Head, usePage, Link } from '@inertiajs/react';
 import type { AppPageProps } from '@/types/filing/inertia';
 
+interface User {
+    id: number;
+    name: string;
+}
+
 interface Permission {
     id: number;
     name: string;
@@ -11,6 +16,7 @@ interface Role {
     id: number;
     name: string;
     permissions: Permission[];
+    users: User[];
 }
 
 type Props = AppPageProps & {
@@ -18,7 +24,9 @@ type Props = AppPageProps & {
 };
 
 export default function Index() {
-    const { roles } = usePage<Props>().props;
+
+    const page = usePage<Props>();
+    const roles: Role[] = page.props.roles;
 
     return (
         <AuthenticatedLayout>
@@ -43,7 +51,7 @@ export default function Index() {
                     <table className="table table-zebra w-full border text sm mt-4">
                         <thead className="bg-green-700 text-white">
                             <tr>
-                                <th className="px-4 py-3 text-center w-[180px] font-semibold">No</th>
+                                <th className="px-4 py-3 text-center w-[180px] font-semibold">Nama User</th>
                                 <th className="px-4 py-3 text-center font-semibold">Role</th>
                                 <th className="px-4 py-3 text-center font-semibold">Permissions</th>
                             </tr>
@@ -59,7 +67,7 @@ export default function Index() {
                             {roles.length === 0 && (
                                 <tr>
                                     <td
-                                        colSpan={2}
+                                        colSpan={3}
                                         className="text-center px-4 py-3 text-gray-500 py-6"
                                     >
                                         No roles found.
@@ -69,12 +77,29 @@ export default function Index() {
 
                             {roles.map((role) => (
                                 <tr key={role.id}>
+                                    {/* USER COLUMN */}
+                                    <td className="px-4 py-3">
+                                        {role.users.length === 0 ? (
+                                            <span className="text-gray-400 text-sm">
+                                                No users
+                                            </span>
+                                        ) : (
+                                            role.users.map((user) => (
+                                                <div key={user.id}>
+                                                    {user.name}
+                                                </div>
+                                            ))
+                                        )}
+                                    </td>
+
+                                    {/* ROLE COLUMN */}
                                     <td className="font-medium">
                                         {role.name}
                                     </td>
 
-                                    <td className='text-center px-4 py-3'>
-                                        <div className="flex flex-wrap gap-2">
+                                    {/* PERMISSION COLUMN */}
+                                    <td className="px-4 py-3">
+                                        <div className="flex flex-wrap gap-2 justify-center">
                                             {role.permissions.length === 0 ? (
                                                 <span className="text-sm text-gray-400">
                                                     No permissions

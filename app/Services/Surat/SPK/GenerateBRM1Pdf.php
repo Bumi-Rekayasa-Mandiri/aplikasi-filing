@@ -6,7 +6,7 @@ use App\Models\Surat;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 
-class GenerateSpkPdf
+class GenerateBRM1Pdf
 {
     public function handle(Surat $surat): void
     {

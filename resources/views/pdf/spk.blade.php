@@ -240,7 +240,7 @@
         dan kerja samanya, kami ucapkan terima kasih.
     </div>
 
-    <div class="content" style="text-align: right; margin-top: 10px;">
+    <div class="content" style="text-align: right; margin-top: 20px;">
         Karawang, {{ \Carbon\Carbon::parse($surat->tanggal_surat)->locale('id')->translatedFormat('d F Y') }}
     </div>
 

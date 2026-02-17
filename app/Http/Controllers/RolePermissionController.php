@@ -13,10 +13,25 @@ class RolePermissionController extends Controller
     //
     public function index()
     {
-        $this->authorize('viewAny', Role::class);
+        $roles = Role::with(['permissions', 'users'])
+            ->get()
+            ->map(function ($role) {
+                return [
+                    'id' => $role->id,
+                    'name' => $role->name,
+                    'permissions' => $role->permissions->map(fn ($p) => [
+                        'id' => $p->id,
+                        'name' => $p->name,
+                    ]),
+                    'users' => $role->users->map(fn ($u) => [
+                        'id' => $u->id,
+                        'name' => $u->name,
+                    ]),
+                ];
+            });
 
-        return Inertia::render('Roles/Index', [
-            'roles' => Role::with('permissions')->get(),
+        return inertia('Roles/Index', [
+            'roles' => $roles,
         ]);
     }
 
