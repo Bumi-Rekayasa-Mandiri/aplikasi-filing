@@ -18,14 +18,15 @@
     }
   }
 
-  export default function CreateSK({ surat }: Props) {
+  export default function CreateSKP({ surat }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         judul: '',
         perihal: '',
         tujuan: '',
         tanggal_surat: '',
-        hasil_denda: '',
-        keringanan_denda: '',
+        nama: '',
+        jabatan_terakhir: '',
+        departemen: '',
         isi_surat: '',
 
         cap: null as File | null,
@@ -44,7 +45,7 @@
          }
 
          post(
-           route('filing.surat.generateSK-pdf', { surat: surat.id }),
+           route('filing.surat.generateSKP-pdf', { surat: surat.id }),
             { 
              preserveScroll: true, 
              forceFormData: true
@@ -109,15 +110,15 @@
       }
 
     return (
-      <AppLayout title="Buat Surat Permohonan Keringanan Denda">
-        <Head title="Buat Surat Permohonan Keringanan Denda" />
+      <AppLayout title="Buat Surat Pemberitahuan PHK">
+        <Head title="Buat Surat Pemberitahuan PHK" />
 
         {/* =======================
             FORM DATA SURAT
         ======================= */}
 
 
-        <span className="text-lg font-bold">Form Data Surat Permohonan Keringanan Denda</span>
+        <span className="text-lg font-bold">Form Data Surat Pemberitahuan PHK</span>
 
         <br />
         <br />
@@ -151,14 +152,20 @@
 
           <input
             className="input input-bordered w-full"
-            placeholder="Hasil Perhitungan Denda"
-            onChange={e => setData('hasil_denda', e.target.value)}
+            placeholder="Nama"
+            onChange={e => setData('nama', e.target.value)}
           />
 
           <input
             className="input input-bordered w-full"
-            placeholder="Keringanan Denda"
-            onChange={e => setData('keringanan_denda', e.target.value)}
+            placeholder="Jabatan Terakhir"
+            onChange={e => setData('jabatan_terakhir', e.target.value)}
+          />
+
+          <input
+            className="input input-bordered w-full"
+            placeholder="Departemen"
+            onChange={e => setData('departemen', e.target.value)}
           />
 
           <textarea

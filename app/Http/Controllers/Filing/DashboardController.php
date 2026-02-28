@@ -12,6 +12,7 @@ class DashboardController extends Controller
     {
         $recentSurat = SuratRecentView::with('surat')
             ->where('user_id', auth()->id())
+            ->whereHas('surat')
             ->orderByDesc('last_viewed_at')
             ->limit(5)
             ->get()
@@ -22,7 +23,9 @@ class DashboardController extends Controller
                 'jenis' => $item->surat->jenis,
                 'status' => $item->surat->status,
                 'last_viewed_at' => $item->last_viewed_at->diffForHumans(),
-            ]);
+            ])
+            
+            ->filter(fn ($item) => $item['id'] !== null);
 
         return Inertia::render('Dashboard', [
             'recentSurat' => $recentSurat,

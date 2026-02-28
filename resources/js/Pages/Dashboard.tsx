@@ -44,7 +44,112 @@ export default function Dashboard() {
                     {recentSurat.map((s) => (
                         <li key={s.id}>
                         <a
-                            href={route('filing.surat.preview', s.id)}
+                            href={route('filing.surat.previewSKP', s.id)}
+                            className="block p-2 border border-black rounded hover:bg-gray-100"
+                        >
+                            <div className="font-semibold">{s.judul}</div>
+                            <div className="text-xs text-gray-600">
+                            {s.nomor_surat} • {s.last_viewed_at}
+                            </div>
+                        </a>
+                        </li>
+                    ))}
+                    </ul>
+                    <ul className="space-y-2">
+                    {recentSurat.map((s) => (
+                        <li key={s.id}>
+                        <a
+                            href={route('filing.surat.previewSK', s.id)}
+                            className="block p-2 border border-black rounded hover:bg-gray-100"
+                        >
+                            <div className="font-semibold">{s.judul}</div>
+                            <div className="text-xs text-gray-600">
+                            {s.nomor_surat} • {s.last_viewed_at}
+                            </div>
+                        </a>
+                        </li>
+                    ))}
+                    </ul>
+                    <ul className="space-y-2">
+                    {recentSurat.map((s) => (
+                        <li key={s.id}>
+                        <a
+                            href={route('filing.surat.previewSPI', s.id)}
+                            className="block p-2 border border-black rounded hover:bg-gray-100"
+                        >
+                            <div className="font-semibold">{s.judul}</div>
+                            <div className="text-xs text-gray-600">
+                            {s.nomor_surat} • {s.last_viewed_at}
+                            </div>
+                        </a>
+                        </li>
+                    ))}
+                    </ul>
+                    <ul className="space-y-2">
+                    {recentSurat.map((s) => (
+                        <li key={s.id}>
+                        <a
+                            href={route('filing.surat.previewSPD', s.id)}
+                            className="block p-2 border border-black rounded hover:bg-gray-100"
+                        >
+                            <div className="font-semibold">{s.judul}</div>
+                            <div className="text-xs text-gray-600">
+                            {s.nomor_surat} • {s.last_viewed_at}
+                            </div>
+                        </a>
+                        </li>
+                    ))}
+                    </ul>
+                    <ul className="space-y-2">
+                    {recentSurat.map((s) => (
+                        <li key={s.id}>
+                        <a
+                            href={route('filing.surat.previewIEI', s.id)}
+                            className="block p-2 border border-black rounded hover:bg-gray-100"
+                        >
+                            <div className="font-semibold">{s.judul}</div>
+                            <div className="text-xs text-gray-600">
+                            {s.nomor_surat} • {s.last_viewed_at}
+                            </div>
+                        </a>
+                        </li>
+                    ))}
+                    </ul>
+                    <ul className="space-y-2">
+                    {recentSurat.map((s) => (
+                        <li key={s.id}>
+                        <a
+                            href={route('filing.surat.previewGRS', s.id)}
+                            className="block p-2 border border-black rounded hover:bg-gray-100"
+                        >
+                            <div className="font-semibold">{s.judul}</div>
+                            <div className="text-xs text-gray-600">
+                            {s.nomor_surat} • {s.last_viewed_at}
+                            </div>
+                        </a>
+                        </li>
+                    ))}
+                    </ul>
+                    <ul className="space-y-2">
+                    {recentSurat.map((s) => (
+                        <li key={s.id}>
+                        <a
+                            href={route('filing.surat.previewBRM1', s.id)}
+                            className="block p-2 border border-black rounded hover:bg-gray-100"
+                        >
+                            <div className="font-semibold">{s.judul}</div>
+                            <div className="text-xs text-gray-600">
+                            {s.nomor_surat} • {s.last_viewed_at}
+                            </div>
+                        </a>
+                        </li>
+                    ))}
+                    </ul>
+                    <ul className="space-y-2">
+                    {recentSurat.map((s) => (
+                        <li key={s.id}>
+                        <a
+                            href={route('filing.surat.previewBRM2', s.id)}
                             className="block p-2 border border-black rounded hover:bg-gray-100"
                         >
                             <div className="font-semibold">{s.judul}</div>

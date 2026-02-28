@@ -10,14 +10,14 @@ type Props = {
   }
 }
 
-export default function PreviewSPK({ surat }: Props) {
+export default function PreviewGRS({ surat }: Props) {
   return (
-    <AppLayout title="Preview SPK-BRM">
-      <Head title="Preview SPK-BRM" />
+    <AppLayout title="Preview GRS BRM">
+      <Head title="Preview GRS BRM" />
 
       <div className="space-y-4">
         <h1 className="text-xl font-semibold">
-          Preview Surat SPK-BRM
+          Preview Surat Pengajuan Garansi Material
         </h1>
 
         <div className="flex gap-3">

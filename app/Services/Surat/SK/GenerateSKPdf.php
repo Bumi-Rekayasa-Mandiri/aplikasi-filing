@@ -1,15 +1,17 @@
 <?php
 
-namespace App\Services\Surat\SPK;
+namespace App\Services\Surat\SK;
 
 use App\Models\Surat;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 
-class GenerateGRSPdf
+class GenerateSKPdf
 {
     public function handle(Surat $surat): void
     {
+        $surat->finalize();
+        
         Carbon::setLocale('id');
         setlocale(LC_TIME, 'id_ID.UTF8');
         
@@ -18,12 +20,12 @@ class GenerateGRSPdf
             'media',
         ]);
 
-        $pdf = Pdf::loadView('pdf.spk', [
+        $pdf = Pdf::loadView('pdf.sk', [
             'surat' => $surat,
         ])->setPaper('A4', 'portrait');
 
         // ✅ TEMP FILE (ABSOLUTE PATH)
-        $tempPath = storage_path("app/temp/spk-{$surat->id}.pdf");
+        $tempPath = storage_path("app/temp/sk-{$surat->id}.pdf");
 
         // pastikan folder ada
         if (!is_dir(dirname($tempPath))) {
@@ -37,7 +39,7 @@ class GenerateGRSPdf
         $surat
             ->clearMediaCollection('pdf')
             ->addMedia($tempPath)
-            ->usingName("SPK_BRM_{$surat->id}.pdf")
+            ->usingName("SK_BRM_{$surat->id}.pdf")
             ->toMediaCollection('pdf');
 
         // optional: hapus temp file

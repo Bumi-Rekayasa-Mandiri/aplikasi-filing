@@ -89,7 +89,7 @@ export default function Index() {
                   </button>
                 }
             >
-                <Dropdown.Link href={route('filing.surat.create', 'SPK-BRM')}>
+                <Dropdown.Link href={route('filing.surat.create', 'SKP-BRM')}>
                    Surat Pemberitahuan PHK
                 </Dropdown.Link>
                 <Dropdown.Link href={route('filing.surat.create', 'GRS-BRM')}>
@@ -107,11 +107,11 @@ export default function Index() {
                 <Dropdown.Link href={route('filing.surat.create', 'SK-BRM')}>
                    Surat Permohonan Keringanan Denda
                 </Dropdown.Link>
-                <Dropdown.Link href={route('filing.surat.create', 'BRM1')}>
-                   Surat Pelepasan Hak
+                <Dropdown.Link href={route('filing.surat.create', 'BRM-1')}>
+                   Surat Izin Kerja dan LK3 
                 </Dropdown.Link>
-                <Dropdown.Link href={route('filing.surat.create', 'BRM2')}>
-                   Surat Izin Kerja dan LK3
+                <Dropdown.Link href={route('filing.surat.create', 'BRM-2')}>
+                   Surat Pelepasan Hak
                 </Dropdown.Link>
               </Dropdown>
             </div>

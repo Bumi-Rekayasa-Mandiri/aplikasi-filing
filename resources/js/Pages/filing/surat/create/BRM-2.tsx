@@ -18,17 +18,20 @@
     }
   }
 
-  export default function CreateSK({ surat }: Props) {
+  export default function CreateBRM2({ surat }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         judul: '',
         perihal: '',
         tujuan: '',
         tanggal_surat: '',
-        hasil_denda: '',
-        keringanan_denda: '',
         isi_surat: '',
+        merk: '',
+        warna: '',
+        rangka: '',
 
         cap: null as File | null,
+
+        gambar_materai: null as File | null,
 
         nama_penandatangan: '',
         jabatan: '',
@@ -44,61 +47,13 @@
          }
 
          post(
-           route('filing.surat.generateSK-pdf', { surat: surat.id }),
+           route('filing.surat.generateBRM2-pdf', { surat: surat.id }),
             { 
              preserveScroll: true, 
              forceFormData: true
             }
          )
        }
-
-    // const capForm = useForm<{ cap: File | null }>({
-    //   cap: null,
-    // })
-
-    //   const submitCap = (e: React.FormEvent) => {
-    //     e.preventDefault()
-
-    //     if (!surat?.id) {
-    //       console.error('SURAT ID MISSING', surat)
-    //       return
-    //     }
-
-    //     capForm.post(
-    //       route('filing.surat.upload-cap', { surat: surat.id }),
-    //       { 
-    //         forceFormData: true, 
-    //         preserveScroll: true,
-    //       }
-    //     )
-    //   }
-
-    // const ttdForm = useForm<{
-    //   nama_penandatangan: string
-    //   jabatan: string
-    //   ttd: File | null
-    // }>({
-    //   nama_penandatangan: '',
-    //   jabatan: '',
-    //   ttd: null,
-    // })
-
-    //   const submitTtd = (e: React.FormEvent) => {
-    //     e.preventDefault()
-
-    //     if (!surat?.id) {
-    //       console.error('SURAT ID MISSING', surat)
-    //       return
-    //     }
-
-    //     ttdForm.post(
-    //       route('filing.surat.upload-ttd', { surat: surat.id }),
-    //       { 
-    //         forceFormData: true, 
-    //         preserveScroll: true,
-    //        }
-    //     )
-    //   }
 
       if (!surat?.id) {
         return (
@@ -109,15 +64,15 @@
       }
 
     return (
-      <AppLayout title="Buat Surat Permohonan Keringanan Denda">
-        <Head title="Buat Surat Permohonan Keringanan Denda" />
+      <AppLayout title="Buat Surat Pelepasan Hak">
+        <Head title="Buat Surat Pelepasan Hak" />
 
         {/* =======================
             FORM DATA SURAT
         ======================= */}
 
 
-        <span className="text-lg font-bold">Form Data Surat Permohonan Keringanan Denda</span>
+        <span className="text-lg font-bold">Form Data Surat Pelepasan Hak</span>
 
         <br />
         <br />
@@ -151,21 +106,22 @@
 
           <input
             className="input input-bordered w-full"
-            placeholder="Hasil Perhitungan Denda"
-            onChange={e => setData('hasil_denda', e.target.value)}
+            placeholder="Merk / Jenis"
+            onChange={e => setData('merk', e.target.value)}
           />
 
           <input
             className="input input-bordered w-full"
-            placeholder="Keringanan Denda"
-            onChange={e => setData('keringanan_denda', e.target.value)}
+            placeholder="Warna / Tahun"
+            onChange={e => setData('warna', e.target.value)}
           />
 
-          <textarea
-            className="textarea textarea-bordered w-full"
-            placeholder="Isi Surat"
-            onChange={e => setData('isi_surat', e.target.value)}
+          <input
+            className="input input-bordered w-full"
+            placeholder="Rangka / Mesin"
+            onChange={e => setData('rangka', e.target.value)}
           />
+          
           <br />
           <br />
 

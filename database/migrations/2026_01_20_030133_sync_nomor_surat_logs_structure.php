@@ -24,7 +24,7 @@ public function up(): void
         // 3. Perbaiki unique index
 
         $table->unique(
-            ['tahun', 'bulan', 'kode_jenis', 'running_number'],
+            ['tahun', 'kode_jenis', 'running_number'],
             'nomor_surat_unique'
         );
     });

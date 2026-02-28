@@ -8,6 +8,8 @@ use App\Models\NomorSuratLog;
 use App\Models\SuratCap;
 use App\Models\SuratTtd;
 use App\Enums\SuratStatus;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;  
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -40,6 +42,29 @@ class Surat extends Model implements HasMedia
         'nama',
         'jabatan_terakhir',
         'departemen',
+        'project',
+        'material',
+        'alamat',
+        'masa_garansi',
+        'no_ktp',
+        'nominal',
+        'nominal_bagihasil',
+        'hasil_denda',
+        'keringanan_denda',
+        'lampiran',
+        'item_pembelian',
+        'merk',
+        'warna',
+        'rangka',
+        'gambar_materai',
+        'lokasi_kerja',
+        'jenis_pekerjaan',
+        'waktu',
+        'jam_kerja',
+        'jumlah_pekerja',
+        'apd',
+        'periode',
+        'no_pekerja',
     ];
 
     public function registerMediaCollections(): void
@@ -60,24 +85,24 @@ class Surat extends Model implements HasMedia
         return $this->hasOne(SuratCap::class);
     }
 
-    public function ttds()
+    public function ttds(): HasMany
     {
-        return $this->hasMany(SuratTtd::class);
+        return $this->hasMany(SuratTtd::class)->orderBy('urutan');
     }
 
     public function finalize(): void
     {
-        if ($this->status !== 'draft') {
-            return;
-        }
 
-        // generate nomor surat jika belum ada
         if (!$this->nomor_surat) {
-            $this->nomor_surat = app(\App\Services\NomorSuratGenerator::class)
-                ->generate($this);
+
+            $generator = app(\App\Services\NomorSuratGenerator::class);
+
+            $result = $generator->generateForSurat($this);
+
+            $this->nomor_surat = $result['nomor_surat'];
         }
 
-        $this->status = 'final';
+        $this->status = 'approved';
         $this->save();
     }
 }

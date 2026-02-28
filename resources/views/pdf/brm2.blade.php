@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Surat Pemberitahuan PHK</title>
+    <title>Surat Pelepasan Hak</title>
 
 <style>
     .kop {
@@ -67,7 +67,7 @@
     }
 
     table.identitas td.label {
-        width: 80px;
+        width: 170px;
     }
 
     table.identitas td.colon {
@@ -85,7 +85,7 @@
     }
 
     table.identitas1 td.label {
-        width: 150px;
+        width: 170px;
     }
 
     table.identitas1 td.colon {
@@ -141,19 +141,7 @@
     </div>
 
     {{-- TITLE --}}
-    <div class="title" style="font-size: 14pt; margin-top: 20px;">SURAT PEMBERITAHUAN</div>
-
-    {{-- NOMOR & TANGGAL --}}
-    <table class="nomor-table">
-    <tr>
-        <td class="left">
-            Nomor : {{ $surat->nomor_surat ?? '—' }}
-        </td>
-        <td class="right">
-            Karawang, {{ \Carbon\Carbon::parse($surat->tanggal_surat)->locale('id')->translatedFormat('d F Y') }}
-        </td>
-    </tr>
-    </table>
+    <div class="title" style="font-size: 14pt; margin-top: 20px;">SURAT PELEPASAN HAK</div>
 
     {{-- PEMBUKA --}}
     <div class="content">
@@ -173,105 +161,125 @@
             <td>Direktur</td>
         </tr>
         <tr>
-            <td class="label"><strong>Perusahaan</strong></td>
+            <td class="label"><strong>NIK</strong></td>
             <td class="colon">:</td>
-            <td>PT. Bumi Rekayasa Mandiri</td>
+            <td>3215030103870006</td>
+        </tr>
+        <tr>
+            <td class="label"><strong>Tempat/Tanggal Lahir</strong></td>
+            <td class="colon">:</td>
+            <td>Karawang, 01 Maret 1987</td>
         </tr>
         <tr>
             <td class="label"><strong>Alamat</strong></td>
             <td class="colon">:</td>
             <td>
-                Ruko Grand Taruma Blok D8/DC, Telukjambe Timur,
-                Karawang, Indonesia
+                Dusun Bobojong RT 005 RW 003, Purwadana, Telukjambe Timur, Karawang
             </td>
         </tr>
     </table>
 
     <div class="content">
-        Dengan ini menerangkan bahwa:
+        Dengan ini menerangkan bahwa data kendaraan tersebut di bawah ini :
     </div>
 
-    {{-- IDENTITAS KARYAWAN --}}
+    {{-- IDENTITAS KENDARAAN --}}
     <table class="identitas1">
         <tr>
-            <td class="label"><strong>Nama</strong></td>
+            <td class="label"><strong>Merk/Jenis</strong></td>
             <td class="colon">:</td>
-            <td>{{ $surat->nama ?? '—' }}</td>
+            <td>{{ $surat->merk ?? '—' }}</td>
         </tr>
         <tr>
-            <td class="label"><strong>Jabatan Terakhir</strong></td>
+            <td class="label"><strong>Warna/Tahun</strong></td>
             <td class="colon">:</td>
-            <td>{{ $surat->jabatan_terakhir ?? '—' }}</td>
+            <td>{{ $surat->warna ?? '—' }}</td>
         </tr>
         <tr>
-            <td class="label"><strong>Departemen / Bagian</strong></td>
+            <td class="label"><strong>Rangka/Mesin</strong></td>
             <td class="colon">:</td>
-            <td>{{ $surat->departemen ?? '—' }}</td>
+            <td>{{ $surat->rangka ?? '—' }}</td>
         </tr>
     </table>
 
     {{-- ISI --}}
     <div class="content" style="margin-top: 10px;">
-        Telah <strong>tidak lagi bekerja di PT. Bumi Rekayasa Mandiri terhitung sejak tanggal
-        {{ \Carbon\Carbon::parse($surat->tanggal_surat)->locale('id')->translatedFormat('d F Y') }}</strong>,
-        dengan alasan mengundurkan diri.
+        Dan telah melepaskan haknya atas kendaraan tersebut di atas.<br>
+        Demikian Surat Pelepasan Hak ini dibuat untuk dipergunakan sebagaimana mestinya.
     </div>
 
-    <div class="content" style="margin-top: 10px;">
-        Segala tindakan yang dilakukan setelah berakhirnya hubungan kerja sepenuhnya
-        menjadi tanggung jawab pribadi yang bersangkutan dan tidak menjadi tanggung
-        jawab perusahaan.
-    </div>
-
-    <div class="content" style="margin-top: 10px;">
-        Apabila terdapat hal-hal yang perlu dikonfirmasi atau terkait dengan pekerjaan
-        yang bersangkutan, dapat menghubungi Ilman Sunaryo di nomor +62811964060
-        atau email berikut:
-    </div>
-
-        <div class="content" style="text-color: navy; margin-left: 20px; margin-top: 10px; margin-bottom: 10px;">
-            • bumirekayasa.mandiri@gmail.com <br>
-            • info@bumirekayasamandiri.co.id <br>
-            • info@bumirekamandiri.id
-        </div>
-    
-    <div class="content" style="margin-top: 10px;">
-        Demikian surat pemberitahuan ini dibuat dengan sebenar-benarnya. Atas perhatian
-        dan kerja samanya, kami ucapkan terima kasih.
-    </div>
-
-    <div class="content" style="text-align: right; margin-top: 10px;">
+    <div class="content" style="text-align: right; margin-top: 10px; margin-bottom: 7px;">
         Karawang, {{ \Carbon\Carbon::parse($surat->tanggal_surat)->locale('id')->translatedFormat('d F Y') }}
     </div>
 
-    <div style="page-break-inside: avoid;"
-    
-        <div class="signature-wrapper">
+    <div style="page-break-inside: avoid;">
 
-            {{-- CAP --}}
-            @if($surat->getFirstMediaUrl('cap'))
-                <img
-                    src="{{ public_path($surat->getFirstMedia('cap')->getPath()) }}"
-                    class="cap"
-                >
+        @php
+            $ttdMedia = $surat->getFirstMedia('ttd');
+            $capMedia = $surat->getFirstMedia('cap');
+
+            $ttdBase64 = $ttdMedia && file_exists($ttdMedia->getPath())
+                ? 'data:' . $ttdMedia->mime_type . ';base64,' . base64_encode(file_get_contents($ttdMedia->getPath()))
+                : null;
+
+            $capBase64 = $capMedia && file_exists($capMedia->getPath())
+                ? 'data:' . $capMedia->mime_type . ';base64,' . base64_encode(file_get_contents($capMedia->getPath()))
+                : null;
+
+            $namaTtd  = $surat->ttds->first()->nama ?? ($surat->nama_penandatangan ?? 'Ilman Sunaryo');
+            $jabatanTtd = $surat->ttds->first()->jabatan ?? ($surat->jabatan ?? 'Direktur');
+        @endphp
+
+        {{-- BLOK TANDA TANGAN --}}
+        <div style="
+            position: relative;
+            width: 100%;
+            height: 140px;      /* ← tinggi container, sesuaikan jika teks terpotong */
+            margin-top: 10px;
+        ">
+
+            {{-- CAP — paling bawah --}}
+            @if($capBase64)
+            <img src="{{ $capBase64 }}" style="
+                position: absolute;
+                top: 10px;
+                right: 55px;
+                width: 115px;
+                height: auto;
+                opacity: 0.75;
+                z-index: 1;
+            "/>
             @endif
 
-            {{-- TTD --}}
-            @if($surat->ttds->count())
-                <img
-                    src="{{ public_path($surat->ttds->first()->getFirstMedia('ttd')->getPath()) }}"
-                    class="ttd"
-                >
+            {{-- TTD — di atas cap --}}
+            @if($ttdBase64)
+            <img src="{{ $ttdBase64 }}" style="
+                position: absolute;
+                top: 18px;
+                right: 60px;
+                width: 100px;
+                height: auto;
+                opacity: 0.95;
+                z-index: 2;
+            "/>
             @endif
 
-            {{-- NAMA --}}
-            <div class="signature-name">
-                Hormat Kami<br><br><br><br>
-                {{ $surat->ttds->first()->nama_penandatangan ?? 'Ilman Sunaryo' }}<br>
-                {{ $surat->ttds->first()->jabatan ?? 'Direktur' }}
+            {{-- TEKS: Hormat Kami, Nama, Jabatan — paling atas --}}
+            <div style="
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 200px;
+                text-align: center;
+                z-index: 3;
+            ">
+                Hormat Kami,<br><br><br><br><br>
+                <strong>{{ $namaTtd }}</strong><br>
+                {{ $jabatanTtd }}
             </div>
+
         </div>
-    
+
     </div>
 
 </body>

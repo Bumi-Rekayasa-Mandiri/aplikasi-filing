@@ -15,6 +15,8 @@ class SuratTtd extends Model implements HasMedia
         'surat_id',
         'nama_penandatangan',
         'jabatan',
+        'urutan',
+        'label',
     ];
 
     public function registerMediaCollections():void
@@ -22,15 +24,22 @@ class SuratTtd extends Model implements HasMedia
         $this->addMediaCollection('ttd')->singleFile();
     }
 
-    public function surat()
+    protected $appends = ['url'];
+
+    public function surat(): BelongsTo
     {
         return $this->belongsTo(Surat::class);
     }
 
-    protected $appends = ['url'];
-
-    public function getUrlAttribute()
+    // Helper: ambil URL gambar TTD
+    public function getTtdUrlAttribute(): ?string
     {
-        return $this->getFirstMediaUrl('ttd');
+        return $this->getFirstMediaUrl('ttd') ?: null;
+    }
+
+    // Helper: ambil path untuk DomPDF
+    public function getTtdPathAttribute(): ?string
+    {
+        return $this->getFirstMediaPath('ttd') ?: null;
     }
 }

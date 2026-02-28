@@ -1,217 +1,199 @@
-import AppLayout from "@/layouts/AppLayout"
-import { Head, useForm, router } from "@inertiajs/react"
+  import AppLayout from "@/layouts/AppLayout"
+  import { Head, useForm, router } from "@inertiajs/react"
 
-type Props = {
-  surat: {
-    id: number
-    nomor_surat: string
-    judul: string
-    tujuan: string
-    status: string
-    cap_url?: string
-    ttds?: {
+  type Props = {
+    surat: {
       id: number
-      nama: string
-      jabatan: string
-      url: string
-    }[]
-  }
-}
-
-export default function CreateSPK({ surat }: Props) {
-  const { data, setData, post, processing, errors } = useForm({
-    judul: '',
-    tanggal_surat: '',
-    nama: '',
-    jabatan_terakhir: '',
-    departemen: '',
-    isi_surat: '',
-  })
-
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault()
-    post(route('filing.surat.store'))
+      nomor_surat: string
+      judul: string
+      tujuan: string
+      status: string
+      cap_url?: string
+      ttds?: {
+        id: number
+        nama: string
+        jabatan: string
+        url: string
+      }[]
+    }
   }
 
-  const capForm = useForm<{ cap: File | null }>({
-    cap: null,
-  })
+  export default function CreateSPD({ surat }: Props) {
+    const { data, setData, post, processing, errors } = useForm({
+        judul: '',
+        perihal: '',
+        lampiran:'',
+        tujuan: '',
+        tanggal_surat: '',
+        nama: '',
+        alamat: '',
+        item_pembelian: '',
+        nominal: '',
+        isi_surat: '',
+        no_ktp:'',
 
-  const submitCap = (e: React.FormEvent) => {
-    e.preventDefault()
-    capForm.post(
-      route('filing.surat.upload-cap', surat.id),
-      { forceFormData: true }
+        cap: null as File | null,
+
+        nama_penandatangan: '',
+        jabatan: '',
+        ttd: null as File | null,
+      })
+
+       const submit = (e: React.FormEvent) => {
+         e.preventDefault()
+
+         if (!surat?.id) {
+           console.error('SURAT ID MISSING', surat)
+           return
+         }
+
+         post(
+           route('filing.surat.generateSPD-pdf', { surat: surat.id }),
+            { 
+             preserveScroll: true, 
+             forceFormData: true
+            }
+         )
+       }
+
+      if (!surat?.id) {
+        return (
+          <AppLayout title="Loading">
+            <p className="text-gray-500">Menyiapkan draft surat…</p>
+          </AppLayout>
+        )
+      }
+
+    return (
+      <AppLayout title="Buat Surat Pengembalian Dana">
+        <Head title="Buat Surat Pengembalian Dana" />
+
+        {/* =======================
+            FORM DATA SURAT
+        ======================= */}
+
+
+        <span className="text-lg font-bold">Form Data Surat Pengembalian Dana</span>
+
+        <br />
+        <br />
+        <form onSubmit={submit} className="space-y-4 max-w-xl">
+          <input
+            className="input input-bordered w-full"
+            placeholder="Judul"
+            onChange={e => setData('judul', e.target.value)}
+          />
+          {errors.judul && <div className="text-red-500">{errors.judul}</div>}
+          
+          <input
+            className="input input-bordered w-full"
+            placeholder="Lampiran"
+            onChange={e => setData('lampiran', e.target.value)}
+          />
+          {errors.perihal && <div className="text-red-500">{errors.lampiran}</div>}
+
+          <input
+            type="date"
+            className="input input-bordered w-full"
+            onChange={e => setData('tanggal_surat', e.target.value)}
+          />
+
+          <input
+            className="input input-bordered w-full"
+            placeholder="Hal"
+            onChange={e => setData('perihal', e.target.value)}
+          />
+          {errors.perihal && <div className="text-red-500">{errors.perihal}</div>}  
+
+          <input
+            className="input input-bordered w-full"
+            placeholder="Tujuan"
+            onChange={e => setData('tujuan', e.target.value)}
+          />
+          {errors.tujuan && <div className="text-red-500">{errors.tujuan}</div>}
+          
+          <input
+            className="input input-bordered w-full"
+            placeholder="Alamat"
+            onChange={e => setData('alamat', e.target.value)}
+          />
+          {errors.tujuan && <div className="text-red-500">{errors.alamat}</div>}
+          
+          <input
+            className="input input-bordered w-full"
+            placeholder="Item Pembelian"
+            onChange={e => setData('item_pembelian', e.target.value)}
+          />
+          {errors.tujuan && <div className="text-red-500">{errors.item_pembelian}</div>}
+
+          <input
+            className="input input-bordered w-full"
+            placeholder="Nominal"
+            onChange={e => setData('nominal', e.target.value)}
+          />
+          <input
+            className="input input-bordered w-full"
+            placeholder="Nama Bank"
+            onChange={e => setData('nama', e.target.value)}
+          />
+
+          <textarea
+            className="textarea textarea-bordered w-full"
+            placeholder="Cabang"
+            onChange={e => setData('isi_surat', e.target.value)}
+          />
+
+          <input
+            className="input input-bordered w-full"
+            placeholder="Nomor Rekening"
+            onChange={e => setData('no_ktp', e.target.value)}
+          />
+          <br />
+          <br />
+
+          <span className="text-lg font-bold mt-10">Cap Perusahaan</span>
+          <br />
+          <input
+            type="file"
+            placeholder="Cap Perusahaan"
+            onChange={e =>
+              setData('cap', e.target.files?.[0] ?? null)
+            }
+          />
+
+          <br />
+          <br />
+
+          <span className="text-lg font-bold mt-10">Tanda Tangan</span>
+          <br />
+
+          <input
+            className="input input-bordered w-full"
+            placeholder="Nama Penandatangan"
+            onChange={e => setData('nama_penandatangan', e.target.value)}
+          />
+
+          <input
+            className="input input-bordered w-full"
+            placeholder="Jabatan"
+            onChange={e => setData('jabatan', e.target.value)}
+          />
+
+          <input
+            type="file"
+            onChange={e =>
+              setData('ttd', e.target.files?.[0] ?? null)
+            }
+          />
+          <br />
+
+          <button
+            className="bg-green-700 px-4 py-2 rounded-full font-semibold text-white"
+            disabled={processing}
+          >
+            Generate PDF
+          </button>
+        </form>
+      </AppLayout> 
     )
   }
-
-  const ttdForm = useForm<{
-    nama_penandatangan: string
-    jabatan: string
-    ttd: File | null
-  }>({
-    nama_penandatangan: '',
-    jabatan: '',
-    ttd: null,
-  })
-
-  const submitTtd = (e: React.FormEvent) => {
-    e.preventDefault()
-    ttdForm.post(
-      route('filing.surat.upload-ttd', surat.id),
-      { forceFormData: true }
-    )
-  }
-
-  return (
-    <AppLayout title="Buat Surat Pemberitahuan PHK">
-      <Head title="Buat Surat Pemberitahuan PHK" />
-
-      {/* =======================
-          FORM DATA SURAT
-      ======================= */}
-      <form onSubmit={submit} className="space-y-4 max-w-xl">
-        <input
-          className="input input-bordered w-full"
-          placeholder="Judul"
-          onChange={e => setData('judul', e.target.value)}
-        />
-        {errors.judul && <div className="text-red-500">{errors.judul}</div>}
-
-        <input
-          type="date"
-          className="input input-bordered w-full"
-          onChange={e => setData('tanggal_surat', e.target.value)}
-        />
-
-        <input
-          className="input input-bordered w-full"
-          placeholder="Nama"
-          onChange={e => setData('nama', e.target.value)}
-        />
-
-        <input
-          className="input input-bordered w-full"
-          placeholder="Jabatan Terakhir"
-          onChange={e => setData('jabatan_terakhir', e.target.value)}
-        />
-
-        <input
-          className="input input-bordered w-full"
-          placeholder="Departemen"
-          onChange={e => setData('departemen', e.target.value)}
-        />
-
-        <textarea
-          className="textarea textarea-bordered w-full"
-          placeholder="Isi Surat"
-          onChange={e => setData('isi_surat', e.target.value)}
-        />
-
-        <button
-          className="bg-green-700 px-4 py-2 rounded-full font-semibold text-white"
-          disabled={processing}
-        >
-          Generate PDF
-        </button>
-      </form>
-
-      <hr className="my-6" />
-
-      {/* =======================
-          FORM UPLOAD CAP
-      ======================= */}
-      <form onSubmit={submitCap} className="space-y-2 max-w-xl">
-        <h2 className="font-semibold">Cap Perusahaan</h2>
-
-        {surat.cap_url && (
-          <img src={surat.cap_url} className="w-40 border" />
-        )}
-
-        <input
-          type="file"
-          accept="image/png,image/jpeg"
-          onChange={e =>
-            capForm.setData('cap', e.target.files?.[0] ?? null)
-          }
-        />
-
-        {capForm.errors.cap && (
-          <div className="text-red-500 text-sm">
-            {capForm.errors.cap}
-          </div>
-        )}
-
-        <button
-          className="bg-green-700 px-4 py-2 rounded-full font-semibold text-white"
-          disabled={capForm.processing}
-        >
-          Upload Cap
-        </button>
-      </form>
-
-      <hr className="my-6" />
-
-      {/* =======================
-          FORM UPLOAD TTD
-      ======================= */}
-      <form onSubmit={submitTtd} className="space-y-2 max-w-xl">
-        <h2 className="font-semibold">Tanda Tangan</h2>
-
-        <input
-          className="input input-bordered w-full"
-          placeholder="Nama Penandatangan"
-          value={ttdForm.data.nama_penandatangan}
-          onChange={e => ttdForm.setData('nama_penandatangan', e.target.value)}
-        />
-
-        <input
-          className="input input-bordered w-full"
-          placeholder="Jabatan"
-          value={ttdForm.data.jabatan}
-          onChange={e => ttdForm.setData('jabatan', e.target.value)}
-        />
-
-        <input
-          type="file"
-          accept="image/png,image/jpeg"
-          onChange={e =>
-            ttdForm.setData('ttd', e.target.files?.[0] ?? null)
-          }
-        />
-
-        <button
-          className="bg-green-700 px-4 py-2 rounded-full font-semibold text-white"
-          disabled={ttdForm.processing}
-        >
-          Tambah TTD
-        </button>
-
-        <div className="flex flex-wrap gap-4">
-          {(surat.ttds ?? []).map((ttd) => (
-            <div key={ttd.id} className="relative">
-              <img src={ttd.url} className="w-32 border rounded" />
-              <p>{ttd.nama}</p>
-              <p className="text-xs text-gray-500">{ttd.jabatan}</p>
-
-              <button
-                type="button"
-                className="bg-red-700 px-4 py-2 rounded-full font-semibold text-white"
-                onClick={() => {
-                  if (confirm('Hapus TTD ini?')) {
-                    router.delete(
-                      route('filing.surat.delete-ttd', ttd.id),
-                      { preserveScroll: true }
-                    )
-                  }
-                }}
-              >
-                Hapus
-              </button>
-            </div>
-          ))}
-        </div>
-      </form>
-    </AppLayout>
-  )
-}

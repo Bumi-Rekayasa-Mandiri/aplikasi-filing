@@ -27,6 +27,6 @@ class SuratRecentView extends Model //implements HasMedia
 
     public function surat()
     {
-        return $this->belongsTo(Surat::class);
+        return $this->belongsTo(Surat::class)->withTrashed();
     }
 }

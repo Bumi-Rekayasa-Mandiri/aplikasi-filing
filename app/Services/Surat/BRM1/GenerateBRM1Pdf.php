@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Surat\SPK;
+namespace App\Services\Surat\BRM1;
 
 use App\Models\Surat;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -10,6 +10,10 @@ class GenerateBRM1Pdf
 {
     public function handle(Surat $surat): void
     {
+        $surat->finalize();
+
+        $surat->refresh();
+
         Carbon::setLocale('id');
         setlocale(LC_TIME, 'id_ID.UTF8');
         
@@ -18,12 +22,12 @@ class GenerateBRM1Pdf
             'media',
         ]);
 
-        $pdf = Pdf::loadView('pdf.spk', [
+        $pdf = Pdf::loadView('pdf.brm1', [
             'surat' => $surat,
         ])->setPaper('A4', 'portrait');
 
         // ✅ TEMP FILE (ABSOLUTE PATH)
-        $tempPath = storage_path("app/temp/spk-{$surat->id}.pdf");
+        $tempPath = storage_path("app/temp/brm1-{$surat->id}.pdf");
 
         // pastikan folder ada
         if (!is_dir(dirname($tempPath))) {
@@ -33,14 +37,14 @@ class GenerateBRM1Pdf
         // simpan pdf
         $pdf->save($tempPath);
 
-        // ✅ SIMPAN KE MEDIA LIBRARY
-        $surat
-            ->clearMediaCollection('pdf')
-            ->addMedia($tempPath)
-            ->usingName("SPK_BRM_{$surat->id}.pdf")
-            ->toMediaCollection('pdf');
+        if (!file_exists($tempPath)) {
+        throw new \RuntimeException("Gagal membuat temp PDF di: {$tempPath}");
+        }
 
-        // optional: hapus temp file
-        //unlink($tempPath);
+        $surat->clearMediaCollection('brm1_pdf');
+        // ✅ SIMPAN KE MEDIA LIBRARY
+        $surat->addMedia($tempPath)
+            ->usingName("BRM1_{$surat->id}.pdf")
+            ->toMediaCollection('brm1_pdf');
     }
 }

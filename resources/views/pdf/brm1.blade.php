@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Surat Pemberitahuan PHK</title>
+    <title>Surat Izin Kerja dan LK3</title>
 
 <style>
     .kop {
@@ -20,7 +20,7 @@
     body {
         font-family: "Times New Roman", serif;
         font-size: 12pt;
-        line-height: 1.15;
+        line-height: 1.5;
         margin: 5mm 10mm 10mm 10mm;
     }
 
@@ -67,7 +67,7 @@
     }
 
     table.identitas td.label {
-        width: 80px;
+        width: 150px;
     }
 
     table.identitas td.colon {
@@ -101,7 +101,7 @@
     .cap {
         position: absolute;
         top: 0;
-        right: 70px;
+        left: 70px;
         top: 0;
         width: 120px;
         opacity: 0.35;
@@ -111,7 +111,7 @@
     .ttd {
         position: absolute;
         top: 0;
-        right: 100px;
+        left: 100px;
         width: 90px;
         z-index: 2;
     }
@@ -119,10 +119,10 @@
     .signature-name {
         position: absolute;
         top: 0;
-        right: 90px;
+        left: 90px;
         text-align: center;
         width: 200px;
-        float: right;
+        float: left;
     }
 
 </style>
@@ -141,138 +141,151 @@
     </div>
 
     {{-- TITLE --}}
-    <div class="title" style="font-size: 14pt; margin-top: 20px;">SURAT PEMBERITAHUAN</div>
+    <div class="title" style="font-size: 14pt; margin-top: 20px;">SURAT PEMBERITAHUAN KERJA</div>
 
     {{-- NOMOR & TANGGAL --}}
     <table class="nomor-table">
     <tr>
         <td class="left">
-            Nomor : {{ $surat->nomor_surat ?? '—' }}
+            <strong> 
+            Kepada : <br>
+            Yth. {{ $surat->tujuan ?? '-' }} </strong> <br>
+            Up. Dept. {{ $surat->departemen ?? '-' }} <br>
+            Bp. {{ $surat->nama ?? '-' }} <br>
+            Di Tempat <br>
         </td>
-        <td class="right">
-            Karawang, {{ \Carbon\Carbon::parse($surat->tanggal_surat)->locale('id')->translatedFormat('d F Y') }}
-        </td>
-    </tr>
     </table>
 
     {{-- PEMBUKA --}}
-    <div class="content">
-        Yang bertanda tangan di bawah ini:
+    <div class="content" style="margin-bottom: 5px">
+        Dengan Hormat,<br>
+        Bersama ini kami mengajukan pelaksanaan kerja :
     </div>
 
-    {{-- IDENTITAS PENANDATANG --}}
+    {{-- DATA DETAIL PEKERJAAN --}}
     <table class="identitas">
         <tr>
-            <td class="label"><strong>Nama</strong></td>
+            <td class="label"><strong>Lokasi Kerja</strong></td>
             <td class="colon">:</td>
-            <td>Ilman Sunaryo</td>
+            <td>{{ $surat->lokasi_kerja ?? '-' }}</td>
         </tr>
         <tr>
-            <td class="label"><strong>Jabatan</strong></td>
+            <td class="label"><strong>Jenis Pekerjaan</strong></td>
             <td class="colon">:</td>
-            <td>Direktur</td>
+            <td>{{ $surat->jenis_pekerjaan ?? '-' }}</td>
         </tr>
         <tr>
-            <td class="label"><strong>Perusahaan</strong></td>
+            <td class="label"><strong>Waktu</strong></td>
             <td class="colon">:</td>
-            <td>PT. Bumi Rekayasa Mandiri</td>
+            <td>{{ $surat->waktu ?? '-' }}</td>
         </tr>
         <tr>
-            <td class="label"><strong>Alamat</strong></td>
+            <td class="label"><strong>Jam Kerja</strong></td>
             <td class="colon">:</td>
             <td>
-                Ruko Grand Taruma Blok D8/DC, Telukjambe Timur,
-                Karawang, Indonesia
+                {{ $surat->jam_kerja ?? '-' }}
+            </td>
+        </tr>
+        <br>
+        <tr>
+            <td class="label"><strong>Penanggung Jawab</strong></td>
+            <td class="colon">:</td>
+            <td>
+                Ilman Sunaryo
+            </td>
+        </tr>
+        <tr>
+            <td class="label"><strong>Jumlah Pekerja</strong></td>
+            <td class="colon">:</td>
+            <td>
+                {{ $surat->jumlah_pekerja ?? '-' }}
             </td>
         </tr>
     </table>
 
-    <div class="content">
-        Dengan ini menerangkan bahwa:
+    <div class="content" style="margin-top: 15px;">
+        Atas kerja samanya, kami mengucapkan terima kasih.
     </div>
 
-    {{-- IDENTITAS KARYAWAN --}}
-    <table class="identitas1">
-        <tr>
-            <td class="label"><strong>Nama</strong></td>
-            <td class="colon">:</td>
-            <td>{{ $surat->nama ?? '—' }}</td>
-        </tr>
-        <tr>
-            <td class="label"><strong>Jabatan Terakhir</strong></td>
-            <td class="colon">:</td>
-            <td>{{ $surat->jabatan_terakhir ?? '—' }}</td>
-        </tr>
-        <tr>
-            <td class="label"><strong>Departemen / Bagian</strong></td>
-            <td class="colon">:</td>
-            <td>{{ $surat->departemen ?? '—' }}</td>
-        </tr>
-    </table>
-
-    {{-- ISI --}}
-    <div class="content" style="margin-top: 10px;">
-        Telah <strong>tidak lagi bekerja di PT. Bumi Rekayasa Mandiri terhitung sejak tanggal
-        {{ \Carbon\Carbon::parse($surat->tanggal_surat)->locale('id')->translatedFormat('d F Y') }}</strong>,
-        dengan alasan mengundurkan diri.
-    </div>
-
-    <div class="content" style="margin-top: 10px;">
-        Segala tindakan yang dilakukan setelah berakhirnya hubungan kerja sepenuhnya
-        menjadi tanggung jawab pribadi yang bersangkutan dan tidak menjadi tanggung
-        jawab perusahaan.
-    </div>
-
-    <div class="content" style="margin-top: 10px;">
-        Apabila terdapat hal-hal yang perlu dikonfirmasi atau terkait dengan pekerjaan
-        yang bersangkutan, dapat menghubungi Ilman Sunaryo di nomor +62811964060
-        atau email berikut:
-    </div>
-
-        <div class="content" style="text-color: navy; margin-left: 20px; margin-top: 10px; margin-bottom: 10px;">
-            • bumirekayasa.mandiri@gmail.com <br>
-            • info@bumirekayasamandiri.co.id <br>
-            • info@bumirekamandiri.id
-        </div>
-    
-    <div class="content" style="margin-top: 10px;">
-        Demikian surat pemberitahuan ini dibuat dengan sebenar-benarnya. Atas perhatian
-        dan kerja samanya, kami ucapkan terima kasih.
-    </div>
-
-    <div class="content" style="text-align: right; margin-top: 10px;">
+    <div class="content" style="text-align: left; margin-top: 15px;">
         Karawang, {{ \Carbon\Carbon::parse($surat->tanggal_surat)->locale('id')->translatedFormat('d F Y') }}
     </div>
 
-    <div style="page-break-inside: avoid;"
-    
-        <div class="signature-wrapper">
+      <div style="page-break-inside: avoid; margin-top: 5px;">
 
-            {{-- CAP --}}
-            @if($surat->getFirstMediaUrl('cap'))
-                <img
-                    src="{{ public_path($surat->getFirstMedia('cap')->getPath()) }}"
-                    class="cap"
-                >
-            @endif
+            @php
+                $ttds   = $surat->ttds;
+                $jumlah = $ttds->count() ?: 1;
 
-            {{-- TTD --}}
-            @if($surat->ttds->count())
-                <img
-                    src="{{ public_path($surat->ttds->first()->getFirstMedia('ttd')->getPath()) }}"
-                    class="ttd"
-                >
-            @endif
+                $capMedia  = $surat->getFirstMedia('cap');
+                $capBase64 = $capMedia && file_exists($capMedia->getPath())
+                    ? 'data:' . $capMedia->mime_type . ';base64,' . base64_encode(file_get_contents($capMedia->getPath()))
+                    : null;
+            @endphp
 
-            {{-- NAMA --}}
-            <div class="signature-name">
-                Hormat Kami<br><br><br><br>
-                {{ $surat->ttds->first()->nama_penandatangan ?? 'Ilman Sunaryo' }}<br>
-                {{ $surat->ttds->first()->jabatan ?? 'Direktur' }}
-            </div>
+            {{-- TABEL TTD --}}
+            <table style="width: 110%; position: relative;">
+                <tr>
+                    @foreach($ttds as $i => $ttd)
+                    @php
+                        $ttdMedia  = $ttd->getFirstMedia('ttd');
+                        $ttdBase64 = $ttdMedia && file_exists($ttdMedia->getPath())
+                            ? 'data:' . $ttdMedia->mime_type . ';base64,' . base64_encode(file_get_contents($ttdMedia->getPath()))
+                            : null;
+
+                        // Cap hanya di kolom paling kanan (penandatangan terakhir)
+                        $showCap = $capBase64 && ($i === 0);
+                    @endphp
+                    <td style="
+                        text-align: center;
+                        width: {{ round(100 / $jumlah) }}%;
+                        vertical-align: bottom;
+                        padding: 0;
+                        position: relative;
+                    ">
+                        {{-- Label: tampil jika ada, spasi jika kosong --}}
+                        @if(!empty($ttd->label))
+                            {{ $ttd->label }}
+                        @else
+                            &nbsp;
+                        @endif
+                        <br><br>
+
+                        {{-- Cap hanya di kolom pertama (index 0) --}}
+                        @if($showCap)
+                        <img src="{{ $capBase64 }}" style="
+                            position: absolute;
+                            bottom: 132px;
+                            left: 50%;
+                            transform: translateX(-50%);
+                            width: 110px;
+                            opacity: 0.70;
+                            z-index: 1;
+                        "/>
+                        @endif
+
+                        @if($ttdBase64)
+                        <img src="{{ $ttdBase64 }}" style="
+                            position: relative;
+                            bottom: 10px;
+                            width: 90px;
+                            height: auto;
+                            opacity: 0.95;
+                            z-index: 2;
+                        "/><br>
+                        @else
+                        <br><br><br><br><br>
+                        @endif
+
+                        <strong style="position: relative; z-index: 3;">
+                            {{ $ttd->nama_penandatangan }}
+                        </strong><br>
+                    </td>
+                    @endforeach
+                </tr>
+            </table>
+
         </div>
-    
-    </div>
 
 </body>
 </html>

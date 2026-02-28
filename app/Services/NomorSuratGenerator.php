@@ -2,27 +2,29 @@
 
 namespace App\Services;
 
+use App\Models\Surat;
 use App\Models\NomorSuratLog;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class NomorSuratGenerator
 {
-    public function generate(string $kodeJenis = 'BRM', ?int $tahunOverride = null): array
+    public function generateForSurat(Surat $surat)
     {
-        return DB::transaction(function () use ($kodeJenis, $tahunOverride) {
+        return DB::transaction(function () use ($surat) {
 
-            $now   = Carbon::now();
-            $tahun = $tahunOverride ?? $now->year;
+            $now   = now();
+            $tahun = $now->year;
             $bulan = $now->month;
 
-            $last = NomorSuratLog::where('tahun', $tahun)
+            $kodeJenis = $surat->jenis ?? 'BRM';
+
+            $lastRunning = NomorSuratLog::where('tahun', $tahun)
                 ->where('kode_jenis', $kodeJenis)
                 ->lockForUpdate()
-                ->orderByDesc('running_number')
-                ->first();
+                ->max('running_number');
 
-            $running = $last ? $last->running_number + 1 : 1;
+            $running = ($lastRunning ?? 0) + 1;
 
             $nomorSurat = sprintf(
                 '%03d/%s/%s/%d',
@@ -32,23 +34,25 @@ class NomorSuratGenerator
                 $tahun
             );
 
+            // ✅ Buat log
             $log = NomorSuratLog::create([
-                'tahun'          => $tahun,
-                'bulan'          => $bulan,
+                'tahun' => $tahun,
+                'bulan' => $bulan,
                 'running_number' => $running,
-                'nomor_surat'    => $nomorSurat,
-                'kode_jenis'     => $kodeJenis,
-                'surat_id'       => null,
+                'kode_jenis' => $kodeJenis,
+                'nomor_surat' => $nomorSurat,
+                'surat_id' => $surat->id,
             ]);
 
-            return [
-                'log_id'         => $log->id,     // ← INI YANG HILANG
-                'nomor_surat'    => $nomorSurat,
-                // 'running_number' => $running,
-                // 'tahun'          => $tahun,
-                // 'bulan'          => $bulan,
-                // 'kode_jenis'     => $kodeJenis,
-            ];
+            // ✅ Update surat
+            $surat->update([
+                'nomor_surat' => $nomorSurat,
+            ]);
+
+                return [
+                    'log_id' => $log->id,
+                    'nomor_surat' => $nomorSurat,
+                ];
         });
     }
 

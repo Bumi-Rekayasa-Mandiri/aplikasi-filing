@@ -10,14 +10,26 @@ type Props = {
   }
 }
 
-export default function PreviewSPK({ surat }: Props) {
+export default function PreviewSKP({ surat }: Props) {
+  if (!surat?.pdf_url) {
+
+    console.log("PDF URL:", surat.pdf_url)
+      
+    return (
+      <AppLayout title="Preview SKP BRM">
+        <Head title="Preview SKP BRM" />
+        <p className="text-gray-500">PDF belum tersedia.</p>
+      </AppLayout>
+    )
+  }
+
   return (
-    <AppLayout title="Preview SPK-BRM">
-      <Head title="Preview SPK-BRM" />
+    <AppLayout title="Preview SKP BRM">
+      <Head title="Preview SKP BRM" />
 
       <div className="space-y-4">
         <h1 className="text-xl font-semibold">
-          Preview Surat SPK-BRM
+          Preview Surat Pemberitahuan PHK
         </h1>
 
         <div className="flex gap-3">
@@ -39,7 +51,7 @@ export default function PreviewSPK({ surat }: Props) {
 
         <iframe
           src={surat.pdf_url}
-          className="w-full h-[85vh] border rounded"
+          className="w-full h-screen rounded"
         />
       </div>
     </AppLayout>

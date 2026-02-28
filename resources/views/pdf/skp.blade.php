@@ -150,7 +150,7 @@
             Nomor : {{ $surat->nomor_surat ?? '—' }}
         </td>
         <td class="right">
-            Karawang, {{ \Carbon\Carbon::parse($surat->tanggal_surat)->locale('id')->translatedFormat('d F Y') }}
+            Karawang, {{ \Carbon\Carbon::createFromFormat('Y-m-d', $surat['tanggal_surat'])->locale('id')->translatedFormat('d F Y') }}
         </td>
     </tr>
     </table>
@@ -213,7 +213,7 @@
     {{-- ISI --}}
     <div class="content" style="margin-top: 10px;">
         Telah <strong>tidak lagi bekerja di PT. Bumi Rekayasa Mandiri terhitung sejak tanggal
-        {{ \Carbon\Carbon::parse($surat->tanggal_surat)->locale('id')->translatedFormat('d F Y') }}</strong>,
+        {{ \Carbon\Carbon::createFromFormat('Y-m-d', $surat['tanggal_surat'])->locale('id')->translatedFormat('d F Y') }}</strong>,
         dengan alasan mengundurkan diri.
     </div>
 
@@ -241,38 +241,77 @@
     </div>
 
     <div class="content" style="text-align: right; margin-top: 20px;">
-        Karawang, {{ \Carbon\Carbon::parse($surat->tanggal_surat)->locale('id')->translatedFormat('d F Y') }}
+        Karawang, {{ \Carbon\Carbon::createFromFormat('Y-m-d', $surat['tanggal_surat'])->locale('id')->translatedFormat('d F Y') }}
     </div>
 
-    <div style="page-break-inside: avoid;"
-    
-        <div class="signature-wrapper">
+    <div style="page-break-inside: avoid;">
 
-                    {{-- CAP --}}
-            @if($surat->hasMedia('cap'))
-                <img src="{{ $surat->getFirstMedia('cap')->getPath() }}" class="cap">
+        @php
+            $ttdMedia = $surat->getFirstMedia('ttd');
+            $capMedia = $surat->getFirstMedia('cap');
+
+            $ttdBase64 = $ttdMedia && file_exists($ttdMedia->getPath())
+                ? 'data:' . $ttdMedia->mime_type . ';base64,' . base64_encode(file_get_contents($ttdMedia->getPath()))
+                : null;
+
+            $capBase64 = $capMedia && file_exists($capMedia->getPath())
+                ? 'data:' . $capMedia->mime_type . ';base64,' . base64_encode(file_get_contents($capMedia->getPath()))
+                : null;
+
+            $namaTtd  = $surat->ttds->first()->nama ?? ($surat->nama_penandatangan ?? 'Ilman Sunaryo');
+            $jabatanTtd = $surat->ttds->first()->jabatan ?? ($surat->jabatan ?? 'Direktur');
+        @endphp
+
+        {{-- BLOK TANDA TANGAN --}}
+        <div style="
+            position: relative;
+            width: 100%;
+            height: 140px;      /* ← tinggi container, sesuaikan jika teks terpotong */
+            margin-top: 10px;
+        ">
+
+            {{-- CAP — paling bawah --}}
+            @if($capBase64)
+            <img src="{{ $capBase64 }}" style="
+                position: absolute;
+                top: 10px;
+                right: 55px;
+                width: 115px;
+                height: auto;
+                opacity: 0.75;
+                z-index: 1;
+            "/>
             @endif
 
-            {{-- TTD --}}
-            <div class="ttd-list">
-                @foreach($surat->ttds as $ttd)
-                    <div class="ttd-item">
-                        @if($ttd->hasMedia('ttd'))
-                            <img
-                                src="{{ $ttd->getFirstMedia('ttd')->getPath() }}"
-                                class="ttd"
-                            >
-                        @endif
+            {{-- TTD — di atas cap --}}
+            @if($ttdBase64)
+            <img src="{{ $ttdBase64 }}" style="
+                position: absolute;
+                top: 18px;
+                right: 60px;
+                width: 100px;
+                height: auto;
+                opacity: 0.95;
+                z-index: 2;
+            "/>
+            @endif
 
-                        <div class="signature-name">
-                            {{ $ttd->nama_penandatangan }}<br>
-                            {{ $ttd->jabatan }}
-                        </div>
-                    </div>
-                @endforeach
+            {{-- TEKS: Hormat Kami, Nama, Jabatan — paling atas --}}
+            <div style="
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 200px;
+                text-align: center;
+                z-index: 3;
+            ">
+                Hormat Kami,<br><br><br><br><br>
+                {{ $namaTtd }}<br>
+                {{ $jabatanTtd }}
             </div>
+
         </div>
-    
+
     </div>
 
 </body>
