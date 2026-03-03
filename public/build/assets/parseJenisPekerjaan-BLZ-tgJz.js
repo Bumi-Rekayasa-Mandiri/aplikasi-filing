@@ -1,0 +1,1 @@
+const t=r=>{if(!r)return[];if(Array.isArray(r))return r.filter(Boolean);if(typeof r=="string")try{const e=JSON.parse(r);if(Array.isArray(e))return e.filter(Boolean)}catch{return[r]}return[]};export{t as p};

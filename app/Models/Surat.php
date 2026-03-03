@@ -18,9 +18,7 @@ class Surat extends Model implements HasMedia
     use InteractsWithMedia, SoftDeletes;
 
     const STATUS_DRAFT = 'draft';
-    const STATUS_SUBMITTED = 'submitted';
     const STATUS_APPROVED = 'approved';
-    const STATUS_REJECTED = 'rejected';
 
     protected $table = 'surat';
 

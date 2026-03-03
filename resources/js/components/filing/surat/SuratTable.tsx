@@ -3,6 +3,7 @@ import { router } from '@inertiajs/react'
 import SuratApprovalActions from '@/components/filing/surat/SuratApprovalActions'
 import SuratDownloadButton from '@/components/filing/surat/SuratDownloadButton'
 import SortIcon from '@/components/SortIcon'
+import { getPreviewRoute } from '@/types/filing/suratRoutes'
 
 interface Props {
   data: Surat[]
@@ -93,14 +94,13 @@ export default function SuratTable({ data, sortField, sortDirection, onSort }: P
                   Detail
                 </button>
 
-                <button
-                  className="btn btn-sm bg-blue-700 px-4 py-2 rounded-full text-white font-semibold"
-                  onClick={() =>
-                    router.visit(route('filing.surat.preview', s.id))
-                  }
-                >
-                  Preview
-                </button>
+              <button
+                className="btn btn-sm bg-blue-700 px-4 py-2 rounded-full text-white font-semibold"
+                onClick={() => {console.log('jenis:', s.jenis, 'id:', s.id) 
+                  router.visit(getPreviewRoute(s.jenis, s.id))}}
+              >
+                Preview
+              </button>
 
                 {s.status === 'draft' && (
                   <>

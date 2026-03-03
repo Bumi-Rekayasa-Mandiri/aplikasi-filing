@@ -21,5 +21,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+        if (!file_exists(storage_path('fonts'))) {
+            mkdir(storage_path('fonts'), 0775, true);
+        }
     }
 }

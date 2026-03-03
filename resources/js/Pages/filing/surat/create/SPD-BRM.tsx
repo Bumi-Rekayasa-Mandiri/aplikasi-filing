@@ -18,6 +18,14 @@
     }
   }
 
+  type TtdItem = {
+    nama_penandatangan: string
+    jabatan: string
+    urutan: number
+    label: string
+    file: File | null
+  }
+
   export default function CreateSPD({ surat }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         judul: '',
@@ -34,9 +42,10 @@
 
         cap: null as File | null,
 
-        nama_penandatangan: '',
-        jabatan: '',
-        ttd: null as File | null,
+        ttds: [
+          { nama_penandatangan: '', jabatan: '', urutan: 1, label: 'Pihak Pertama', file: null },
+          { nama_penandatangan: '', jabatan: '', urutan: 2, label: 'Pihak Kedua',   file: null },
+        ] as TtdItem[],
       })
 
        const submit = (e: React.FormEvent) => {
@@ -55,6 +64,23 @@
             }
          )
        }
+
+              const addTtd = () => {
+          setData('ttds', [
+            ...data.ttds,
+            { nama_penandatangan: '', jabatan: '', urutan: data.ttds.length + 1, label: `Pihak ${data.ttds.length + 1}`, file: null }
+          ])
+        }
+
+      const removeTtd = (index: number) => {
+          setData('ttds', data.ttds.filter((_, i) => i !== index))
+        }
+
+      const updateTtd = (index: number, field: keyof TtdItem, value: string | File | null) => {
+          const updated = [...data.ttds]
+          updated[index] = { ...updated[index], [field]: value }
+          setData('ttds', updated)
+        }
 
       if (!surat?.id) {
         return (
@@ -167,25 +193,58 @@
           <span className="text-lg font-bold mt-10">Tanda Tangan</span>
           <br />
 
-          <input
-            className="input input-bordered w-full"
-            placeholder="Nama Penandatangan"
-            onChange={e => setData('nama_penandatangan', e.target.value)}
-          />
+          {data.ttds.map((ttd, index) => (
+            <div key={index} className="border p-4 rounded-lg space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="font-semibold">Penandatangan {index + 1}</span>
+                {data.ttds.length > 1 && (
+                  <button
+                    type="button"
+                    className="text-red-500 text-sm"
+                    onClick={() => removeTtd(index)}
+                  >
+                    Hapus
+                  </button>
+                )}
+              </div>
 
-          <input
-            className="input input-bordered w-full"
-            placeholder="Jabatan"
-            onChange={e => setData('jabatan', e.target.value)}
-          />
+              <input
+                className="input input-bordered w-full"
+                placeholder="Label (contoh: Pihak Pertama, Pihak Kedua, Hormat Kami)"
+                value={ttd.label}
+                onChange={e => updateTtd(index, 'label', e.target.value)}
+              />
 
-          <input
-            type="file"
-            onChange={e =>
-              setData('ttd', e.target.files?.[0] ?? null)
-            }
-          />
-          <br />
+              <input
+                className="input input-bordered w-full"
+                placeholder="Nama Penandatangan"
+                value={ttd.nama_penandatangan}
+                onChange={e => updateTtd(index, 'nama_penandatangan', e.target.value)}
+              />
+
+              <input
+                className="input input-bordered w-full"
+                placeholder="Jabatan"
+                value={ttd.jabatan}
+                onChange={e => updateTtd(index, 'jabatan', e.target.value)}
+              />
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={e => updateTtd(index, 'file', e.target.files?.[0] ?? null)}
+              />
+            </div>
+          ))}
+
+          <button
+            type="button"
+            className="border border-green-700 text-green-700 px-4 py-2 rounded-full text-sm"
+            onClick={addTtd}
+          >
+            + Tambah Tanda Tangan
+          </button>
+          <br></br>
 
           <button
             className="bg-green-700 px-4 py-2 rounded-full font-semibold text-white"

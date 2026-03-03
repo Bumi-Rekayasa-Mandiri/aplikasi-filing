@@ -212,75 +212,87 @@
         Karawang, {{ \Carbon\Carbon::parse($surat->tanggal_surat)->locale('id')->translatedFormat('d F Y') }}
     </div>
 
-    <div style="page-break-inside: avoid;">
+    <div style="page-break-inside: avoid; margin-top: 10px;">
+            @php
+                $ttds   = $surat->ttds;
+                $jumlah = $ttds->count() ?: 1;
 
-        @php
-            $ttdMedia = $surat->getFirstMedia('ttd');
-            $capMedia = $surat->getFirstMedia('cap');
+                $capMedia  = $surat->getFirstMedia('cap');
+                $capPath   = $capMedia ? str_replace('\\', '/', $capMedia->getPath()) : null;
+                $capBase64 = $capPath && file_exists($capPath)
+                    ? 'data:' . $capMedia->mime_type . ';base64,' . base64_encode(file_get_contents($capPath))
+                    : null;
+            @endphp
 
-            $ttdBase64 = $ttdMedia && file_exists($ttdMedia->getPath())
-                ? 'data:' . $ttdMedia->mime_type . ';base64,' . base64_encode(file_get_contents($ttdMedia->getPath()))
-                : null;
+            <table style="width: 50%; margin-left: auto;">  {{-- ← 50% dan dorong ke kanan --}}
+                <tr>
+                    @foreach($ttds as $i => $ttd)
+                    @php
+                        $ttdMedia  = $ttd->getFirstMedia('ttd');
+                        $ttdPath   = $ttdMedia ? str_replace('\\', '/', $ttdMedia->getPath()) : null;
+                        $ttdBase64 = $ttdPath && file_exists($ttdPath)
+                            ? 'data:' . $ttdMedia->mime_type . ';base64,' . base64_encode(file_get_contents($ttdPath))
+                            : null;
+                        $showCap = $capBase64 && ($i === 0);
+                    @endphp
+                    <td style="
+                        text-align: center;
+                        width: {{ round(100 / $jumlah) }}%;
+                        vertical-align: bottom;
+                        padding: 0 15px 5px 15px;
+                        position: relative;
+                        height: 160px;
+                    ">
 
-            $capBase64 = $capMedia && file_exists($capMedia->getPath())
-                ? 'data:' . $capMedia->mime_type . ';base64,' . base64_encode(file_get_contents($capMedia->getPath()))
-                : null;
+                        {{-- Cap --}}
+                        @if($showCap)
+                        <img src="{{ $capBase64 }}" style="
+                            position: absolute;
+                            top: 20px;
+                            left: 100%;
+                            transform: translateX(-100%);
+                            width: 100px;
+                            height: auto;
+                            opacity: 0.75;
+                            z-index: 1;
+                        "/>
+                        @endif
 
-            $namaTtd  = $surat->ttds->first()->nama ?? ($surat->nama_penandatangan ?? 'Ilman Sunaryo');
-            $jabatanTtd = $surat->ttds->first()->jabatan ?? ($surat->jabatan ?? 'Direktur');
-        @endphp
+                        {{-- TTD --}}
+                        @if($ttdBase64)
+                        <img src="{{ $ttdBase64 }}" style="
+                            position: absolute;
+                            top: 47px;
+                            left: 100%;
+                            transform: translateX(-100%);
+                            width: 100px;
+                            height: auto;
+                            opacity: 0.95;
+                            z-index: 2;
+                        "/>
+                        @endif
 
-        {{-- BLOK TANDA TANGAN --}}
-        <div style="
-            position: relative;
-            width: 100%;
-            height: 140px;      /* ← tinggi container, sesuaikan jika teks terpotong */
-            margin-top: 10px;
-        ">
+                        {{-- Nama & Jabatan --}}
 
-            {{-- CAP — paling bawah --}}
-            @if($capBase64)
-            <img src="{{ $capBase64 }}" style="
-                position: absolute;
-                top: 10px;
-                right: 55px;
-                width: 115px;
-                height: auto;
-                opacity: 0.75;
-                z-index: 1;
-            "/>
-            @endif
-
-            {{-- TTD — di atas cap --}}
-            @if($ttdBase64)
-            <img src="{{ $ttdBase64 }}" style="
-                position: absolute;
-                top: 18px;
-                right: 60px;
-                width: 100px;
-                height: auto;
-                opacity: 0.95;
-                z-index: 2;
-            "/>
-            @endif
-
-            {{-- TEKS: Hormat Kami, Nama, Jabatan — paling atas --}}
-            <div style="
-                position: absolute;
-                top: 0;
-                right: 0;
-                width: 200px;
-                text-align: center;
-                z-index: 3;
-            ">
-                Hormat Kami,<br><br><br><br><br>
-                <strong>{{ $namaTtd }}</strong><br>
-                {{ $jabatanTtd }}
-            </div>
-
+                        <div style="
+                            position: absolute;
+                            top: 0;
+                            right: 0;
+                            width: 200px;
+                            text-align: center;
+                            z-index: 3;
+                        ">
+                            {{ $ttd->label }},<br><br><br><br><br>
+                            {{$ttd->nama_penandatangan }}<br>
+                            {{ $ttd->jabatan }}
+                        </div>
+                                          
+                    </div>
+                    </td>
+                    @endforeach
+                </tr>
+            </table>
         </div>
-
-    </div>
 
 </body>
 </html>

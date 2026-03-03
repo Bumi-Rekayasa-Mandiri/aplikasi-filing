@@ -15,6 +15,7 @@ export interface NomorSuratLog {
 export interface Surat {
   id: number
   judul: string
+  jenis: string
   perihal: string
   tujuan: string
   isi_surat: string

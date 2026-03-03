@@ -208,78 +208,82 @@
         Demikian Garansi ini kami buat untuk dapat dipergunakan sebagaimana mestinya.
     </div>
 
-    <div class="content" style="text-align: left; margin-top: 20px;">
+    <div class="content" style="text-align: left; margin-top: 40px;">
         Karawang, {{ \Carbon\Carbon::parse($surat->tanggal_surat)->locale('id')->translatedFormat('d F Y') }}
     </div>
 
     <div style="page-break-inside: avoid;">
 
-        @php
-            $ttdMedia = $surat->getFirstMedia('ttd');
-            $capMedia = $surat->getFirstMedia('cap');
+            @php
+                $ttds   = $surat->ttds;
+                $jumlah = $ttds->count() ?: 1;
 
-            $ttdBase64 = $ttdMedia && file_exists($ttdMedia->getPath())
-                ? 'data:' . $ttdMedia->mime_type . ';base64,' . base64_encode(file_get_contents($ttdMedia->getPath()))
-                : null;
+                $capMedia  = $surat->getFirstMedia('cap');
+                $capBase64 = $capMedia && file_exists($capMedia->getPath())
+                    ? 'data:' . $capMedia->mime_type . ';base64,' . base64_encode(file_get_contents($capMedia->getPath()))
+                    : null;
+            @endphp
 
-            $capBase64 = $capMedia && file_exists($capMedia->getPath())
-                ? 'data:' . $capMedia->mime_type . ';base64,' . base64_encode(file_get_contents($capMedia->getPath()))
-                : null;
+            {{-- TABEL TTD --}}
+            <table style="width: 100%; position: relative;">
+                <tr>
+                    @foreach($ttds as $i => $ttd)
+                    @php
+                        $ttdMedia  = $ttd->getFirstMedia('ttd');
+                        $ttdBase64 = $ttdMedia && file_exists($ttdMedia->getPath())
+                            ? 'data:' . $ttdMedia->mime_type . ';base64,' . base64_encode(file_get_contents($ttdMedia->getPath()))
+                            : null;
 
-            $namaTtd  = $surat->ttds->first()->nama ?? ($surat->nama_penandatangan ?? 'Ilman Sunaryo');
-            $jabatanTtd = $surat->ttds->first()->jabatan ?? ($surat->jabatan ?? 'Direktur');
-        @endphp
+                        // Cap hanya di kolom paling kanan (penandatangan terakhir)
+                        $showCap = $capBase64 && ($i === $ttds->count() - 1);
+                    @endphp
+                    <td style="
+                        text-align: left;
+                        width: {{ round(100 / $jumlah) }}%;
+                        vertical-align: bottom;
+                        padding: 0 15px 5px 0;
+                        position: relative;
+                    ">
+                        {{-- Label --}}
+                        {{ $ttd->label }}<br><br>
 
-        {{-- BLOK TANDA TANGAN --}}
-        <div style="
-            position: relative;
-            width: 100%;
-            height: 180px;
-        ">
+                        {{-- Cap rata kiri --}}
+                        @if($showCap)
+                        <img src="{{ $capBase64 }}" style="
+                            position: absolute;
+                            bottom: 93px;
+                            left: 0px;
+                            width: 110px;
+                            opacity: 0.70;
+                            z-index: 1;
+                        "/>
+                        @endif
 
-            {{-- CAP — paling bawah --}}
-            @if($capBase64)
-            <img src="{{ $capBase64 }}" style="
-                position: absolute;
-                top: 25px;
-                left: 15px;
-                width: 115px;
-                height: auto;
-                opacity: 0.75;
-                z-index: 1;
-            "/>
-            @endif
+                        {{-- TTD rata kiri --}}
+                        @if($ttdBase64)
+                        <img src="{{ $ttdBase64 }}" style="
+                            position: relative;
+                            bottom: 10px;
+                            left: 0;
+                            width: 90px;
+                            height: auto;
+                            opacity: 0.95;
+                            z-index: 2;
+                        "/><br>
+                        @else
+                        <br><br><br><br>
+                        @endif
 
-            {{-- TTD — di atas cap --}}
-            @if($ttdBase64)
-            <img src="{{ $ttdBase64 }}" style="
-                position: absolute;
-                top: 33px;
-                left: 20px;
-                width: 100px;
-                height: auto;
-                opacity: 0.95;
-                z-index: 2;
-            "/>
-            @endif
-
-            {{-- TEKS: Hormat Kami, Nama, Jabatan — paling atas --}}
-            <div style="
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 250px;
-                text-align: left;
-                z-index: 3;
-                white-space: nowrap;
-            ">
-                PT. BUMI REKAYASA MANDIRI<br><br><br><br><br>
-                <strong style="text-decoration: underline; text-transform: uppercase; margin-top: 7px;">{{ $namaTtd }}</strong><br>
-            </div>
+                        {{-- Nama & Jabatan --}}
+                        <strong style="position: relative; z-index: 3;">
+                            {{ $ttd->nama_penandatangan }}
+                        </strong><br>
+                    </td>
+                    @endforeach
+                </tr>
+            </table>
 
         </div>
-
-    </div>
 
 </body>
 </html>

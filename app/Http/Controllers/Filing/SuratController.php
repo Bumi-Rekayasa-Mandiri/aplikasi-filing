@@ -70,20 +70,60 @@ public function show(Surat $surat)
     $surat->load(['ttds.media']);
 
     return Inertia::render('filing/surat/Show', [
-            'surat' => [
-                'id' => $surat->id,
-                'nomor_surat' => $surat->nomor_surat,
-                'judul' => $surat->judul,
-                'tujuan' => $surat->tujuan,
-                'status' => $surat->status,
+        'surat' => [
+            // ── INFO UMUM ──────────────────────────
+            'id'           => $surat->id,
+            'jenis'        => $surat->jenis,
+            'nomor_surat'  => $surat->nomor_surat,
+            'judul'        => $surat->judul,
+            'perihal'      => $surat->perihal,
+            'tujuan'       => $surat->tujuan,
+            'tanggal_surat'=> $surat->tanggal_surat,
+            'status'       => $surat->status,
+            'lampiran'     => $surat->lampiran,
+            'isi_surat'    => $surat->isi_surat,
 
-                'cap_url' => $surat->getFirstMediaUrl('cap'),
+            // ── IDENTITAS ──────────────────────────
+            'nama'             => $surat->nama,
+            'alamat'           => $surat->alamat,
+            'no_ktp'           => $surat->no_ktp,
+            'jabatan'          => $surat->jabatan,
+            'departemen'       => $surat->departemen,
+            'jabatan_terakhir' => $surat->jabatan_terakhir,
 
-                'ttds' => $surat->ttds->map(fn ($ttd) => [
-                'id' => $ttd->id,
-                'nama' => $ttd->nama_penandatangan,
+            // ── FINANSIAL ──────────────────────────
+            'nominal'           => $surat->nominal,
+            'nominal_bagihasil' => $surat->nominal_bagihasil,
+            'item_pembelian'    => $surat->item_pembelian,
+            'hasil_denda'       => $surat->hasil_denda,
+            'keringanan_denda'  => $surat->keringanan_denda,
+
+            // ── PEKERJAAN ──────────────────────────
+            'project'        => $surat->project,
+            'material'       => $surat->material,
+            'lokasi_kerja'   => $surat->lokasi_kerja,
+            'jenis_pekerjaan'=> $surat->jenis_pekerjaan,
+            'waktu'          => $surat->waktu,
+            'jam_kerja'      => $surat->jam_kerja,
+            'jumlah_pekerja' => $surat->jumlah_pekerja,
+            'masa_garansi'   => $surat->masa_garansi,
+            'apd'            => $surat->apd,
+            'periode'        => $surat->periode,
+            'no_pekerja'     => $surat->no_pekerja,
+
+            // ── KENDARAAN ──────────────────────────
+            'merk'   => $surat->merk,
+            'warna'  => $surat->warna,
+            'rangka' => $surat->rangka,
+
+            // ── MEDIA ──────────────────────────────
+            'cap_url' => $surat->getFirstMediaUrl('cap'),
+            'ttds'    => $surat->ttds->map(fn($ttd) => [
+                'id'      => $ttd->id,
+                'nama'    => $ttd->nama_penandatangan,
                 'jabatan' => $ttd->jabatan,
-                'url' => $ttd->getFirstMediaUrl('ttd'),
+                'label'   => $ttd->label,
+                'url'     => $ttd->getFirstMediaUrl('ttd'),
             ]),
         ],
     ]);
@@ -166,63 +206,26 @@ public function edit(Surat $surat)
         ]);
     }
 
-    /**
-     * DELETE SURAT
-     */
 public function destroy(Surat $surat)
     {
         $this->authorize('delete', $surat);
 
+        // ✅ Hapus semua file media (cap, ttd, pdf)
+        $surat->clearMediaCollections();
+
+        // ✅ Hapus semua TTD berelasi beserta media-nya
+        foreach ($surat->ttds as $ttd) {
+            $ttd->clearMediaCollections();
+            $ttd->delete();
+        }
+
+        // ✅ Hapus record surat
         $surat->delete();
 
-        return Inertia::render('filing/surat/Index')->with('success', 'Surat berhasil dihapus');
+        return Inertia::location(
+            route('filing.surat.index', ['surat' => $surat->id])
+        );
     }
-
-    /**
-     * UPLOAD CAP / TTD
-     */
-// public function uploadCap(Request $request, Surat $surat)
-//     {
-//         $this->authorize('update', $surat);
-
-//         $request->validate([
-//             'cap' => 'required|image|mimes:png,jpg,jpeg|max:10240',
-//         ]);
-
-//         $surat->clearMediaCollection('cap');
-         
-//         $surat->addMediaFromRequest('cap')->toMediaCollection('cap');
-
-//         $this->regeneratePdf($surat);
-
-//         return redirect()
-//             ->back()
-//             ->with('success', 'Cap perusahaan berhasil diupload');
-//     }
-
-// public function uploadTtd(Request $request, Surat $surat)
-//     {
-//         $this->authorize('update', $surat);
-
-//         $validated = $request->validate([
-//             'ttd' => 'required|image|mimes:png,jpg,jpeg|max:2048',
-//             'nama_penandatangan' => 'required|string',
-//             'jabatan' => 'required|string',
-//         ]);
-
-//         $ttd = $surat->ttds()->create([
-//             'nama_penandatangan' => $validated['nama_penandatangan'],
-//             'jabatan' => $validated['jabatan'],
-//         ]);
-
-//         $ttd->addMediaFromRequest('ttd')->toMediaCollection('ttd');
-
-//         $this->regeneratePdf($surat);
-
-//         return redirect()
-//             ->back()
-//             ->with('success', 'Tanda tangan berhasil ditambahkan');
-//     }
 
 public function deleteTtd(SuratTtd $ttd)
     {
@@ -286,9 +289,12 @@ public function generateSKPPdf(Request $request, Surat $surat)
             'jabatan_terakhir' => 'required|string|max:255',
             'departemen' => 'required|string|max:255',
             'cap' => 'nullable|image',
-            'nama_penandatangan' => 'nullable|string',
-            'jabatan' => 'nullable|string',
-            'ttd' => 'nullable|image',
+            'ttds'                        => 'nullable|array',
+            'ttds.*.nama_penandatangan'   => 'required_with:ttds|string|max:255',
+            'ttds.*.jabatan'              => 'nullable|string|max:255',
+            'ttds.*.urutan'               => 'nullable|integer',
+            'ttds.*.label'                => 'nullable|string|max:100',
+            'ttds.*.file'                 => 'nullable|image|max:2048',
         ]);
 
         // 🔥 SIMPAN KE DATABASE (PENTING)
@@ -301,8 +307,6 @@ public function generateSKPPdf(Request $request, Surat $surat)
             'nama' => $data['nama'],
             'jabatan_terakhir' => $data['jabatan_terakhir'],
             'departemen' => $data['departemen'],
-            'nama_penandatangan' => $data['nama_penandatangan'] ?? null,
-            'jabatan' => $data['jabatan'] ?? null,
         ]);
 
         // 🔥 SIMPAN MEDIA
@@ -311,9 +315,21 @@ public function generateSKPPdf(Request $request, Surat $surat)
             $surat->addMediaFromRequest('cap')->toMediaCollection('cap');
         }
 
-        if ($request->hasFile('ttd')) {
-            $surat->clearMediaCollection('ttd');
-            $surat->addMediaFromRequest('ttd')->toMediaCollection('ttd');
+        $surat->ttds()->delete();
+
+        foreach ($request->input('ttds', []) as $index => $ttdData) {
+            $ttd = $surat->ttds()->create([
+                'nama_penandatangan' => $ttdData['nama_penandatangan'],
+                'jabatan'            => $ttdData['jabatan'] ?? '',
+                'urutan'             => $ttdData['urutan'] ?? ($index + 1),
+                'label'              => $ttdData['label'] ?? '',
+            ]);
+
+            if ($request->hasFile("ttds.{$index}.file")) {
+                $ttd->clearMediaCollection('ttd');
+                $ttd->addMediaFromRequest("ttds.{$index}.file")
+                    ->toMediaCollection('ttd');
+            }
         }
 
         // 🔥 GENERATE NOMOR + PDF
@@ -361,9 +377,12 @@ public function generateSKPdf(Request $request, Surat $surat)
             'hasil_denda' => 'required|string|max:255',
             'keringanan_denda' => 'required|string|max:255',
             'cap' => 'nullable|image',
-            'nama_penandatangan' => 'nullable|string',
-            'jabatan' => 'nullable|string',
-            'ttd' => 'nullable|image',
+            'ttds'                        => 'nullable|array',
+            'ttds.*.nama_penandatangan'   => 'required_with:ttds|string|max:255',
+            'ttds.*.jabatan'              => 'nullable|string|max:255',
+            'ttds.*.urutan'               => 'nullable|integer',
+            'ttds.*.label'                => 'nullable|string|max:100',
+            'ttds.*.file'                 => 'nullable|image|max:2048',
         ]);
 
         // 🔥 SIMPAN KE DATABASE (PENTING)
@@ -385,9 +404,21 @@ public function generateSKPdf(Request $request, Surat $surat)
             $surat->addMediaFromRequest('cap')->toMediaCollection('cap');
         }
 
-        if ($request->hasFile('ttd')) {
-            $surat->clearMediaCollection('ttd');
-            $surat->addMediaFromRequest('ttd')->toMediaCollection('ttd');
+        $surat->ttds()->delete();
+
+        foreach ($request->input('ttds', []) as $index => $ttdData) {
+            $ttd = $surat->ttds()->create([
+                'nama_penandatangan' => $ttdData['nama_penandatangan'],
+                'jabatan'            => $ttdData['jabatan'] ?? '',
+                'urutan'             => $ttdData['urutan'] ?? ($index + 1),
+                'label'              => $ttdData['label'] ?? '',
+            ]);
+
+            if ($request->hasFile("ttds.{$index}.file")) {
+                $ttd->clearMediaCollection('ttd');
+                $ttd->addMediaFromRequest("ttds.{$index}.file")
+                    ->toMediaCollection('ttd');
+            }
         }
 
         // 🔥 GENERATE NOMOR + PDF
@@ -472,7 +503,7 @@ public function generateSPIPdf(Request $request, Surat $surat)
                 'nama_penandatangan'    => $ttdData['nama_penandatangan'],
                 'jabatan'               => $ttdData['jabatan'],
                 'urutan'                => $ttdData['urutan'] ?? ($index + 1),
-                'label'                 => $ttdData['label'] ?? 'Hormat Kami', 
+                'label'                 => $ttdData['label'] ?? '', 
             ]);
 
             // Upload file TTD jika ada
@@ -549,9 +580,12 @@ public function generateSPDPdf(Request $request, Surat $surat)
             'no_ktp' => 'required|string|max:255',
             'nama' => 'required|string|max:255',
             'cap' => 'nullable|image',
-            'nama_penandatangan' => 'nullable|string',
-            'jabatan' => 'nullable|string',
-            'ttd' => 'nullable|image',
+            'ttds'                        => 'nullable|array',
+            'ttds.*.nama_penandatangan'   => 'required_with:ttds|string|max:255',
+            'ttds.*.jabatan'              => 'nullable|string|max:255',
+            'ttds.*.urutan'               => 'nullable|integer',
+            'ttds.*.label'                => 'nullable|string|max:100',
+            'ttds.*.file'                 => 'nullable|image|max:2048',
         ]);
 
         // 🔥 SIMPAN KE DATABASE (PENTING)
@@ -567,8 +601,6 @@ public function generateSPDPdf(Request $request, Surat $surat)
             'nominal' => $data['nominal'],
             'no_ktp' => $data['no_ktp'],
             'nama' => $data['nama'],
-            'nama_penandatangan' => $data['nama_penandatangan'] ?? null,
-            'jabatan' => $data['jabatan'] ?? null,
         ]);
 
         // 🔥 SIMPAN MEDIA
@@ -577,9 +609,21 @@ public function generateSPDPdf(Request $request, Surat $surat)
             $surat->addMediaFromRequest('cap')->toMediaCollection('cap');
         }
 
-        if ($request->hasFile('ttd')) {
-            $surat->clearMediaCollection('ttd');
-            $surat->addMediaFromRequest('ttd')->toMediaCollection('ttd');
+        $surat->ttds()->delete();
+
+        foreach ($request->input('ttds', []) as $index => $ttdData) {
+            $ttd = $surat->ttds()->create([
+                'nama_penandatangan' => $ttdData['nama_penandatangan'],
+                'jabatan'            => $ttdData['jabatan'] ?? '',
+                'urutan'             => $ttdData['urutan'] ?? ($index + 1),
+                'label'              => $ttdData['label'] ?? '',
+            ]);
+
+            if ($request->hasFile("ttds.{$index}.file")) {
+                $ttd->clearMediaCollection('ttd');
+                $ttd->addMediaFromRequest("ttds.{$index}.file")
+                    ->toMediaCollection('ttd');
+            }
         }
 
         // 🔥 GENERATE NOMOR + PDF
@@ -630,9 +674,12 @@ public function generateIEIPdf(Request $request, Surat $surat)
             'jenis_pekerjaan.*.deskripsi' => 'required_with:jenis_pekerjaan|string|max:500',
             'lampiran' => 'nullable|string|max:255',
             'cap' => 'nullable|image',
-            'nama_penandatangan' => 'nullable|string',
-            'jabatan' => 'nullable|string',
-            'ttd' => 'nullable|image',
+            'ttds'                        => 'nullable|array',
+            'ttds.*.nama_penandatangan'   => 'required_with:ttds|string|max:255',
+            'ttds.*.jabatan'              => 'nullable|string|max:255',
+            'ttds.*.urutan'               => 'nullable|integer',
+            'ttds.*.label'                => 'nullable|string|max:100',
+            'ttds.*.file'                 => 'nullable|image|max:2048',
         ]);
 
         // 🔥 SIMPAN KE DATABASE (PENTING)
@@ -652,8 +699,6 @@ public function generateIEIPdf(Request $request, Surat $surat)
                                 ->toArray()
                         ),
             'lampiran' => $data['lampiran'],
-            'nama_penandatangan' => $data['nama_penandatangan'] ?? null,
-            'jabatan' => $data['jabatan'] ?? null,
         ]);
 
         // 🔥 SIMPAN MEDIA
@@ -662,9 +707,21 @@ public function generateIEIPdf(Request $request, Surat $surat)
             $surat->addMediaFromRequest('cap')->toMediaCollection('cap');
         }
 
-        if ($request->hasFile('ttd')) {
-            $surat->clearMediaCollection('ttd');
-            $surat->addMediaFromRequest('ttd')->toMediaCollection('ttd');
+        $surat->ttds()->delete();
+
+        foreach ($request->input('ttds', []) as $index => $ttdData) {
+            $ttd = $surat->ttds()->create([
+                'nama_penandatangan' => $ttdData['nama_penandatangan'],
+                'jabatan'            => $ttdData['jabatan'] ?? '',
+                'urutan'             => $ttdData['urutan'] ?? ($index + 1),
+                'label'              => $ttdData['label'] ?? '',
+            ]);
+
+            if ($request->hasFile("ttds.{$index}.file")) {
+                $ttd->clearMediaCollection('ttd');
+                $ttd->addMediaFromRequest("ttds.{$index}.file")
+                    ->toMediaCollection('ttd');
+            }
         }
 
         // ✅ Wrap service call
@@ -735,9 +792,12 @@ public function generateGRSPdf(Request $request, Surat $surat)
             'alamat' => 'required|string|max:255',
             'masa_garansi' => 'required|string|max:255',
             'cap' => 'nullable|image',
-            'nama_penandatangan' => 'nullable|string',
-            'jabatan' => 'nullable|string',
-            'ttd' => 'nullable|image',
+            'ttds'                        => 'nullable|array',
+            'ttds.*.nama_penandatangan'   => 'required_with:ttds|string|max:255',
+            'ttds.*.jabatan'              => 'nullable|string|max:255',
+            'ttds.*.urutan'               => 'nullable|integer',
+            'ttds.*.label'                => 'nullable|string|max:100',
+            'ttds.*.file'                 => 'nullable|image|max:2048',
         ]);
 
         // 🔥 SIMPAN KE DATABASE (PENTING)
@@ -751,8 +811,6 @@ public function generateGRSPdf(Request $request, Surat $surat)
             'material' => $data['material'],
             'alamat' => $data['alamat'],
             'masa_garansi' => $data['masa_garansi'],
-            'nama_penandatangan' => $data['nama_penandatangan'] ?? null,
-            'jabatan' => $data['jabatan'] ?? null,
         ]);
 
         // 🔥 SIMPAN MEDIA
@@ -761,9 +819,21 @@ public function generateGRSPdf(Request $request, Surat $surat)
             $surat->addMediaFromRequest('cap')->toMediaCollection('cap');
         }
 
-        if ($request->hasFile('ttd')) {
-            $surat->clearMediaCollection('ttd');
-            $surat->addMediaFromRequest('ttd')->toMediaCollection('ttd');
+        $surat->ttds()->delete();
+
+        foreach ($request->input('ttds', []) as $index => $ttdData) {
+            $ttd = $surat->ttds()->create([
+                'nama_penandatangan' => $ttdData['nama_penandatangan'],
+                'jabatan'            => $ttdData['jabatan'] ?? '',
+                'urutan'             => $ttdData['urutan'] ?? ($index + 1),
+                'label'              => $ttdData['label'] ?? '',
+            ]);
+
+            if ($request->hasFile("ttds.{$index}.file")) {
+                $ttd->clearMediaCollection('ttd');
+                $ttd->addMediaFromRequest("ttds.{$index}.file")
+                    ->toMediaCollection('ttd');
+            }
         }
 
         // 🔥 GENERATE NOMOR + PDF
@@ -924,9 +994,12 @@ public function generateBRM2Pdf(Request $request, Surat $surat)
             'warna' => 'required|string|max:255',
             'rangka' => 'required|string|max:255',
             'cap' => 'nullable|image',
-            'nama_penandatangan' => 'nullable|string',
-            'jabatan' => 'nullable|string',
-            'ttd' => 'nullable|image',
+            'ttds'                        => 'nullable|array',
+            'ttds.*.nama_penandatangan'   => 'required_with:ttds|string|max:255',
+            'ttds.*.jabatan'              => 'nullable|string|max:255',
+            'ttds.*.urutan'               => 'nullable|integer',
+            'ttds.*.label'                => 'nullable|string|max:100',
+            'ttds.*.file'                 => 'nullable|image|max:2048',
         ]);
 
         // 🔥 SIMPAN KE DATABASE (PENTING)
@@ -939,8 +1012,6 @@ public function generateBRM2Pdf(Request $request, Surat $surat)
             'merk' => $data['merk'],
             'warna' => $data['warna'],
             'rangka' => $data['rangka'],
-            'nama_penandatangan' => $data['nama_penandatangan'] ?? null,
-            'jabatan' => $data['jabatan'] ?? null,
         ]);
 
         // 🔥 SIMPAN MEDIA
@@ -949,9 +1020,21 @@ public function generateBRM2Pdf(Request $request, Surat $surat)
             $surat->addMediaFromRequest('cap')->toMediaCollection('cap');
         }
         
-        if ($request->hasFile('ttd')) {
-            $surat->clearMediaCollection('ttd');
-            $surat->addMediaFromRequest('ttd')->toMediaCollection('ttd');
+        $surat->ttds()->delete();
+
+        foreach ($request->input('ttds', []) as $index => $ttdData) {
+            $ttd = $surat->ttds()->create([
+                'nama_penandatangan' => $ttdData['nama_penandatangan'],
+                'jabatan'            => $ttdData['jabatan'] ?? '',
+                'urutan'             => $ttdData['urutan'] ?? ($index + 1),
+                'label'              => $ttdData['label'] ?? '',
+            ]);
+
+            if ($request->hasFile("ttds.{$index}.file")) {
+                $ttd->clearMediaCollection('ttd');
+                $ttd->addMediaFromRequest("ttds.{$index}.file")
+                    ->toMediaCollection('ttd');
+            }
         }
 
         // 🔥 GENERATE NOMOR + PDF

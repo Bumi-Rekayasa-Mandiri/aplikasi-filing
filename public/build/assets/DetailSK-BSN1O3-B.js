@@ -1,0 +1,1 @@
+import{j as n}from"./app-C1dV8hr6.js";function a({surat:e}){return n.jsxs("div",{className:"space-y-1 text-sm",children:[n.jsxs("p",{children:[n.jsx("strong",{children:"Hasil Perhitungan Denda:"})," ",e.hasil_denda]}),n.jsxs("p",{children:[n.jsx("strong",{children:"Keringanan Denda:"})," ",e.keringanan_denda]})]})}export{a as default};

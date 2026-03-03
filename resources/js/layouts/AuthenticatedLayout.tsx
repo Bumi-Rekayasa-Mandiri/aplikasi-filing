@@ -87,10 +87,10 @@ export default function AuthenticatedLayout({
               </button>
             }
           >
-            <Dropdown.Link href={route('filing.profile.edit')}>
+            <Dropdown.Link href={route('profile.edit')}>
               Profile
             </Dropdown.Link>
-            <Dropdown.Link href={route('logout')} method="post" as="button">
+            <Dropdown.Link href={route('logout')} method="post" as="button" >
               Logout
             </Dropdown.Link>
           </Dropdown>

@@ -14,7 +14,7 @@ class DashboardController extends Controller
             ->where('user_id', auth()->id())
             ->whereHas('surat')
             ->orderByDesc('last_viewed_at')
-            ->limit(5)
+            ->limit(15)
             ->get()
             ->map(fn ($item) => [
                 'id' => $item->surat->id,
