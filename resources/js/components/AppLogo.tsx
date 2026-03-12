@@ -1,5 +1,5 @@
 import { ImgHTMLAttributes } from "react"
-import dashboard from '@/assets/dashboard.jpg'
+import dashboard from '@/assets/dashboard.png'
 
 // type Props = ImgHTMLAttributes<HTMLImageElement>
 

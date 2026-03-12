@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Filing\SuratController;
+use App\Http\Controllers\Filing\SuratDocxController;
 use App\Http\Controllers\Filing\SuratApprovalController;
 use App\Http\Controllers\Filing\ArsipSuratController;
 use App\Http\Controllers\Filing\ArsipSertifikatController;
@@ -92,6 +93,20 @@ Route::middleware(['auth'])->prefix('filing')->name('filing.')->group(function (
     Route::post('/sertifikat/{sertifikat}/upload',    [ArsipSertifikatController::class, 'uploadFile'])->name('sertifikat.upload');
     Route::get('/sertifikat/{sertifikat}/download',   [ArsipSertifikatController::class, 'download'])->name('sertifikat.download');
     Route::resource('sertifikat', ArsipSertifikatController::class);
+});
+
+// ── DOCX Downloads ──────────────────────────────────────────
+Route::middleware(['auth'])->prefix('filing')->name('filing.')->group(function () {
+    Route::prefix('surat')->name('surat.')->group(function () {
+        Route::get('/{surat}/download/skp',  [SuratDocxController::class, 'downloadSKP'])->name('downloadSKP-docx');
+        Route::get('/{surat}/download/iei',  [SuratDocxController::class, 'downloadIEI'])->name('downloadIEI-docx');
+        Route::get('/{surat}/download/grs',  [SuratDocxController::class, 'downloadGRS'])->name('downloadGRS-docx');
+        Route::get('/{surat}/download/spi',  [SuratDocxController::class, 'downloadSPI'])->name('downloadSPI-docx');
+        Route::get('/{surat}/download/spd',  [SuratDocxController::class, 'downloadSPD'])->name('downloadSPD-docx');
+        Route::get('/{surat}/download/brm1', [SuratDocxController::class, 'downloadBRM1'])->name('downloadBRM1-docx');
+        Route::get('/{surat}/download/brm2', [SuratDocxController::class, 'downloadBRM2'])->name('downloadBRM2-docx');
+        Route::get('/{surat}/download/sk',   [SuratDocxController::class, 'downloadSK'])->name('downloadSK-docx');
+    });
 });
 
 // ─── ROLES ────────────────────────────────────────────────

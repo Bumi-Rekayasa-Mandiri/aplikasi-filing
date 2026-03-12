@@ -118,5 +118,23 @@ class ArsipSertifikatController extends Controller
         abort_if(!$media, 404);
 
         return response()->download($media->getPath(), $media->file_name);
-    }   
+    }
+    
+    public function show(ArsipSertifikat $sertifikat)
+    {
+        $this->authorize('view', $sertifikat);
+
+        return Inertia::render('filing/sertifikat/Preview', [
+            'sertifikat' => [
+                'id'               => $sertifikat->id,
+                'nama_sertifikat'  => $sertifikat->nama_sertifikat,
+                'nomor_sertifikat' => $sertifikat->nomor_sertifikat,
+                'jenis_sertifikat' => $sertifikat->jenis_sertifikat,
+                'instansi'         => $sertifikat->instansi,
+                'file_url'         => $sertifikat->getFirstMediaUrl('arsip_sertifikat_files'),
+                'file_name'        => optional($sertifikat->getFirstMedia('arsip_sertifikat_files'))->file_name,
+                'file_mime'        => optional($sertifikat->getFirstMedia('arsip_sertifikat_files'))->mime_type,
+            ],
+        ]);
+    }
 }

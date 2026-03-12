@@ -106,7 +106,7 @@ export default function Create() {
 
         <button
           type="submit"
-          className="btn btn-primary"
+          className="bg-blue-700 px-4 py-2 rounded-full text-white font-semibold"
           disabled={processing}
         >
           Upload

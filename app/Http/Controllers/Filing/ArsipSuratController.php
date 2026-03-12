@@ -120,5 +120,23 @@ class ArsipSuratController extends Controller
         abort_if(!$media, 404);
 
         return response()->download($media->getPath(), $media->file_name);
-    }   
+    }
+    
+    public function show(ArsipSurat $arsip)
+    {
+        $this->authorize('view', $arsip);
+
+        return Inertia::render('filing/arsip/Preview', [
+            'arsip' => [
+                'id'          => $arsip->id,
+                'nomor_surat' => $arsip->nomor_surat,
+                'judul'       => $arsip->judul,
+                'tujuan'      => $arsip->tujuan,
+                'jenis_surat' => $arsip->jenis_surat,
+                'file_url'    => $arsip->getFirstMediaUrl('arsip_surat_files'),
+                'file_name'   => optional($arsip->getFirstMedia('arsip_surat_files'))->file_name,
+                'file_mime'   => optional($arsip->getFirstMedia('arsip_surat_files'))->mime_type,
+            ],
+        ]);
+    }
 }

@@ -193,6 +193,17 @@ export default function Index() {
                     <div className="flex justify-center gap-2">
                       {item.file_url && (
                         <a
+                          href={route('filing.sertifikat.show', item.id)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn btn-sm bg-green-700 px-4 py-2 rounded-full text-white font-semibold"
+                        >
+                          Preview
+                        </a>
+                      )}
+
+                      {item.file_url && (
+                        <a
                           href={route('filing.sertifikat.download', item.id)}
                           target="_blank"
                           rel="noopener noreferrer"
