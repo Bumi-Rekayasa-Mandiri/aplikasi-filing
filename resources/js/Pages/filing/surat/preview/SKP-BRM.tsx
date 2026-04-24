@@ -1,4 +1,4 @@
-import AppLayout from "@/layouts/AppLayout"
+import AuthenticatedLayout from "@/layouts/AuthenticatedLayout"
 import { Head } from "@inertiajs/react"
 
 type Props = {
@@ -16,15 +16,15 @@ export default function PreviewSKP({ surat }: Props) {
     console.log("PDF URL:", surat.pdf_url)
       
     return (
-      <AppLayout title="Preview SKP BRM">
+      <AuthenticatedLayout>
         <Head title="Preview SKP BRM" />
         <p className="text-gray-500">PDF belum tersedia.</p>
-      </AppLayout>
+      </AuthenticatedLayout>
     )
   }
 
   return (
-    <AppLayout title="Preview SKP BRM">
+    <AuthenticatedLayout>
       <Head title="Preview SKP BRM" />
 
       <div className="space-y-4">
@@ -61,6 +61,6 @@ export default function PreviewSKP({ surat }: Props) {
           className="w-full h-screen rounded"
         />
       </div>
-    </AppLayout>
+    </AuthenticatedLayout>
   )
 }

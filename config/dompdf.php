@@ -91,7 +91,7 @@ return [
          * @var array
          */
         'allowed_protocols' => [
-            //'data://' => ['rules' => []],
+            'data://' => ['rules' => []],
             'file://' => ['rules' => []],
             'http://' => ['rules' => []],
             'https://' => ['rules' => []],

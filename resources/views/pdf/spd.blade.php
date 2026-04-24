@@ -237,11 +237,11 @@
                         @if($showCap)
                         <img src="{{ $capBase64 }}" style="
                             position: absolute;
-                            top: 40px;
+                            top: 30px;
                             left: 0px;
                             width: 115px;
                             height: auto;
-                            opacity: 0.75;
+                            opacity: 0.80;
                             z-index: 1;
                         "/>
                         @endif
@@ -271,7 +271,7 @@
                             z-index: 3;
                         ">
                         Diajukan oleh,<br>
-                        {{ $ttd->label }},<br><br><br><br><br>
+                        {{ $ttd->label }},<br><br><br><br><br><br>
                             {{$ttd->nama_penandatangan }}<br>
                             {{ $ttd->jabatan }}
                         </div>

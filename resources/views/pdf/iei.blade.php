@@ -251,10 +251,10 @@
                         @if($showCap)
                         <img src="{{ $capBase64 }}" style="
                             position: absolute;
-                            bottom: 93px;
+                            bottom: 52px;
                             left: 0px;
                             width: 110px;
-                            opacity: 0.70;
+                            opacity: 0.84;
                             z-index: 1;
                         "/>
                         @endif
@@ -275,7 +275,7 @@
                         @endif
 
                         {{-- Nama & Jabatan --}}
-                        <strong style="position: relative; z-index: 3;">
+                        <strong style="position: relative; text-decoration: underline; left: 10px; z-index: 3;">
                             {{ $ttd->nama_penandatangan }}
                         </strong><br>
                     </td>

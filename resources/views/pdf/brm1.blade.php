@@ -224,7 +224,7 @@
             @endphp
 
             {{-- TABEL TTD --}}
-            <table style="width: 110%; position: relative;">
+            <table style="width: 100%; position: relative;">
                 <tr>
                     @foreach($ttds as $i => $ttd)
                     @php
@@ -255,7 +255,7 @@
                         @if($showCap)
                         <img src="{{ $capBase64 }}" style="
                             position: absolute;
-                            bottom: 132px;
+                            bottom: 90px;
                             left: 50%;
                             transform: translateX(-50%);
                             width: 110px;

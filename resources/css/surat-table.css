@@ -1,0 +1,214 @@
+/* ── Page layout ─────────────────────── */
+.surat-index { display: flex; flex-direction: column; gap: 16px; }
+
+.surat-index-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.surat-index-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #111827;
+}
+
+.btn-create-surat {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: #185FA5;
+    color: #ffffff;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.12s;
+}
+.btn-create-surat:hover { background: #0C447C; }
+
+/* ── Filter bar ──────────────────────── */
+.surat-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.surat-search-wrap { position: relative; flex: 1; min-width: 200px; }
+
+.surat-search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    pointer-events: none;
+}
+
+.surat-search-input {
+    width: 100%;
+    padding: 8px 12px 8px 32px;
+    border: 0.5px solid rgba(0,0,0,0.15);
+    border-radius: 8px;
+    font-size: 13px;
+    color: #111827;
+    background: #ffffff;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.12s, box-shadow 0.12s;
+}
+.surat-search-input:focus {
+    border-color: #378ADD;
+    box-shadow: 0 0 0 3px rgba(55,138,221,0.12);
+}
+
+.surat-status-select {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 0.5px solid rgba(0,0,0,0.15);
+    background: #ffffff;
+    color: #111827;
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+    min-width: 160px;
+    font-family: inherit;
+}
+
+/* ── Table card ──────────────────────── */
+.surat-table-card {
+    background: #ffffff;
+    border: 0.5px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.surat-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.surat-table thead tr {
+    background: #f9fafb;
+    border-bottom: 0.5px solid rgba(0,0,0,0.08);
+}
+
+.surat-table th {
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: left;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.surat-table th.sortable { cursor: pointer; }
+.surat-table th.sortable:hover { color: #6b7280; }
+.surat-table th.center { text-align: center; }
+
+.surat-table tbody tr {
+    border-bottom: 0.5px solid rgba(0,0,0,0.06);
+    transition: background 0.12s;
+}
+.surat-table tbody tr:last-child { border-bottom: none; }
+.surat-table tbody tr:hover { background: #f9fafb; }
+
+.surat-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #111827;
+    vertical-align: middle;
+}
+.surat-table td.center { text-align: center; }
+
+.surat-nomor {
+    font-size: 12px;
+    font-family: monospace;
+    color: #6b7280;
+}
+
+.surat-judul {
+    font-size: 13px;
+    font-weight: 500;
+    color: #111827;
+    margin-bottom: 4px;
+}
+
+.surat-jenis-badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #EEEDFE;
+    color: #3C3489;
+}
+
+.surat-tujuan { font-size: 12px; color: #6b7280; }
+
+/* ── Status badges ───────────────────── */
+.st-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 999px;
+}
+.st-badge::before {
+    content: '';
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.7;
+    flex-shrink: 0;
+}
+.st-approved  { background: #EAF3DE; color: #27500A; }
+.st-draft     { background: #F1EFE8; color: #444441; }
+.st-submitted { background: #E6F1FB; color: #0C447C; }
+.st-rejected  { background: #FCEBEB; color: #791F1F; }
+
+/* ── Action buttons ──────────────────── */
+.surat-actions { display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; }
+
+.act-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    border: 0.5px solid;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: inherit;
+    transition: background 0.12s;
+    background: transparent;
+}
+
+.act-detail  { color: #0C447C; border-color: #B5D4F4; background: #E6F1FB; }
+.act-detail:hover  { background: #B5D4F4; }
+
+.act-preview { color: #3C3489; border-color: #AFA9EC; background: #EEEDFE; }
+.act-preview:hover { background: #AFA9EC; }
+
+.act-edit    { color: #633806; border-color: #FAC775; background: #FAEEDA; }
+.act-edit:hover    { background: #FAC775; }
+
+.act-delete  { color: #791F1F; border-color: #F09595; background: #FCEBEB; }
+.act-delete:hover  { background: #F7C1C1; }
+
+/* ── Empty state ─────────────────────── */
+.surat-table-empty {
+    text-align: center;
+    padding: 2.5rem;
+    color: #9ca3af;
+    font-size: 13px;
+}

@@ -35,12 +35,10 @@
         font-weight: bold;
         text-decoration: underline;
         text-transform: uppercase;
-        margin-bottom: 10px;
     }
 
     .nomor-table {
         width: 100%;
-        margin-bottom: 10px;
     }
 
     .nomor-table td.left {
@@ -109,6 +107,7 @@
 
     table.content td.colon {
         width: 10px;
+        mar
     }
 
     .signature-wrapper {
@@ -165,7 +164,7 @@
     </div>
 
     {{-- TITLE --}}
-    <div class="title" style="font-size: 14pt; margin-top: 20px;">SURAT PERJANJIAN INVESTASI</div><br />
+    <div class="title" style="font-size: 14pt; margin-top: 15px;">SURAT PERJANJIAN INVESTASI</div><br>
 
     {{-- NOMOR & TANGGAL --}}
     <table class="nomor-table">
@@ -232,7 +231,7 @@
         </tr>
     </table>
 
-    <div class="content" style="margin-bottom: 20px;">
+    <div class="content" style="margin-bottom: 15px;">
         Yang Menjadi <i> Pihak Kedua </i>
     </div>
 
@@ -240,10 +239,10 @@
         ISI PERJANJIAN
     </div>
 
-     <table class="content" style="margin-top: 10px;, margin-left:20px">
+     <table class="content" style="margin-top: 10px; margin-left:20px">
         <tr>
-            <td class="colon" style="margin-left:20px></td>
-            <td>Perjanjian ini bersifat Mudhorobah, Pihak Pertama Sebagai Shohibul Maal/Investor, dan Pihak Kedua Sebagai Mudhorib/Penerima</td>
+            <td class="colon" style="margin-left:20px">•</td>
+            <td>Perjanjian ini bersifat Mudhorobah, Pihak Pertama Sebagai Shohibul Maal atau Investor, dan Pihak Kedua Sebagai Mudhorib atau Penerima</td>
         </tr>
 
         <tr>
@@ -272,11 +271,11 @@
         </tr>
     </table>
 
-    <div class="content" style="text-align: right; margin-top: 15px;">
+    <div class="content" style="text-align: right; margin-top: 10px;">
         Karawang, {{ \Carbon\Carbon::parse($surat->tanggal_surat)->locale('id')->translatedFormat('d F Y') }}
     </div>
 
-        <div style="page-break-inside: avoid; margin-top: 20px;">
+        <div style="page-break-inside: avoid; margin-top: 10px;">
 
             @php
                 $ttds   = $surat->ttds;
@@ -289,62 +288,73 @@
             @endphp
 
             {{-- TABEL TTD --}}
-            <table style="width: 100%; margin-top: 10px; position: relative;">
+            <table style="width: 100%; margin-top: 5px; position: relative;">
                 <tr>
                     @foreach($ttds as $i => $ttd)
-                    @php
-                        $ttdMedia  = $ttd->getFirstMedia('ttd');
-                        $ttdBase64 = $ttdMedia && file_exists($ttdMedia->getPath())
-                            ? 'data:' . $ttdMedia->mime_type . ';base64,' . base64_encode(file_get_contents($ttdMedia->getPath()))
-                            : null;
+                        @php
+                            $ttdMedia  = $ttd->getFirstMedia('ttd');
+                            $ttdBase64 = $ttdMedia && file_exists($ttdMedia->getPath())
+                                ? 'data:' . $ttdMedia->mime_type . ';base64,' . base64_encode(file_get_contents($ttdMedia->getPath()))
+                                : null;
 
-                        // Cap hanya di kolom paling kanan (penandatangan terakhir)
-                        $showCap = $capBase64 && ($i === $ttds->count() - 1);
-                    @endphp
-                    <td style="
-                        text-align: center;
-                        width: {{ round(100 / $jumlah) }}%;
-                        vertical-align: bottom;
-                        padding: 5px;
-                        padding: 0 15px 5px 15px;
-                        position: relative;
-                    ">
+                            $showCap = $capBase64 && ($i === $ttds->count() - 1);
+                        @endphp
+                        <td style="
+                            text-align: center;
+                            width: {{ round(100 / $jumlah) }}%;
+                            vertical-align: top;
+                            padding: 0 15px;
+                        ">
 
-                        {{-- Label kustomisasi per penandatangan --}}
-                        {{ $ttd->label }}<br><br>
-                        
-                        {{-- Cap hanya muncul di kolom terakhir, di belakang TTD --}}
-                        @if($showCap)
-                        <img src="{{ $capBase64 }}" style="
-                            position: absolute;
-                            bottom: 70px;
-                            left: 50%;
-                            transform: translateX(-50%);
-                            width: 110px;
-                            opacity: 0.70;
-                            z-index: 1;
-                        "/>
-                        @endif
+                            {{-- Label --}}
+                            <div style="margin-bottom: 6px;">{{ $ttd->label }}</div>
 
-                        {{-- Gambar TTD --}}
-                        @if($ttdBase64)
-                        <img src="{{ $ttdBase64 }}" style="
-                            position: relative;
-                            bottom: 10px;
-                            width: 90px;
-                            height: auto;
-                            opacity: 0.95;
-                            z-index: 2;
-                        "/><br>
-                        @else
-                        <br><br><br><br>
-                        @endif
+                            {{-- Container sejajar untuk cap + TTD --}}
+                            {{-- width 140px, height 90px → keduanya pakai left: 50%, top: 50% + transform --}}
+                            <table style="margin: 0 auto; border-collapse: collapse; width: 140px; height: 90px;">
+                                <tr>
+                                    <td style="position: relative; width: 140px; height: 90px; padding: 0;">
 
-                        {{-- Nama & Jabatan --}}
-                        <strong style="position: relative; z-index: 3;">
-                            {{ $ttd->nama_penandatangan }}
-                        </strong><br>
-                    </td>
+                                        {{-- Cap (layer bawah) --}}
+                                        @if($showCap)
+                                        <img src="{{ $capBase64 }}" style="
+                                            position: absolute;
+                                            top: 50%;
+                                            left: 50%;
+                                            margin-top: -45px;
+                                            margin-left: -55px;
+                                            width: 110px;
+                                            height: 90px;
+                                            opacity: 0.80;
+                                            z-index: 1;
+                                        "/>
+                                        @endif
+
+                                        {{-- TTD (layer atas) --}}
+                                        @if($ttdBase64)
+                                        <img src="{{ $ttdBase64 }}" style="
+                                            position: absolute;
+                                            top: 50%;
+                                            left: 50%;
+                                            margin-top: -40px;
+                                            margin-left: -45px;
+                                            width: 90px;
+                                            height: 80px;
+                                            opacity: 0.95;
+                                            z-index: 2;
+                                        "/>
+                                        @endif
+
+                                    </td>
+                                </tr>
+                            </table>
+
+                            {{-- Nama & Jabatan --}}
+                            <div style="margin-top: 4px; font-size: 11pt;">
+                                {{ $ttd->nama_penandatangan }}
+                            </div>
+
+                        </td>
                     @endforeach
                 </tr>
             </table>

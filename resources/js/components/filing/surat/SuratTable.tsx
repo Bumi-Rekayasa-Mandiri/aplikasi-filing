@@ -1,7 +1,5 @@
 import { Surat } from '@/types/filing/surat'
 import { router } from '@inertiajs/react'
-import SuratApprovalActions from '@/components/filing/surat/SuratApprovalActions'
-import SuratDownloadButton from '@/components/filing/surat/SuratDownloadButton'
 import SortIcon from '@/components/SortIcon'
 import { getPreviewRoute } from '@/types/filing/suratRoutes'
 
@@ -10,124 +8,88 @@ interface Props {
   sortField: string
   sortDirection: 'asc' | 'desc'
   onSort: (field: string) => void
+  onDelete: (id: number) => void
 }
 
-export default function SuratTable({ data, sortField, sortDirection, onSort }: Props) {
+const statusClass: Record<string, string> = {
+  approved:  'st-badge st-approved',
+  draft:     'st-badge st-draft',
+  submitted: 'st-badge st-submitted',
+  rejected:  'st-badge st-rejected',
+}
+
+const statusLabel: Record<string, string> = {
+  approved:  'Approved',
+  draft:     'Draft',
+  submitted: 'Submitted',
+  rejected:  'Rejected',
+}
+
+export default function SuratTable({ data, sortField, sortDirection, onSort, onDelete }: Props) {
   if (!data || data.length === 0) {
     return (
-      <div className="text-center text-gray-500 py-6">
+      <div className="surat-table-empty">
         Tidak ada surat untuk ditampilkan
       </div>
     )
   }
 
   const destroy = (id: number) => {
-    if (confirm('Yakin ingin menghapus surat ini?')) {
-      router.delete(route('filing.surat.destroy', id), {
-        preserveScroll: true,
-      })
-    }
+    if (confirm('Yakin ingin menghapus surat ini?')) onDelete(id)
   }
 
   return (
-    <table className="table w-full border-t border-b border-black">
-      <thead className="bg-green-700 text-white">
+    <table className="surat-table">
+      <thead>
         <tr>
-          <th className="px-4 py-3 text-center text-sm font-semibold" onClick={() => onSort('nomor_surat')}>
-            <span className="inline-flex items-center gap-1">
-            Nomor
-            <SortIcon
-              active={sortField === 'nomor_surat'}
-              direction={sortDirection}
-            />
-            </span>
+          <th onClick={() => onSort('nomor_surat')} className="sortable">
+            Nomor <SortIcon active={sortField === 'nomor_surat'} direction={sortDirection} />
           </th>
-          <th className="px-4 py-3 text-center text-sm font-semibold" onClick={() => onSort('judul')}>
-            <span className="inline-flex items-center gap-1">
-            Judul
-            <SortIcon
-              active={sortField === 'judul'}
-              direction={sortDirection}
-            />
-            </span>
+          <th onClick={() => onSort('judul')} className="sortable">
+            Judul <SortIcon active={sortField === 'judul'} direction={sortDirection} />
           </th>
-          <th className="px-4 py-3 text-center text-sm font-semibold">
-            <span className="inline-flex items-center gap-1">
-            Tujuan<SortIcon
-              active={sortField === 'tujuan'}
-              direction={sortDirection}
-            />
-            </span>
-            </th>
-          <th className="px-4 py-3 text-center text-sm font-semibold" onClick={() => onSort('status')}>
-            <span className="inline-flex items-center gap-1">
-            Status
-            <SortIcon
-              active={sortField === 'status'}
-              direction={sortDirection}
-            />
-            </span>
+          <th>Tujuan</th>
+          <th onClick={() => onSort('status')} className="sortable center">
+            Status <SortIcon active={sortField === 'status'} direction={sortDirection} />
           </th>
-          <th className="px-4 py-3 text-center text-sm font-semibold">Aksi</th>
+          <th className="center">Aksi</th>
         </tr>
       </thead>
-
-      <tbody className="bg-gray-100 text-black">
-        {data.map((s) => (
-          <tr key={s.id} className="border-b border-gray-200">
-            <td className="px-4 py-3 text-center text-sm">{s.nomor_surat}</td>
-            <td className="px-4 py-3 text-center text-sm">{s.judul}</td>
-            <td className="px-4 py-3 text-center text-sm">{s.tujuan}</td>
-            <td className="px-4 py-3 text-center text-sm">
-              <span className="badge badge-outline">
-                {s.status}
+      <tbody>
+        {data.map(s => (
+          <tr key={s.id}>
+            <td><span className="surat-nomor">{s.nomor_surat}</span></td>
+            <td>
+              <div className="surat-judul">{s.judul}</div>
+              <span className="surat-jenis-badge">{s.jenis}</span>
+            </td>
+            <td className="surat-tujuan">{s.tujuan}</td>
+            <td className="center">
+              <span className={statusClass[s.status] ?? 'st-badge st-draft'}>
+                {statusLabel[s.status] ?? s.status}
               </span>
             </td>
-            <td className="px-4 py-3 text-center text-sm">
-              <div className="flex justify-center gap-2">
-                <button
-                  className="btn btn-sm bg-green-700 px-4 py-2 rounded-full text-white font-semibold"
-                  onClick={() =>
-                    router.visit(route('filing.surat.show', s.id))
-                  }
-                >
+            <td className="center">
+              <div className="surat-actions">
+                <button className="act-btn act-detail"
+                  onClick={() => router.visit(route('filing.surat.show', s.id))}>
                   Detail
                 </button>
-
-              <button
-                className="btn btn-sm bg-blue-700 px-4 py-2 rounded-full text-white font-semibold"
-                onClick={() => {console.log('jenis:', s.jenis, 'id:', s.id) 
-                  router.visit(getPreviewRoute(s.jenis, s.id))}}
-              >
-                Preview
-              </button>
-
+                <button className="act-btn act-preview"
+                  onClick={() => router.visit(getPreviewRoute(s.jenis, s.id))}>
+                  Preview
+                </button>
                 {s.status === 'draft' && (
                   <>
-                    <button
-                      className="btn btn-sm bg-yellow-600 px-4 py-2 rounded-full text-white font-semibold"
-                      onClick={() =>
-                        router.visit(route('filing.surat.edit', s.id))
-                      }
-                    >
+                    <button className="act-btn act-edit"
+                      onClick={() => router.visit(route('filing.surat.edit', { surat: s.id, jenis: s.jenis }))}>
                       Edit
                     </button>
-
-                    <button
-                      className="btn btn-sm bg-red-600 px-4 py-2 rounded-full text-white font-semibold"
-                      onClick={() => destroy(s.id)}
-                    >
+                    <button className="act-btn act-delete"
+                      onClick={() => destroy(s.id)}>
                       Hapus
                     </button>
                   </>
-                )}
-
-                {(s.status === 'submitted' || s.status === 'approved') && (
-                  <SuratDownloadButton surat={s} />
-                )}
-
-                {s.status === 'submitted' && (
-                  <SuratApprovalActions surat={s} />
                 )}
               </div>
             </td>

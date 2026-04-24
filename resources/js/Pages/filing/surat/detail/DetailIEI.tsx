@@ -1,22 +1,34 @@
 import { parseJenisPekerjaan } from '@/types/filing/parseJenisPekerjaan'
 
 export default function DetailIEI({ surat }: { surat: any }) {
-
     const pekerjaanList = parseJenisPekerjaan(surat.jenis_pekerjaan)
+
     return (
-        <div className="space-y-1 text-sm">
-            <p><strong>Lokasi Kerja:</strong> {surat.lokasi_kerja}</p>
-            <p><strong>Project:</strong> {surat.project}</p>
-            <p><strong>Masa Garansi:</strong> {surat.masa_garansi}</p>
+        <div className="detail-body">
+            <div className="detail-row">
+                <span className="detail-key">Lokasi kerja</span>
+                <span className="detail-val">{surat.lokasi_kerja ?? '—'}</span>
+            </div>
+            <div className="detail-row">
+                <span className="detail-key">Project</span>
+                <span className="detail-val">{surat.project ?? '—'}</span>
+            </div>
+            <div className="detail-row">
+                <span className="detail-key">Masa garansi</span>
+                <span className="detail-val">{surat.masa_garansi ?? '—'}</span>
+            </div>
 
             {pekerjaanList.length > 0 && (
-                <div>
-                    <strong>Jenis Pekerjaan:</strong>
-                    <ol className="list-decimal ml-5 mt-1 space-y-0.5">
+                <div className="detail-row detail-row--block">
+                    <span className="detail-key">Jenis pekerjaan</span>
+                    <ul className="pekerjaan-list">
                         {pekerjaanList.map((item, i) => (
-                            <li key={i}>{item}</li>
+                            <li key={i} className="pekerjaan-item">
+                                <span className="pekerjaan-num">{i + 1}</span>
+                                {item}
+                            </li>
                         ))}
-                    </ol>
+                    </ul>
                 </div>
             )}
         </div>

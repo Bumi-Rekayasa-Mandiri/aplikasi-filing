@@ -190,8 +190,8 @@ class GenerateSKPDocx
     private function addIdentitasKaryawan(Surat $surat): void
     {
         $rows = [
-            ['Nama',               $surat->nama],
-            ['Jabatan Terakhir',   $surat->jabatan_terakhir],
+            ['Nama',                $surat->nama],
+            ['Jabatan Terakhir',    $surat->jabatan_terakhir],
             ['Departemen / Bagian', $surat->departemen],
         ];
 

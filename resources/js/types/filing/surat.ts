@@ -28,6 +28,4 @@ export interface Surat {
 
 export type SuratStatus =
   | 'draft'
-  | 'submitted'
   | 'approved'
-  | 'rejected'

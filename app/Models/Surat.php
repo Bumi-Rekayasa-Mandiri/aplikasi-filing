@@ -27,14 +27,7 @@ class Surat extends Model implements HasMedia
     ];
 
     protected $fillable = [
-        'judul',
-        'nomor_surat',
-        'tanggal_surat',
-        'perihal',
-        'tujuan',
-        'isi_surat',
-        'status',
-        'created_by',
+        'judul','nomor_surat','tanggal_surat','perihal','tujuan','isi_surat','status','created_by',
         'jenis',
         'pdf_path',
         'nama',

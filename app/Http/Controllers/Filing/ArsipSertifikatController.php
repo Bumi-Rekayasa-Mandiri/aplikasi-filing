@@ -32,9 +32,12 @@ class ArsipSertifikatController extends Controller
         $query->where('jenis_sertifikat', $request->jenis_sertifikat);
         }
 
+    $perPage = (int) $request->input('per_page', 10);
+    $perPage = in_array($perPage, [10, 25, 50]) ? $perPage : 10;
+
     $sertifikat = $query
         ->orderBy($sortField, $sortDirection)
-        ->paginate(10)
+        ->paginate($perPage)
         ->withQueryString()
         ->through(fn ($se) => [
             'id' => $se->id,
@@ -53,6 +56,7 @@ class ArsipSertifikatController extends Controller
         'sort'          => $sortField,
         'direction'     => $sortDirection,
         'filters'       => $request->only(['search', 'jenis_sertifikat']),
+        'per_page'      => $perPage,
         ]);
     }
 

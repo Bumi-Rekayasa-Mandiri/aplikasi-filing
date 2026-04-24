@@ -1,0 +1,221 @@
+.show-page {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 768px;
+}
+
+.section-card {
+    background: #ffffff;
+    border: 0.5px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.07);
+}
+
+.section-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.icon-blue   { background: #E6F1FB; }
+.icon-purple { background: #EEEDFE; }
+.icon-teal   { background: #E1F5EE; }
+.icon-amber  { background: #FAEEDA; }
+
+.section-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #111827;
+}
+
+/* Info Umum */
+.nomor-surat {
+    font-size: 18px;
+    font-weight: 500;
+    color: #111827;
+    margin-bottom: 14px;
+    letter-spacing: 0.01em;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 24px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.info-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.info-value {
+    font-size: 13px;
+    color: #111827;
+}
+
+/* Badge */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 999px;
+    width: fit-content;
+}
+.badge-approved  { background: #EAF3DE; color: #27500A; }
+.badge-pending   { background: #FAEEDA; color: #633806; }
+.badge-submitted { background: #E6F1FB; color: #0C447C; }
+.badge-rejected  { background: #FCEBEB; color: #791F1F; }
+.badge-draft     { background: #F1EFE8; color: #444441; }
+
+/* Detail rows — dipakai di DetailRouter */
+.detail-row {
+    display: flex;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.06);
+    font-size: 13px;
+    align-items: baseline;
+}
+.detail-row:last-child { border-bottom: none; }
+
+.detail-key {
+    min-width: 130px;
+    color: #9ca3af;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+.detail-val { color: #111827; }
+
+.detail-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-row--block {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.detail-empty {
+    font-size: 13px;
+    color: #9ca3af;
+    font-style: italic;
+}
+
+/* List pekerjaan — dipakai di DetailRouter */
+.pekerjaan-list {
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-left: 0;
+    list-style: none;
+    width: 100%;
+}
+.pekerjaan-item {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-size: 12px;
+    color: #111827;
+    padding: 7px 10px;
+    background: #f9fafb;
+    border-radius: 6px;
+}
+.pekerjaan-num {
+    font-size: 11px;
+    font-weight: 500;
+    color: #3C3489;
+    background: #EEEDFE;
+    padding: 1px 7px;
+    border-radius: 999px;
+    flex-shrink: 0;
+}
+
+/* Cap */
+.cap-img {
+    width: 140px;
+    height: auto;
+    border-radius: 8px;
+    border: 0.5px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Tanda Tangan */
+.ttd-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.ttd-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 16px;
+    border: 0.5px solid rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    width: 148px;
+    text-align: center;
+}
+.ttd-img-wrap {
+    width: 100px;
+    height: 60px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 0.5px solid rgba(0, 0, 0, 0.08);
+    background: #f9fafb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.ttd-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.ttd-initials {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #E6F1FB;
+    color: #0C447C;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 500;
+}
+.ttd-nama    { font-size: 13px; font-weight: 500; color: #111827; }
+.ttd-jabatan { font-size: 11px; color: #6b7280; }
+.ttd-label   { font-size: 11px; color: #9ca3af; font-style: italic; }
+
+/* Tambahkan ke show-surat.css */
+.status-toggle-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 0.5px solid rgba(0, 0, 0, 0.07);
+}
+
+.section-card { position: relative; }

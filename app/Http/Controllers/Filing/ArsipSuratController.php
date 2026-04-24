@@ -32,9 +32,12 @@ class ArsipSuratController extends Controller
         $query->where('jenis_surat', $request->jenis_surat);
         }
 
+    $perPage = (int) $request->input('per_page', 10);
+    $perPage = in_array($perPage, [10, 25, 50]) ? $perPage : 10;
+
     $arsip = $query
         ->orderBy($sortField, $sortDirection)
-        ->paginate(10)
+        ->paginate($perPage)
         ->withQueryString()
         ->through(fn ($a) => [
             'id' => $a->id,
@@ -53,6 +56,7 @@ class ArsipSuratController extends Controller
         'sort'      => $sortField,
         'direction' => $sortDirection,
         'filters'   => $request->only(['search', 'status']),
+        'per_page'  => $perPage
         ]);
     }
 

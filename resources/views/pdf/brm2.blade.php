@@ -208,7 +208,7 @@
         Demikian Surat Pelepasan Hak ini dibuat untuk dipergunakan sebagaimana mestinya.
     </div>
 
-    <div class="content" style="text-align: right; margin-top: 10px; margin-bottom: 7px;">
+    <div class="content" style="text-align: right; margin-top: 25px; margin-bottom: 7px;">
         Karawang, {{ \Carbon\Carbon::parse($surat->tanggal_surat)->locale('id')->translatedFormat('d F Y') }}
     </div>
 
@@ -248,7 +248,7 @@
                         @if($showCap)
                         <img src="{{ $capBase64 }}" style="
                             position: absolute;
-                            top: 20px;
+                            top: 0px;
                             left: 100%;
                             transform: translateX(-100%);
                             width: 100px;
@@ -262,8 +262,8 @@
                         @if($ttdBase64)
                         <img src="{{ $ttdBase64 }}" style="
                             position: absolute;
-                            top: 47px;
-                            left: 100%;
+                            top: 30px;
+                            left: 95%;
                             transform: translateX(-100%);
                             width: 100px;
                             height: auto;
@@ -283,7 +283,7 @@
                             z-index: 3;
                         ">
                             {{ $ttd->label }},<br><br><br><br><br>
-                            {{$ttd->nama_penandatangan }}<br>
+                            {{$ttd->nama_penandatangan }}<br />
                             {{ $ttd->jabatan }}
                         </div>
                                           

@@ -279,9 +279,9 @@
                         @if($showCap)
                         <img src="{{ $capBase64 }}" style="
                             position: absolute;
-                            top: 35px;
-                            left: 90%;
-                            transform: translateX(-90%);
+                            top: 24px;
+                            left: 85%;
+                            transform: translateX(-85%);
                             width: 115px;
                             height: auto;
                             opacity: 0.75;
@@ -293,9 +293,9 @@
                         @if($ttdBase64)
                         <img src="{{ $ttdBase64 }}" style="
                             position: absolute;
-                            top: 40px;
-                            left: 90%;
-                            transform: translateX(-90%);
+                            top: 27px;
+                            left: 85%;
+                            transform: translateX(-85%);
                             width: 100px;
                             height: auto;
                             opacity: 0.95;

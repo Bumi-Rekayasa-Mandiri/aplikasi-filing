@@ -1,147 +1,93 @@
 import InputError from '@/components/InputError'
-import InputLabel from '@/components/InputLabel'
-import PrimaryButton from '@/components/PrimaryButton'
-import TextInput from '@/components/TextInput'
 import { Transition } from '@headlessui/react'
 import { Link, useForm, usePage } from '@inertiajs/react'
-import { PageProps } from '@inertiajs/core'
-
-interface ProfileForm {
-    name: string
-    email: string
-}
+import '../../../../css/create-surat.css'
 
 interface Props {
-    mustVerifyEmail: boolean
-    status?: string
-    className?: string
+  mustVerifyEmail: boolean
+  status?: string
+  className?: string
 }
 
-export default function UpdateProfileInformationForm({
-    mustVerifyEmail,
-    status,
-    className = '',
-}: Props) {
-    const { auth } = usePage<PageProps>().props
-    const user = auth.user
+// ✅ Definisikan tipe sendiri agar auth.user tidak error
+interface AuthPageProps {
+  auth: { user: { name: string; email: string; email_verified_at: string | null } }
+  [key: string]: unknown
+}
 
-    const {
-        data,
-        setData,
-        patch,
-        errors,
-        processing,
-        recentlySuccessful,
-    } = useForm<ProfileForm>({
-        name: user.name,
-        email: user.email,
-    })
+export default function UpdateProfileInformationForm({ mustVerifyEmail, status, className = '' }: Props) {
+  const { auth } = usePage<AuthPageProps>().props
+  const user = auth.user
 
-    const submit = (e: React.FormEvent) => {
-        e.preventDefault()
+  const { data, setData, patch, errors, processing, recentlySuccessful } = useForm({
+    name: user.name,
+    email: user.email,
+  })
 
-        patch(route('filing.profile.update'), {
-            preserveScroll: true,
-        })
-    }
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault()
+    patch(route('filing.profile.update'), { preserveScroll: true })
+  }
 
-    return (
-        <section className={className}>
-            <header>
-                <h2 className="text-lg font-medium text-gray-900">
-                    Profile Information
-                </h2>
+  return (
+    <section className={className}>
+      <div className="form-card-header" style={{ marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '0.5px solid rgba(0,0,0,0.07)' }}>
+        <div className="form-icon icon-blue">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="5" r="3" stroke="#185FA5" strokeWidth="1.2"/>
+            <path d="M2 14c0-3 2.5-5 6-5s6 2 6 5" stroke="#185FA5" strokeWidth="1.2" strokeLinecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <div className="form-card-title">Informasi profil</div>
+          <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '2px' }}>
+            Perbarui nama dan alamat email akun kamu
+          </div>
+        </div>
+      </div>
 
-                <p className="mt-1 text-sm text-gray-600">
-                    Update your account&apos;s profile information and email
-                    address.
-                </p>
-            </header>
+      <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div className="field">
+          <label className="field-label">Nama</label>
+          <input className="field-input" value={data.name} autoFocus autoComplete="name"
+            onChange={e => setData('name', e.target.value)} />
+          <InputError message={errors.name} className="mt-2" />
+        </div>
 
-            <form onSubmit={submit} className="mt-6 space-y-6">
-                <div>
-                    <InputLabel htmlFor="name" value="Name" />
+        <div className="field">
+          <label className="field-label">Email</label>
+          <input type="email" className="field-input" value={data.email} autoComplete="username"
+            onChange={e => setData('email', e.target.value)} />
+          <InputError message={errors.email} className="mt-2" />
+        </div>
 
-                    <TextInput
-                        id="name"
-                        className="mt-1 block w-full"
-                        value={data.name}
-                        onChange={(e) =>
-                            setData('name', e.target.value)
-                        }
-                        required
-                        autoFocus
-                        autoComplete="name"
-                    />
+        {mustVerifyEmail && user.email_verified_at === null && (
+          <div style={{ background: '#FAEEDA', borderRadius: '8px', padding: '10px 14px', fontSize: '12px', color: '#633806' }}>
+            Email kamu belum terverifikasi.{' '}
+            <Link href={route('verification.send')} method="post" as="button"
+              style={{ textDecoration: 'underline', color: '#633806', fontWeight: 500 }}>
+              Kirim ulang email verifikasi
+            </Link>
+            {status === 'verification-link-sent' && (
+              <div style={{ marginTop: '6px', color: '#27500A', fontWeight: 500 }}>
+                Link verifikasi baru telah dikirim ke email kamu.
+              </div>
+            )}
+          </div>
+        )}
 
-                    <InputError
-                        className="mt-2"
-                        message={errors.name}
-                    />
-                </div>
-
-                <div>
-                    <InputLabel htmlFor="email" value="Email" />
-
-                    <TextInput
-                        id="email"
-                        type="email"
-                        className="mt-1 block w-full"
-                        value={data.email}
-                        onChange={(e) =>
-                            setData('email', e.target.value)
-                        }
-                        required
-                        autoComplete="username"
-                    />
-
-                    <InputError
-                        className="mt-2"
-                        message={errors.email}
-                    />
-                </div>
-
-                {mustVerifyEmail && user.email_verified_at === null && (
-                    <div>
-                        <p className="mt-2 text-sm text-gray-800">
-                            Your email address is unverified.&nbsp;
-                            <Link
-                                href={route('verification.send')}
-                                method="post"
-                                as="button"
-                                className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                            >
-                                Click here to re-send the verification email.
-                            </Link>
-                        </p>
-
-                        {status === 'verification-link-sent' && (
-                            <div className="mt-2 text-sm font-medium text-green-600">
-                                A new verification link has been sent to your
-                                email address.
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>
-                        Save
-                    </PrimaryButton>
-
-                    <Transition
-                        show={recentlySuccessful}
-                        enter="transition ease-in-out"
-                        enterFrom="opacity-0"
-                        leave="transition ease-in-out"
-                        leaveTo="opacity-0"
-                    >
-                        <p className="text-sm text-gray-600">
-                            Saved.
-                        </p>
-                    </Transition>
-                </div>
-            </form>
-        </section>
-    )
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button type="submit" className="btn-submit"
+            style={{ width: 'auto', padding: '8px 20px', fontSize: '13px' }}
+            disabled={processing}>
+            {processing ? 'Menyimpan…' : 'Simpan'}
+          </button>
+          <Transition show={recentlySuccessful} enter="transition ease-in-out"
+            enterFrom="opacity-0" leave="transition ease-in-out" leaveTo="opacity-0">
+            <p style={{ fontSize: '12px', color: '#27500A' }}>✓ Tersimpan</p>
+          </Transition>
+        </div>
+      </form>
+    </section>
+  )
 }

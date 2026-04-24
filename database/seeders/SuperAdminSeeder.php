@@ -19,7 +19,7 @@ class SuperAdminSeeder extends Seeder
             'password' => env('SUPER_ADMIN_PASSWORD'),
         ]);
 
-        $role = Role::findByName('Super Admin');
+        $role = Role::findByName('super-admin');
         $superAdmin->assignRole($role);
     }
 }

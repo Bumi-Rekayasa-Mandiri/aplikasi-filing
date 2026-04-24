@@ -71,18 +71,16 @@ class SuratPolicy
         return true;
     }
 
-    public function approve(User $user, Surat $surat):bool
+    public function revertDraft(User $user, Surat $surat): bool
     {
-        return $surat->status === SuratStatus::SUBMITTED;
+        return $user->hasAnyRole(['super-admin', 'admin'])
+            && $surat->status === SuratStatus::APPROVED;
     }
 
-    public function reject(User $user, Surat $surat):bool
+    // Update method approve — tambahkan role check
+    public function approve(User $user, Surat $surat): bool
     {
-        return $surat->status === SuratStatus::SUBMITTED;
-    }
-
-    public function submit(User $user, Surat $surat):bool
-    {
-        return $surat->status === SuratStatus::DRAFT;
+        return $user->hasAnyRole(['super-admin', 'admin'])
+            && $surat->status === SuratStatus::SUBMITTED;
     }
 }

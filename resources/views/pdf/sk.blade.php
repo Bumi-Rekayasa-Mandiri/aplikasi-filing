@@ -206,11 +206,11 @@
                         @if($showCap)
                         <img src="{{ $capBase64 }}" style="
                             position: absolute;
-                            top: 25px;
+                            top: 15px;
                             right: 45px;
                             width: 115px;
                             height: auto;
-                            opacity: 0.75;
+                            opacity: 0.85;
                             z-index: 1;
                         "/>
                         @endif
@@ -219,7 +219,7 @@
                         @if($ttdBase64)
                         <img src="{{ $ttdBase64 }}" style="
                             position: absolute;
-                            top: 30px;
+                            top: 20px;
                             right: 50px;
                             width: 100px;
                             height: auto;
@@ -239,7 +239,7 @@
                             text-align: center;
                             z-index: 3;
                         ">
-                        {{ $ttd->label }},<br><br><br><br><br>
+                        {{ $ttd->label }},<br><br><br><br><br><br>
                             {{$ttd->nama_penandatangan }}<br>
                             {{ $ttd->jabatan }}
                         </div>

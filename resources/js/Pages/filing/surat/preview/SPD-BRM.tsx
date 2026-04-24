@@ -1,4 +1,4 @@
-import AppLayout from "@/layouts/AppLayout"
+import AuthenticatedLayout from "@/layouts/AuthenticatedLayout"
 import { Head } from "@inertiajs/react"
 
 type Props = {
@@ -12,7 +12,7 @@ type Props = {
 
 export default function PreviewSPD({ surat }: Props) {
   return (
-    <AppLayout title="Preview SPD BRM">
+    <AuthenticatedLayout>
       <Head title="Preview SPD BRM" />
 
       <div className="space-y-4">
@@ -42,6 +42,6 @@ export default function PreviewSPD({ surat }: Props) {
           className="w-full h-[85vh] border rounded"
         />
       </div>
-    </AppLayout>
+    </AuthenticatedLayout>
   )
 }

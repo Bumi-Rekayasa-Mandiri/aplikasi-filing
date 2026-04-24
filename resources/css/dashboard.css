@@ -1,0 +1,149 @@
+.dashboard-card {
+    background: #ffffff;
+    border: 0.5px solid rgba(0, 0, 0, 0.12);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+}
+
+.card-header-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #E6F1FB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.card-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: #1a1a1a;
+}
+
+.card-subtitle {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 1px;
+}
+
+.surat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.surat-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 0.5px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    text-decoration: none;
+    background: #ffffff;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.surat-item:hover {
+    background: #f9fafb;
+    border-color: rgba(0, 0, 0, 0.18);
+}
+
+.surat-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #E6F1FB;
+    color: #185FA5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.surat-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.surat-judul {
+    font-size: 13px;
+    font-weight: 500;
+    color: #111827;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.surat-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 3px;
+    flex-wrap: wrap;
+}
+
+.surat-nomor { font-size: 11px; color: #9ca3af; }
+.surat-dot   { font-size: 11px; color: #d1d5db; }
+.surat-time  {
+    font-size: 11px;
+    color: #9ca3af;
+    white-space: nowrap;
+    flex-shrink: 0;
+    align-self: flex-start;
+    margin-top: 2px;
+}
+
+/* Badge status */
+.badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+.badge-approved  { background: #EAF3DE; color: #27500A; }
+.badge-pending   { background: #FAEEDA; color: #633806; }
+.badge-submitted { background: #E6F1FB; color: #0C447C; }
+.badge-rejected  { background: #FCEBEB; color: #791F1F; }
+.badge-draft     { background: #F1EFE8; color: #444441; }
+
+/* Badge jenis surat */
+.jenis-badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #EEEDFE;
+    color: #3C3489;
+    white-space: nowrap;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: #9ca3af;
+    font-size: 13px;
+}
+.empty-state svg {
+    width: 32px;
+    height: 32px;
+    margin: 0 auto 8px;
+    display: block;
+    opacity: 0.4;
+}

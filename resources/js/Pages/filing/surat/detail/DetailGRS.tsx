@@ -1,11 +1,26 @@
 export default function DetailGRS({ surat }: { surat: any }) {
     return (
-        <div className="space-y-1 text-sm">
-            <p><strong>Jenis Project:</strong> {surat.isi_surat}</p>
-            <p><strong>Project:</strong> {surat.project}</p>
-            <p><strong>Masa Garansi:</strong> {surat.masa_garansi}</p>
-            <p><strong>Material:</strong> {surat.material}</p>
-            <p><strong>Alamat:</strong> {surat.alamat}</p>
+        <div className="detail-body">
+            <div className="detail-row">
+                <span className="detail-key">Jenis project</span>
+                <span className="detail-val">{surat.isi_surat ?? '—'}</span>
+            </div>
+            <div className="detail-row">
+                <span className="detail-key">Project</span>
+                <span className="detail-val">{surat.project ?? '—'}</span>
+            </div>
+            <div className="detail-row">
+                <span className="detail-key">Masa garansi</span>
+                <span className="detail-val">{surat.masa_garansi ?? '—'}</span>
+            </div>
+            <div className="detail-row">
+                <span className="detail-key">Material</span>
+                <span className="detail-val">{surat.material ?? '—'}</span>
+            </div>
+            <div className="detail-row">
+                <span className="detail-key">Alamat</span>
+                <span className="detail-val">{surat.alamat ?? '—'}</span>
+            </div>
         </div>
     )
 }

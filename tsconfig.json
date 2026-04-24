@@ -18,11 +18,13 @@
 
     "baseUrl": ".",
     "paths": {
-      "@/*": ["resources/js/*"]
+      "@/*": ["resources/js/*"],
+      "@*": ["resources/css/*"],
     },
     "types": ["ziggy-js"]
   },
   "include": [
+    "resources/css/*.css",
     "resources/js/**/*.ts",
     "resources/js/**/*.tsx",
     "resources/js/types/**/*.d.ts",

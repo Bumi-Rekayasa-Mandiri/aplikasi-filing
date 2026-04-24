@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Filing;
 
 use App\Http\Controllers\Controller;
 use App\Models\Surat;
+use App\Models\SuratApprovalLog;
 use App\Enums\SuratStatus;
+use Illuminate\Support\Facades\DB;
 
 class SuratApprovalController extends Controller
 {
@@ -50,6 +52,15 @@ class SuratApprovalController extends Controller
         ]);
         
         return back()->with('success', 'Surat ditolak');
+    }
+
+    public function revertDraft(Surat $surat)
+    {
+        $this->authorize('revertDraft', $surat);
+
+        $surat->update(['status' => SuratStatus::DRAFT]);
+
+        return back()->with('success', 'Status surat dikembalikan ke draft.');
     }
 
 }

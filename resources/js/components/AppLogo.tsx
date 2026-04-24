@@ -1,7 +1,5 @@
 import { ImgHTMLAttributes } from "react"
-import dashboard from '@/assets/dashboard.png'
-
-// type Props = ImgHTMLAttributes<HTMLImageElement>
+import dashboard from '@/assets/logo.png'
 
 export default function AppLogo() {
   return (

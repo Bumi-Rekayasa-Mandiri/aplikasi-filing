@@ -21,9 +21,7 @@ export default function AuthenticatedLayout({
     localStorage.setItem('sidebarOpen', SidebarOpen.toString());
   }, [SidebarOpen]);
 
-  const { auth } = usePage().props as any
-  console.log('AUTH PROPS:', auth)
-  
+  const { auth } = usePage().props as any  
 
   return (
     <div className="min-h-screen flex bg-gray-100">

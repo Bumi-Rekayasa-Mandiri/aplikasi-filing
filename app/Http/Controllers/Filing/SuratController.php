@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Gate;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\Surat\SKP\GenerateSKPPdf;
 use App\Services\Surat\SK\GenerateSKPdf;
@@ -51,10 +52,13 @@ public function index(Request $request)
         $query->where('status', $request->status);
     }
 
+    $perPage = (int) $request->input('per_page', 10);
+    $perPage = in_array($perPage, [10, 25, 50]) ? $perPage : 10;
+
     // FINAL EXECUTION (WAJIB)
     $surat = $query
         ->orderBy($sortField, $sortDirection)
-        ->paginate(10)
+        ->paginate($perPage)
         ->withQueryString();
 
     return Inertia::render('filing/surat/Index', [
@@ -62,13 +66,12 @@ public function index(Request $request)
         'sort'      => $sortField,
         'direction' => $sortDirection,
         'filters'   => $request->only(['search', 'status']),
+        'per_page'  => $perPage, 
     ]);
 }
 
 public function show(Surat $surat)
 {
-    $surat->load(['ttds.media']);
-
     return Inertia::render('filing/surat/Show', [
         'surat' => [
             // ── INFO UMUM ──────────────────────────
@@ -166,65 +169,131 @@ public function create(string $jenis)
     }
 }
 
+public function edit(Surat $surat, string $jenis)
+{
+    $this->authorize('update', $surat);
+
+    return Inertia::render('filing/surat/Edit', [
+        'surat' => $surat,
+        'jenis' => $jenis,
+        'can'   => [
+            'approve'     => Gate::allows('approve', $surat),
+            'revertDraft' => Gate::allows('revertDraft', $surat),
+        ],
+    ]);
+}
+
 public function update(Request $request, Surat $surat)
 {
+    $this->authorize('update', $surat);
 
-        $this->authorize('update', $surat);
-
-        $validated = $request->validate([
-        'judul'      => 'required|string|max:255',
-        'perihal'    => 'required|string|max:255',
-        'tujuan'     => 'required|string|max:255',
-        'isi_surat'  => 'required|string',
+    // Validasi field umum
+    $rules = [
+        'judul'         => 'required|string|max:255',
+        'perihal'       => 'nullable|string|max:255',
+        'tujuan'        => 'nullable|string|max:255',
+        'isi_surat'     => 'nullable|string',
         'tanggal_surat' => 'required|date',
-        ]);
+    ];
 
-        $surat->update($validated);
-        $surat->refresh();
+    // Validasi tambahan per jenis
+    $extraRules = match($surat->jenis) {
+        'BRM-1'   => [
+            'nama'           => 'nullable|string',
+            'departemen'     => 'nullable|string',
+            'lokasi_kerja'   => 'nullable|string',
+            'jenis_pekerjaan'=> 'nullable|string',
+            'waktu'          => 'nullable|string',
+            'jam_kerja'      => 'nullable|string',
+            'jumlah_pekerja' => 'nullable|string',
+            'apd'            => 'nullable|string',
+            'periode'        => 'nullable|string',
+            'no_pekerja'     => 'nullable|string',
+        ],
+        'BRM-2'   => [
+            'merk'   => 'nullable|string',
+            'warna'  => 'nullable|string',
+            'rangka' => 'nullable|string',
+        ],
+        'IEI-BRM' => [
+            'project'         => 'nullable|string',
+            'lokasi_kerja'    => 'nullable|string',
+            'jenis_pekerjaan' => 'nullable|string',
+            'masa_garansi'    => 'nullable|string',
+        ],
+        'GRS-BRM' => [
+            'project'      => 'nullable|string',
+            'material'     => 'nullable|string',
+            'alamat'       => 'nullable|string',
+            'masa_garansi' => 'nullable|string',
+        ],
+        'SK-BRM'  => [
+            'hasil_denda'      => 'nullable|string',
+            'keringanan_denda' => 'nullable|string',
+        ],
+        'SKP-BRM' => [
+            'nama'             => 'nullable|string',
+            'jabatan_terakhir' => 'nullable|string',
+            'departemen'       => 'nullable|string',
+        ],
+        'SPD-BRM' => [
+            'lampiran'      => 'nullable|string',
+            'alamat'        => 'nullable|string',
+            'item_pembelian'=> 'nullable|string',
+            'nominal'       => 'nullable|string',
+            'nama'          => 'nullable|string',
+            'no_ktp'        => 'nullable|string',
+        ],
+        'SPI-BRM' => [
+            'nama'              => 'nullable|string',
+            'alamat'            => 'nullable|string',
+            'no_ktp'            => 'nullable|string',
+            'nominal'           => 'nullable|string',
+            'nominal_bagihasil' => 'nullable|string',
+        ],
+        default => [],
+    };
 
-        return redirect()
+    $validated = $request->validate(array_merge($rules, $extraRules));
+
+    $surat->update($validated);
+
+    return redirect()
         ->route('filing.surat.show', $surat->id)
         ->with('success', 'Surat berhasil diperbarui');
 }
 
-public function edit(Surat $surat)
-    {
-        $this->authorize('update', $surat);
+public function destroy(Surat $surat)
+{
+    $this->authorize('delete', $surat);
 
-        return Inertia::render('filing/surat/Edit', [
-            'surat' => $surat->loadMissing([]),
-            'kodeJenis' => [
-                    'SKP-BRM' => 'Surat Pemberitahuan atau PHK',
-                    'GRS-BRM' => 'Surat Pengajuan Garansi Material',
-                    'SPD-BRM' => 'Surat Pengembalian Dana',
-                    'SK-BRM' => 'Surat Permohonan Keringanan Denda',
-                    'IEI-BRM' => 'Surat Garansi Pekerjaan',
-                    'SPI-BRM' => 'Surat Permohonan Investasi',
-                    'BRM1' => 'Surat Izin Kerja dan LK3',
-                    'BRM2' => 'Surat Pelepasan Hak'
-            ],
-        ]);
+    // Hapus semua media surat (cap, pdf, dll)
+    $surat->deleteAllMedia();
+
+    // Hapus semua TTD berelasi beserta media-nya
+    foreach ($surat->ttds as $ttd) {
+        $ttd->deleteAllMedia();
+        $ttd->delete();
     }
 
-public function destroy(Surat $surat)
-    {
-        $this->authorize('delete', $surat);
+    // Hapus record surat
+    $surat->delete();
 
-        // ✅ Hapus semua file media (cap, ttd, pdf)
-        $surat->clearMediaCollections();
+    $query = array_filter([
+            'status'        => request('status'),
+            'search'        => request('search'),
+            'sortField'     => request('sortField'),
+            'sortDirection' => request('sortDirection'),
+            'page'          => request('page'),
+        ]);
 
-        // ✅ Hapus semua TTD berelasi beserta media-nya
-        foreach ($surat->ttds as $ttd) {
-            $ttd->clearMediaCollections();
-            $ttd->delete();
+        $redirectUrl = route('filing.surat.index');
+
+        if (!empty($query)) {
+            $redirectUrl .= '?' . http_build_query($query);
         }
 
-        // ✅ Hapus record surat
-        $surat->delete();
-
-        return Inertia::location(
-            route('filing.surat.index', ['surat' => $surat->id])
-        );
+        return Inertia::location($redirectUrl);
     }
 
 public function deleteTtd(SuratTtd $ttd)

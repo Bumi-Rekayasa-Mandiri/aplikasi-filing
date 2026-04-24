@@ -84,6 +84,10 @@ Route::middleware(['auth'])->prefix('filing')->name('filing.')->group(function (
     // Download Surat
     Route::get('/surat/{surat}/download', [\App\Http\Controllers\Filing\SuratDownloadController::class, 'download'])->name('surat.download');
 
+    // Approval
+    Route::patch('/surat/{surat}/approve',      [SuratApprovalController::class, 'approve'])->name('surat.approve');
+    Route::patch('/surat/{surat}/revert-draft', [SuratApprovalController::class, 'revertDraft'])->name('surat.revert-draft');
+
     // Arsip Surat
     Route::post('/arsip/{arsip}/upload', [ArsipSuratController::class, 'uploadFile'])->name('arsip.upload');
     Route::get('/arsip/{arsip}/download', [ArsipSuratController::class, 'download'])->name('arsip.download');

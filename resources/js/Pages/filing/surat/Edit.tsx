@@ -1,73 +1,308 @@
 import { useForm, Head, router } from '@inertiajs/react'
-import AppLayout from '@/layouts/AppLayout'
+import AuthenticatedLayout from '@/layouts/AuthenticatedLayout'
+import '../../../../css/create-surat.css'
+import StatusToggle from '@/components/filing/surat/StatusToggle'
+import '../../../../css/status-toggle.css'
 
-type Props = {
-  surat: {
-    id: number
-    judul: string
-    perihal: string
-    tujuan: string
-    isi_surat: string
-    tanggal_surat: string
-  }
-  kodeJenis: Record<string, string>
+type SuratData = {
+  id: number
+  jenis: string
+  judul: string
+  perihal?: string
+  tujuan?: string
+  isi_surat?: string
+  tanggal_surat: string
+  nama?: string
+  jabatan_terakhir?: string
+  departemen?: string
+  lokasi_kerja?: string
+  jenis_pekerjaan?: string
+  waktu?: string
+  jam_kerja?: string
+  jumlah_pekerja?: string
+  apd?: string
+  periode?: string
+  no_pekerja?: string
+  merk?: string
+  warna?: string
+  rangka?: string
+  project?: string
+  material?: string
+  alamat?: string
+  masa_garansi?: string
+  hasil_denda?: string
+  keringanan_denda?: string
+  lampiran?: string
+  item_pembelian?: string
+  nominal?: string
+  nominal_bagihasil?: string
+  no_ktp?: string
+  status?: string
 }
 
-export default function Edit({ surat, kodeJenis }: Props) {
-  const { data, setData, put, processing, errors } = useForm({
-    judul: surat?.judul ?? '',
-    tanggal_surat: surat?.tanggal_surat ?? '',
-    perihal: surat?.perihal ?? '',
-    tujuan: surat?.tujuan ?? '',
-    isi_surat: surat?.isi_surat ?? '',
+type Props = {
+  surat: SuratData
+  jenis: string
+  can: { approve: boolean; revertDraft: boolean } 
+}
+
+const judulJenis: Record<string, string> = {
+  'SKP-BRM': 'Surat Pemberitahuan PHK',
+  'GRS-BRM': 'Surat Pengajuan Garansi Material',
+  'SPD-BRM': 'Surat Pengembalian Dana',
+  'SK-BRM':  'Surat Permohonan Keringanan Denda',
+  'IEI-BRM': 'Surat Garansi Pekerjaan',
+  'SPI-BRM': 'Surat Permohonan Investasi',
+  'BRM-1':   'Surat Izin Kerja dan LK3',
+  'BRM-2':   'Surat Pelepasan Hak',
+}
+
+// Icon SVG reusable
+const IconDoc = (color = '#185FA5') => (
+  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+    <path d="M3 2.5A1.5 1.5 0 0 1 4.5 1h5.086a1.5 1.5 0 0 1 1.06.44l2.415 2.414A1.5 1.5 0 0 1 13.5 4.914V13.5A1.5 1.5 0 0 1 12 15H4.5A1.5 1.5 0 0 1 3 13.5v-11Z" stroke={color} strokeWidth="1.2"/>
+    <path d="M6 8h4M6 10.5h2.5" stroke={color} strokeWidth="1.2" strokeLinecap="round"/>
+  </svg>
+)
+
+const IconDetail = (color = '#534AB7') => (
+  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+    <rect x="2" y="2" width="12" height="12" rx="2" stroke={color} strokeWidth="1.2"/>
+    <path d="M5 5.5h6M5 8h6M5 10.5h4" stroke={color} strokeWidth="1.2" strokeLinecap="round"/>
+  </svg>
+)
+
+export default function Edit({ surat, jenis, can = { approve : false, revertDraft : false } }: Props) {
+  const { data, setData, processing, errors } = useForm<SuratData>({
+    ...surat,
   })
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
-    router.put(route('filing.surat.update', {surat: surat.id}), data)
+    router.put(route('filing.surat.update', { surat: surat.id, jenis }), data)
   }
 
+  const Field = ({
+    label, field, type = 'text', placeholder = '', fullWidth = false
+  }: {
+    label: string
+    field: keyof SuratData
+    type?: string
+    placeholder?: string
+    fullWidth?: boolean
+  }) => (
+    <div className={`field ${fullWidth ? 'col-span-2' : ''}`}>
+      <label className="field-label">{label}</label>
+      <input
+        type={type}
+        className="field-input"
+        value={(data[field] as string) ?? ''}
+        placeholder={placeholder}
+        onChange={e => setData(field, e.target.value)}
+      />
+      {errors[field] && <span className="field-error">{errors[field]}</span>}
+    </div>
+  )
+
+  const TextArea = ({
+    label, field, fullWidth = true
+  }: {
+    label: string
+    field: keyof SuratData
+    fullWidth?: boolean
+  }) => (
+    <div className={`field ${fullWidth ? 'col-span-2' : ''}`}>
+      <label className="field-label">{label}</label>
+      <textarea
+        className="field-input"
+        value={(data[field] as string) ?? ''}
+        onChange={e => setData(field, e.target.value)}
+      />
+      {errors[field] && <span className="field-error">{errors[field]}</span>}
+    </div>
+  )
+
   return (
-    <AppLayout title="Edit Surat">
-      <Head title="Edit Surat" />
+    <AuthenticatedLayout>
+      <Head title={`Edit ${judulJenis[jenis] ?? 'Surat'}`} />
 
-      <form onSubmit={submit} className="space-y-4 max-w-xl">
-        <input
-          className="input input-bordered w-full"
-          value={data.judul}
-          onChange={e => setData('judul', e.target.value)}
-        />
-        {errors.judul && <div className="text-red-500">{errors.judul}</div>}
+      <form onSubmit={submit} className="create-form">
 
-        <input
-          type="date"
-          className="input input-bordered w-full"
-          value={data.tanggal_surat}
-          onChange={e => setData('tanggal_surat', e.target.value)}
-        />
+        <div className="create-form-heading">
+          <h1 className="create-form-title">Edit {judulJenis[jenis] ?? 'surat'}</h1>
+          <p className="create-form-subtitle">Perbarui field yang diperlukan lalu klik Simpan Perubahan</p>
+        </div>
 
-        <input
-          className="input input-bordered w-full"
-          value={data.perihal}
-          onChange={e => setData('perihal', e.target.value)}
-        />
+        {/* ── Informasi Umum ─── */}
+        <div className="form-card">
+          <div className="form-card-header">
+            <div className="form-icon icon-blue">{IconDoc()}</div>
+            <span className="form-card-title">Informasi umum</span>
+          </div>
+          <div className="form-grid">
+            <Field label="Judul" field="judul" fullWidth placeholder="Judul surat" />
+            <Field label="Perihal" field="perihal" placeholder="Perihal surat" />
+            <Field label="Tujuan" field="tujuan" placeholder="Tujuan surat" />
+            <Field label="Tanggal surat" field="tanggal_surat" type="date" />
+          </div>
 
-        <input
-          className="input input-bordered w-full"
-          value={data.tujuan}
-          onChange={e => setData('tujuan', e.target.value)}
-        />
+          {(can.approve || can.revertDraft) && (
+            <div className="status-toggle-section">
+              <StatusToggle
+                suratId={surat.id}
+                status={surat.status as 'draft' | 'approved' }
+                canApprove={can.approve || can.revertDraft}
+              />
+            </div>
+          )}
+        </div>
 
-        <textarea
-          className="textarea textarea-bordered w-full"
-          value={data.isi_surat}
-          onChange={e => setData('isi_surat', e.target.value)}
-        />
+        {/* ── Detail per Jenis ─── */}
+        {jenis === 'BRM-1' && (
+          <div className="form-card">
+            <div className="form-card-header">
+              <div className="form-icon icon-purple">{IconDetail()}</div>
+              <span className="form-card-title">Detail pekerjaan</span>
+            </div>
+            <div className="form-grid">
+              <Field label="Nama tujuan" field="nama" placeholder="Nama penerima" />
+              <Field label="Departemen" field="departemen" placeholder="Nama departemen" />
+              <Field label="Lokasi kerja" field="lokasi_kerja" placeholder="Lokasi pekerjaan" />
+              <Field label="Waktu" field="waktu" placeholder="Contoh: 3 hari" />
+              <Field label="Jam kerja" field="jam_kerja" placeholder="Contoh: 08.00–17.00" />
+              <Field label="Jumlah pekerja" field="jumlah_pekerja" placeholder="Contoh: 5 orang" />
+              <Field label="APD" field="apd" placeholder="Alat pelindung diri" />
+              <Field label="Periode" field="periode" placeholder="Contoh: Maret 2026" />
+              <Field label="No pekerja" field="no_pekerja" placeholder="Nomor ID pekerja" />
+              <TextArea label="Jenis pekerjaan" field="jenis_pekerjaan" />
+            </div>
+          </div>
+        )}
 
-        <button className="btn btn-primary" disabled={processing}>
-          Update
+        {jenis === 'BRM-2' && (
+          <div className="form-card">
+            <div className="form-card-header">
+              <div className="form-icon icon-purple">{IconDetail()}</div>
+              <span className="form-card-title">Detail kendaraan</span>
+            </div>
+            <div className="form-grid">
+              <Field label="Merk / jenis" field="merk" placeholder="Contoh: Honda Vario" />
+              <Field label="Warna / tahun" field="warna" placeholder="Contoh: Putih / 2020" />
+              <Field label="Rangka / mesin" field="rangka" placeholder="Nomor rangka / mesin" />
+            </div>
+          </div>
+        )}
+
+        {jenis === 'IEI-BRM' && (
+          <div className="form-card">
+            <div className="form-card-header">
+              <div className="form-icon icon-purple">{IconDetail()}</div>
+              <span className="form-card-title">Detail pekerjaan</span>
+            </div>
+            <div className="form-grid">
+              <Field label="Project" field="project" placeholder="Nama project" />
+              <Field label="Lokasi kerja" field="lokasi_kerja" placeholder="Lokasi pekerjaan" />
+              <Field label="Masa garansi" field="masa_garansi" placeholder="Contoh: 12 bulan" />
+              <TextArea label="Jenis pekerjaan" field="jenis_pekerjaan" />
+            </div>
+          </div>
+        )}
+
+        {jenis === 'GRS-BRM' && (
+          <div className="form-card">
+            <div className="form-card-header">
+              <div className="form-icon icon-purple">{IconDetail()}</div>
+              <span className="form-card-title">Detail garansi</span>
+            </div>
+            <div className="form-grid">
+              <Field label="Project" field="project" placeholder="Nama project" />
+              <Field label="Material" field="material" placeholder="Jenis material" />
+              <Field label="Masa garansi" field="masa_garansi" placeholder="Contoh: 12 bulan" />
+              <TextArea label="Jenis project" field="isi_surat" />
+              <TextArea label="Alamat" field="alamat" />
+              {(can?.approve || can?.revertDraft) && (
+                <div className="status-toggle-section">
+                  <StatusToggle
+                    suratId={surat.id}
+                    status={surat.status as 'draft' | 'approved'}
+                    canApprove={can?.approve || can?.revertDraft}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {jenis === 'SK-BRM' && (
+          <div className="form-card">
+            <div className="form-card-header">
+              <div className="form-icon icon-purple">{IconDetail()}</div>
+              <span className="form-card-title">Detail denda</span>
+            </div>
+            <div className="form-grid">
+              <Field label="Hasil perhitungan denda" field="hasil_denda" placeholder="Contoh: Rp 5.000.000" />
+              <Field label="Keringanan denda" field="keringanan_denda" placeholder="Contoh: Rp 2.500.000" />
+              <TextArea label="Isi surat" field="isi_surat" />
+            </div>
+          </div>
+        )}
+
+        {jenis === 'SKP-BRM' && (
+          <div className="form-card">
+            <div className="form-card-header">
+              <div className="form-icon icon-purple">{IconDetail()}</div>
+              <span className="form-card-title">Data karyawan</span>
+            </div>
+            <div className="form-grid">
+              <Field label="Nama" field="nama" placeholder="Nama lengkap karyawan" />
+              <Field label="Jabatan terakhir" field="jabatan_terakhir" placeholder="Jabatan terakhir" />
+              <Field label="Departemen" field="departemen" placeholder="Nama departemen" />
+              <TextArea label="Isi surat" field="isi_surat" />
+            </div>
+          </div>
+        )}
+
+        {jenis === 'SPD-BRM' && (
+          <div className="form-card">
+            <div className="form-card-header">
+              <div className="form-icon icon-purple">{IconDetail()}</div>
+              <span className="form-card-title">Detail dana</span>
+            </div>
+            <div className="form-grid">
+              <Field label="Lampiran" field="lampiran" placeholder="Contoh: 1 lembar" />
+              <Field label="Alamat" field="alamat" placeholder="Alamat lengkap" fullWidth />
+              <Field label="Item pembelian" field="item_pembelian" placeholder="Nama item" fullWidth />
+              <Field label="Nominal" field="nominal" placeholder="Contoh: Rp 10.000.000" />
+              <Field label="Nama bank" field="nama" placeholder="Nama bank" />
+              <Field label="Nomor rekening" field="no_ktp" placeholder="Nomor rekening" />
+              <TextArea label="Cabang" field="isi_surat" />
+            </div>
+          </div>
+        )}
+
+        {jenis === 'SPI-BRM' && (
+          <div className="form-card">
+            <div className="form-card-header">
+              <div className="form-icon icon-purple">{IconDetail()}</div>
+              <span className="form-card-title">Data investor</span>
+            </div>
+            <div className="form-grid">
+              <Field label="Nama investor" field="nama" placeholder="Nama lengkap investor" />
+              <Field label="No KTP" field="no_ktp" placeholder="Nomor KTP" />
+              <Field label="Alamat" field="alamat" placeholder="Alamat lengkap" fullWidth />
+              <Field label="Nominal investasi" field="nominal" placeholder="Contoh: Rp 100.000.000" />
+              <Field label="Nominal bagi hasil" field="nominal_bagihasil" placeholder="Contoh: Rp 5.000.000/bulan" />
+            </div>
+          </div>
+        )}
+        
+
+        {/* ── Submit ─── */}
+        <button type="submit" className="btn-submit" disabled={processing}>
+          {processing ? 'Menyimpan…' : 'Simpan perubahan'}
         </button>
+
       </form>
-    </AppLayout>
+    </AuthenticatedLayout>
   )
 }

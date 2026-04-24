@@ -281,7 +281,7 @@
                         @if($showCap)
                         <img src="{{ $capBase64 }}" style="
                             position: absolute;
-                            top: 20px;
+                            top: 8px;
                             right: 45px;
                             width: 115px;
                             height: auto;
@@ -294,7 +294,7 @@
                         @if($ttdBase64)
                         <img src="{{ $ttdBase64 }}" style="
                             position: absolute;
-                            top: 28px;
+                            top: 16px;
                             right: 50px;
                             width: 100px;
                             height: auto;
