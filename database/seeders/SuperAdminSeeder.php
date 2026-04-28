@@ -16,7 +16,7 @@ class SuperAdminSeeder extends Seeder
         $superAdmin = User::create([
             'name' => env('SUPER_ADMIN_NAME'),
             'email' => env('SUPER_ADMIN_EMAIL'),
-            'password' => env('SUPER_ADMIN_PASSWORD'),
+            'password' => Hash::make(env('SUPER_ADMIN_PASSWORD')),
         ]);
 
         $role = Role::findByName('super-admin');

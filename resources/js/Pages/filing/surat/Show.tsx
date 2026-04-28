@@ -98,7 +98,15 @@ export default function Show({ surat, can }: Props) {
               <span className="info-value">{surat.tujuan}</span>
             </div>
           </div>
-
+                  {(can?.approve || can?.revertDraft) && (
+                   <div className="status-toggle-section">
+                      <StatusToggle
+                        suratId={surat.id}
+                        status={surat.status as 'draft' | 'approved'}
+                        canApprove={can?.approve || can?.revertDraft}
+                      />
+                    </div>
+                  )}
         </div>{/* tutup section-card */}
 
         {/* DETAIL SPESIFIK */}

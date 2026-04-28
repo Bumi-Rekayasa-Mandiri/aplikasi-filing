@@ -24,6 +24,7 @@ class Surat extends Model implements HasMedia
 
      protected $casts = [
         'status' => SuratStatus::class,
+        'meta'   => 'array',
     ];
 
     protected $fillable = [
@@ -56,12 +57,16 @@ class Surat extends Model implements HasMedia
         'apd',
         'periode',
         'no_pekerja',
+        'meta',
     ];
 
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('cap')
             ->singleFile();
+        $this->addMediaCollection('pdf')->singleFile();
+        $this->addMediaCollection('brm1_pdf')->singleFile();
+        $this->addMediaCollection('ktp');
 
         // $this->addMediaCollection('ttd');
     }

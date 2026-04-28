@@ -21,6 +21,18 @@ type Props = {
   }
 }
 
+type JsaItem = {
+  urutan_kerja: string
+  potensi_bahaya: string
+  upaya_pengendalian: string
+}
+
+type PekerjaItem = {
+  nama: string
+  role: string
+  ktp: File | null
+}
+
 export default function CreateBRM1({ surat }: Props) {
   const { data, setData, post, processing, errors } = useForm({
     judul: '',
@@ -42,6 +54,8 @@ export default function CreateBRM1({ surat }: Props) {
       { nama_penandatangan: '', urutan: 1, label: 'Pihak Pertama', jabatan: '', file: null },
       { nama_penandatangan: '', urutan: 2, label: 'Pihak Kedua',   jabatan: '', file: null },
     ] as TtdItem[],
+    jsa: [] as JsaItem[],
+    pekerja: [] as PekerjaItem[],
   })
 
   const submit = (e: React.FormEvent) => {
@@ -68,6 +82,32 @@ export default function CreateBRM1({ surat }: Props) {
 
   if (!surat?.id) {
     return <AppLayout title="Loading"><p className="text-gray-500">Menyiapkan draft surat…</p></AppLayout>
+  }
+
+  const addJsa = () => setData('jsa', [
+    ...data.jsa,
+    { urutan_kerja: '', potensi_bahaya: '', upaya_pengendalian: '' }
+  ])
+
+  const removeJsa = (i: number) => setData('jsa', data.jsa.filter((_, idx) => idx !== i))
+
+  const updateJsa = (i: number, field: keyof JsaItem, value: string) => {
+    const updated = [...data.jsa]
+    updated[i] = { ...updated[i], [field]: value }
+    setData('jsa', updated)
+  }
+
+  const addPekerja = () => setData('pekerja', [
+    ...data.pekerja,
+    { nama: '', role: 'Pekerja', ktp: null }
+  ])
+
+  const removePekerja = (i: number) => setData('pekerja', data.pekerja.filter((_, idx) => idx !== i))
+
+  const updatePekerja = (i: number, field: keyof PekerjaItem, value: string | File | null) => {
+    const updated = [...data.pekerja]
+    updated[i] = { ...updated[i], [field]: value }
+    setData('pekerja', updated)
   }
 
   return (
@@ -167,33 +207,6 @@ export default function CreateBRM1({ surat }: Props) {
           </div>
         </div>
 
-        {/* ── Lampiran ───────────────────────────── */}
-        <div className="form-card">
-          <div className="form-card-header">
-            <div className="form-icon icon-teal">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                <path d="M4 8l2.5 2.5L12 5" stroke="#0F6E56" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-                <rect x="1.5" y="1.5" width="13" height="13" rx="3" stroke="#0F6E56" strokeWidth="1.2"/>
-              </svg>
-            </div>
-            <span className="form-card-title">Lampiran</span>
-          </div>
-          <div className="form-grid">
-            <div className="field">
-              <label className="field-label">APD</label>
-              <input className="field-input" placeholder="Alat pelindung diri" onChange={e => setData('apd', e.target.value)} />
-            </div>
-            <div className="field">
-              <label className="field-label">Periode</label>
-              <input className="field-input" placeholder="Contoh: Maret 2026" onChange={e => setData('periode', e.target.value)} />
-            </div>
-            <div className="field">
-              <label className="field-label">No pekerja</label>
-              <input className="field-input" placeholder="Nomor ID pekerja" onChange={e => setData('no_pekerja', e.target.value)} />
-            </div>
-          </div>
-        </div>
-
         {/* ── Cap Perusahaan ─────────────────────── */}
         <div className="form-card">
           <div className="form-card-header">
@@ -278,6 +291,170 @@ export default function CreateBRM1({ surat }: Props) {
                 <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
               Tambah tanda tangan
+            </button>
+          </div>
+        </div>
+
+        <div className="form-card">
+          <div className="form-card-header">
+            <div className="form-icon icon-purple">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <rect x="2" y="2" width="12" height="12" rx="2" stroke="#534AB7" strokeWidth="1.2"/>
+                <path d="M5 5.5h6M5 8h6M5 10.5h4" stroke="#534AB7" strokeWidth="1.2" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <span className="form-card-title">
+              Lampiran A — JSA
+              {data.jsa.length > 0 && (
+                <span style={{ marginLeft: '8px', fontSize: '11px', background: '#EEEDFE', color: '#3C3489', padding: '2px 8px', borderRadius: '999px' }}>
+                  {data.jsa.length} item
+                </span>
+              )}
+            </span>
+          </div>
+
+          {/* ── Lampiran ───────────────────────────── */}
+          <div className="form-card">
+            <div className="form-card-header">
+              <div className="form-icon icon-teal">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                  <path d="M4 8l2.5 2.5L12 5" stroke="#0F6E56" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                  <rect x="1.5" y="1.5" width="13" height="13" rx="3" stroke="#0F6E56" strokeWidth="1.2"/>
+                </svg>
+              </div>
+              <span className="form-card-title">Lampiran</span>
+            </div>
+            <div className="form-grid">
+              <div className="field">
+                <label className="field-label">APD</label>
+                <input className="field-input" placeholder="Alat pelindung diri" onChange={e => setData('apd', e.target.value)} />
+              </div>
+              <div className="field">
+                <label className="field-label">Periode</label>
+                <input className="field-input" placeholder="Contoh: Maret 2026" onChange={e => setData('periode', e.target.value)} />
+              </div>
+              <div className="field">
+                <label className="field-label">No pekerja</label>
+                <input className="field-input" placeholder="Nomor ID pekerja" onChange={e => setData('no_pekerja', e.target.value)} />
+              </div>
+            </div>
+          </div>
+
+          <div className="ttd-list">
+            {data.jsa.map((item, i) => (
+              <div key={i} className="ttd-item">
+                <div className="ttd-item-header">
+                  <div className="ttd-item-title">
+                    <span className="ttd-num">{i + 1}</span>
+                    Item JSA {i + 1}
+                  </div>
+                  <button type="button" className="ttd-remove" onClick={() => removeJsa(i)}>Hapus</button>
+                </div>
+                <div className="ttd-fields">
+                  <div className="field col-span-2">
+                    <label className="field-label">Urutan kerja</label>
+                    <input className="field-input" placeholder="Contoh: Penggalian pondasi"
+                      value={item.urutan_kerja}
+                      onChange={e => updateJsa(i, 'urutan_kerja', e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label className="field-label">Potensi bahaya</label>
+                    <textarea className="field-input"
+                      placeholder={"Tulis tiap potensi dipisah baris baru\nContoh:\nSalah gali\nTools kurang"}
+                      value={item.potensi_bahaya}
+                      rows={4}
+                      onChange={e => updateJsa(i, 'potensi_bahaya', e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label className="field-label">Upaya pengendalian</label>
+                    <textarea className="field-input"
+                      placeholder={"Tulis tiap upaya dipisah baris baru\nContoh:\nAPD mandatori\nSupervisi pengawas"}
+                      value={item.upaya_pengendalian}
+                      rows={4}
+                      onChange={e => updateJsa(i, 'upaya_pengendalian', e.target.value)} />
+                  </div>
+                </div>
+              </div>
+            ))}
+            <button type="button" className="btn-add" onClick={addJsa}>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+              Tambah item JSA
+            </button>
+          </div>
+        </div>
+
+        <div className="form-card">
+          <div className="form-card-header">
+            <div className="form-icon icon-teal">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="5" r="3" stroke="#0F6E56" strokeWidth="1.2"/>
+                <path d="M2 14c0-3 2.5-5 6-5s6 2 6 5" stroke="#0F6E56" strokeWidth="1.2" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <span className="form-card-title">
+              Lampiran B — Daftar pekerja
+              {data.pekerja.length > 0 && (
+                <span style={{ marginLeft: '8px', fontSize: '11px', background: '#EAF3DE', color: '#27500A', padding: '2px 8px', borderRadius: '999px' }}>
+                  {data.pekerja.length} pekerja
+                </span>
+              )}
+            </span>
+          </div>
+
+          <div className="ttd-list">
+            {data.pekerja.map((p, i) => (
+              <div key={i} className="ttd-item">
+                <div className="ttd-item-header">
+                  <div className="ttd-item-title">
+                    <span className="ttd-num">{i + 1}</span>
+                    Pekerja {i + 1}
+                  </div>
+                  <button type="button" className="ttd-remove" onClick={() => removePekerja(i)}>Hapus</button>
+                </div>
+                <div className="ttd-fields">
+                  <div className="field">
+                    <label className="field-label">Nama pekerja</label>
+                    <input className="field-input" placeholder="Nama lengkap"
+                      value={p.nama}
+                      onChange={e => updatePekerja(i, 'nama', e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label className="field-label">Role</label>
+                    <select className="field-input"
+                      value={p.role}
+                      onChange={e => updatePekerja(i, 'role', e.target.value)}>
+                      <option value="Pengawas">Pengawas</option>
+                      <option value="Pekerja">Pekerja</option>
+                      <option value="Driver">Driver</option>
+                      <option value="Teknisi">Teknisi</option>
+                    </select>
+                  </div>
+                  <label className="file-upload-area col-span-2">
+                    <input type="file" accept="image/*" className="sr-only"
+                      onChange={e => updatePekerja(i, 'ktp', e.target.files?.[0] ?? null)} />
+                    <div className="file-upload-icon">
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                        <path d="M8 11V5M5.5 7.5L8 5l2.5 2.5" stroke="#185FA5" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M3 13h10" stroke="#185FA5" strokeWidth="1.3" strokeLinecap="round"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="file-upload-text">
+                        {p.ktp ? p.ktp.name : 'Unggah foto KTP'}
+                      </div>
+                      <div className="file-upload-hint">JPG, PNG hingga 2MB</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            ))}
+            <button type="button" className="btn-add" onClick={addPekerja}>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+              Tambah pekerja
             </button>
           </div>
         </div>

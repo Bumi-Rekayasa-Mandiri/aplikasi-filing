@@ -13,7 +13,9 @@ type TtdItem = {
 type JenisPekerjaanItem = { deskripsi: string }
 
 type Props = {
-  surat: { id: number; nomor_surat: string; judul: string; tujuan: string; status: string }
+  surat: { id: number; nomor_surat: string; judul: string; tujuan: string; status: string
+
+   }
 }
 
 export default function CreateIEI({ surat }: Props) {
@@ -26,6 +28,8 @@ export default function CreateIEI({ surat }: Props) {
       { nama_penandatangan: '', jabatan: '', urutan: 1, label: 'Pihak Pertama', file: null },
       { nama_penandatangan: '', jabatan: '', urutan: 2, label: 'Pihak Kedua', file: null },
     ] as TtdItem[],
+
+    dokumen: [] as string[],
   })
 
   const submit = (e: React.FormEvent) => {
@@ -265,6 +269,50 @@ export default function CreateIEI({ surat }: Props) {
                 <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
               Tambah tanda tangan
+            </button>
+          </div>
+        </div>
+
+        <div className="form-card">
+          <div className="form-card-header">
+            <div className="form-icon icon-purple">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <rect x="2" y="2" width="12" height="12" rx="2" stroke="#534AB7" strokeWidth="1.2"/>
+                <path d="M5 5.5h6M5 8h6M5 10.5h4" stroke="#534AB7" strokeWidth="1.2" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <span className="form-card-title">Daftar dokumen lampiran</span>
+          </div>
+          <div className="ttd-list">
+            {(data.dokumen ?? []).map((dok: string, i: number) => (
+              <div key={i} className="ttd-item">
+                <div className="ttd-item-header">
+                  <div className="ttd-item-title">
+                    <span className="ttd-num">{i + 1}</span>
+                    Dokumen {i + 1}
+                  </div>
+                  <button type="button" className="ttd-remove"
+                    onClick={() => setData('dokumen', (data.dokumen ?? []).filter((_: string, idx: number) => idx !== i))}>
+                    Hapus
+                  </button>
+                </div>
+                <div className="field">
+                  <input className="field-input" placeholder="Contoh: Guarantee Letter"
+                    value={dok}
+                    onChange={e => {
+                      const updated = [...(data.dokumen ?? [])]
+                      updated[i] = e.target.value
+                      setData('dokumen', updated)
+                    }} />
+                </div>
+              </div>
+            ))}
+            <button type="button" className="btn-add"
+              onClick={() => setData('dokumen', [...(data.dokumen ?? []), ''])}>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+              Tambah dokumen
             </button>
           </div>
         </div>

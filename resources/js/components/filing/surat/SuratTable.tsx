@@ -75,16 +75,16 @@ export default function SuratTable({ data, sortField, sortDirection, onSort, onD
                   onClick={() => router.visit(route('filing.surat.show', s.id))}>
                   Detail
                 </button>
+                <button className="act-btn act-edit"
+                  onClick={() => router.visit(route('filing.surat.edit', { surat: s.id, jenis: s.jenis }))}>
+                  Edit
+                </button>
                 <button className="act-btn act-preview"
                   onClick={() => router.visit(getPreviewRoute(s.jenis, s.id))}>
                   Preview
                 </button>
                 {s.status === 'draft' && (
                   <>
-                    <button className="act-btn act-edit"
-                      onClick={() => router.visit(route('filing.surat.edit', { surat: s.id, jenis: s.jenis }))}>
-                      Edit
-                    </button>
                     <button className="act-btn act-delete"
                       onClick={() => destroy(s.id)}>
                       Hapus

@@ -741,7 +741,7 @@ public function generateIEIPdf(Request $request, Surat $surat)
             'lokasi_kerja' => 'required|string|max:255',
             'jenis_pekerjaan'            => 'nullable|array|max:6',
             'jenis_pekerjaan.*.deskripsi' => 'required_with:jenis_pekerjaan|string|max:500',
-            'lampiran' => 'nullable|string|max:255',
+            'lampiran' => 'nullable|string|max:1000',
             'cap' => 'nullable|image',
             'ttds'                        => 'nullable|array',
             'ttds.*.nama_penandatangan'   => 'required_with:ttds|string|max:255',
@@ -749,6 +749,8 @@ public function generateIEIPdf(Request $request, Surat $surat)
             'ttds.*.urutan'               => 'nullable|integer',
             'ttds.*.label'                => 'nullable|string|max:100',
             'ttds.*.file'                 => 'nullable|image|max:2048',
+            'dokumen'                     => 'nullable|array',
+            'dokumen.*'                   => 'nullable|string|max:255',
         ]);
 
         // 🔥 SIMPAN KE DATABASE (PENTING)
@@ -768,6 +770,12 @@ public function generateIEIPdf(Request $request, Surat $surat)
                                 ->toArray()
                         ),
             'lampiran' => $data['lampiran'],
+        ]);
+
+        $surat->update([
+            'meta' => [
+                'dokumen' => array_filter($request->input('dokumen', [])),
+            ],
         ]);
 
         // 🔥 SIMPAN MEDIA
@@ -940,88 +948,118 @@ public function previewGRS(Surat $surat)
     }
 
 public function generateBRM1Pdf(Request $request, Surat $surat)
-    {
-        $data = $request->validate([
-            'judul' => 'required|string|max:255',
-            'perihal' => 'required|string|max:255',
-            'tujuan' => 'required|string|max:255',
-            'tanggal_surat' => 'required|date',
-            'nama' => 'required|string|max:255',
-            'lokasi_kerja' => 'required|string|max:255',
-            'jenis_pekerjaan' => 'required|string|max:255',
-            'waktu' => 'required|string|max:255',
-            'jam_kerja' => 'required|string|max:255',
-            'jumlah_pekerja' => 'required|string|max:255',
-            'departemen' => 'required|string|max:255',
-            'cap' => 'nullable|image',
-            'ttds'                      => 'nullable|array',
-            'ttds.*.nama_penandatangan' => 'required_with:ttds|string|max:255',
-            'ttds.*.urutan'             => 'nullable|integer',
-            'ttds.*.label'              => 'nullable|string|max:100',
-            'ttds.*.file'               => 'nullable|image|max:2048',
-            'apd' => 'nullable|string',
-            'periode' => 'nullable|string',
-            'no_pekerja' => 'nullable|string',
+{
+    $data = $request->validate([
+        'judul'                         => 'required|string|max:255',
+        'perihal'                       => 'required|string|max:255',
+        'tujuan'                        => 'required|string|max:255',
+        'tanggal_surat'                 => 'required|date',
+        'nama'                          => 'required|string|max:255',
+        'lokasi_kerja'                  => 'required|string|max:255',
+        'jenis_pekerjaan'               => 'required|string|max:255',
+        'waktu'                         => 'required|string|max:255',
+        'jam_kerja'                     => 'required|string|max:255',
+        'jumlah_pekerja'                => 'required|string|max:255',
+        'departemen'                    => 'required|string|max:255',
+        'cap'                           => 'nullable|image',
+        'ttds'                          => 'nullable|array',
+        'ttds.*.nama_penandatangan'     => 'required_with:ttds|string|max:255',
+        'ttds.*.jabatan'                => 'nullable|string|max:255',
+        'ttds.*.urutan'                 => 'nullable|integer',
+        'ttds.*.label'                  => 'nullable|string|max:100',
+        'ttds.*.file'                   => 'nullable|image|max:2048',
+        'apd'                           => 'nullable|string',
+        'periode'                       => 'nullable|string',
+        'no_pekerja'                    => 'nullable|string',
+        'jsa'                           => 'nullable|array',
+        'jsa.*.urutan_kerja'            => 'nullable|string',
+        'jsa.*.potensi_bahaya'          => 'nullable|string',
+        'jsa.*.upaya_pengendalian'      => 'nullable|string',
+        'pekerja'                       => 'nullable|array',
+        'pekerja.*.nama'                => 'nullable|string|max:255',
+        'pekerja.*.role'                => 'nullable|string|max:100',
+        'pekerja.*.ktp'                 => 'nullable|image|max:5120',
+    ]);
 
-        ]);
+    // ── Simpan data utama ──────────────────────────
+    $surat->update([
+        'judul'           => $data['judul'],
+        'perihal'         => $data['perihal'],
+        'tujuan'          => $data['tujuan'],
+        'tanggal_surat'   => $data['tanggal_surat'],
+        'nama'            => $data['nama'],
+        'lokasi_kerja'    => $data['lokasi_kerja'],
+        'jenis_pekerjaan' => $data['jenis_pekerjaan'],
+        'waktu'           => $data['waktu'],
+        'jam_kerja'       => $data['jam_kerja'],
+        'jumlah_pekerja'  => $data['jumlah_pekerja'],
+        'departemen'      => $data['departemen'],
+        'apd'             => $data['apd'],
+        'periode'         => $data['periode'],
+        'no_pekerja'      => $data['no_pekerja'],
+    ]);
 
-        // 🔥 SIMPAN KE DATABASE (PENTING)
-        $surat->update([
-            'judul' => $data['judul'],
-            'perihal' => $data['perihal'],
-            'tujuan' => $data['tujuan'],
-            'tanggal_surat' => $data['tanggal_surat'],
-            'nama' => $data['nama'],
-            'lokasi_kerja' => $data['lokasi_kerja'],
-            'jenis_pekerjaan' => $data['jenis_pekerjaan'],
-            'waktu' => $data['waktu'],
-            'jam_kerja' => $data['jam_kerja'],
-            'jumlah_pekerja' => $data['jumlah_pekerja'],
-            'departemen' => $data['departemen'],
-            'nama_penandatangan' => $data['nama_penandatangan'] ?? null,
-            'apd' => $data['apd'],
-            'periode' => $data['periode'],
-            'no_pekerja' => $data['no_pekerja'],
-        ]);
+    // Simpan JSA + daftar pekerja ke meta
+    $surat->update([
+        'meta' => [          
+            'jsa'     => $request->input('jsa', []),
+            'pekerja' => collect($request->input('pekerja', []))
+                ->map(fn($p) => [
+                    'nama' => $p['nama'] ?? '',
+                    'role' => $p['role'] ?? 'Pekerja',
+                ])
+                ->toArray(),
+        ],
+    ]);
 
-        // 🔥 SIMPAN MEDIA
-        if ($request->hasFile('cap')) {
-            $surat->clearMediaCollection('cap');
-            $surat->addMediaFromRequest('cap')->toMediaCollection('cap');
-        }
-
-        $surat->ttds()->delete();
-
-        foreach ($request->input('ttds', []) as $index => $ttdData) {
-            $ttd = $surat->ttds()->create([
-                'nama_penandatangan'    => $ttdData['nama_penandatangan'],
-                'jabatan'   => $ttdData['jabatan'] ?? '',
-                'urutan'  => $ttdData['urutan'] ?? ($index + 1),
-                'label'   => $ttdData['label'] ?? '',
-            ]);
-
-            // Upload file TTD jika ada
-            if ($request->hasFile("ttds.{$index}.file")) {
-                $ttd->clearMediaCollection('ttd');
-                $ttd->addMediaFromRequest("ttds.{$index}.file")
-                    ->toMediaCollection('ttd');
-            }
-        }
-
-        try {
-                app(GenerateBRM1Pdf::class)->handle($surat);
-            } catch (\Throwable $e) {
-                return back()->withErrors(['generate' => 'Gagal: ' . $e->getMessage()]);
-            }
-
-            $surat->refresh();
-            $pdfUrl = $surat->getFirstMediaUrl('brm1_pdf');
-            if (empty($pdfUrl)) {
-                return back()->withErrors(['generate' => 'PDF tidak ditemukan di media library.']);
-            }
-
-        return Inertia::location(route('filing.surat.previewBRM1', ['surat' => $surat->id]));
+    // ── Simpan cap ─────────────────────────────────
+    if ($request->hasFile('cap')) {
+        $surat->clearMediaCollection('cap');
+        $surat->addMediaFromRequest('cap')->toMediaCollection('cap');
     }
+
+    // ── Simpan TTD ─────────────────────────────────
+    $surat->ttds()->delete();
+    foreach ($request->input('ttds', []) as $index => $ttdData) {
+        $ttd = $surat->ttds()->create([
+            'nama_penandatangan' => $ttdData['nama_penandatangan'],
+            'jabatan'            => $ttdData['jabatan'] ?? '',
+            'urutan'             => $ttdData['urutan'] ?? ($index + 1),
+            'label'              => $ttdData['label'] ?? '',
+        ]);
+
+        if ($request->hasFile("ttds.{$index}.file")) {
+            $ttd->clearMediaCollection('ttd');
+            $ttd->addMediaFromRequest("ttds.{$index}.file")
+                ->toMediaCollection('ttd');
+        }
+    }
+
+    // ── Simpan foto KTP pekerja ────────────────────
+    $surat->clearMediaCollection('ktp');
+    foreach ($request->file('pekerja', []) as $idx => $p) {
+        if (!empty($p['ktp'])) {
+            $surat->addMedia($p['ktp'])
+                ->usingFileName("ktp-{$idx}-" . time() . '.jpg')
+                ->toMediaCollection('ktp');
+        }
+    }
+
+    // ── Generate PDF ───────────────────────────────
+    try {
+        app(GenerateBRM1Pdf::class)->handle($surat);
+    } catch (\Throwable $e) {
+        return back()->withErrors(['generate' => 'Gagal: ' . $e->getMessage()]);
+    }
+
+    $surat->refresh();
+    $pdfUrl = $surat->getFirstMediaUrl('brm1_pdf');
+    if (empty($pdfUrl)) {
+        return back()->withErrors(['generate' => 'PDF tidak ditemukan di media library.']);
+    }
+
+    return Inertia::location(route('filing.surat.previewBRM1', ['surat' => $surat->id]));
+}
 
     public function previewBRM1(Surat $surat)
     {

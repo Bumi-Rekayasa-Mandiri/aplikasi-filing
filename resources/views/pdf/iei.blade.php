@@ -122,14 +122,14 @@
 
     {{-- KOP SURAT --}}
     <div class="kop">
-        <img src="{{ public_path('assets/kop.png') }}">
+        <img src="{{ public_path('assets/lampiran.png') }}">
     </div>
 
-    {{-- HEADER --}}
+    <!-- {{-- HEADER --}}
     <div class="header">
         e-mail : bumirekayasa.mandiri@gmail.com
         Phone : 0267-8639-837 / Fax: 0267-8639-837
-    </div>
+    </div> -->
 
     {{-- TITLE --}}
     <div class="title" style="font-size: 20pt; margin-top: 20px;">SURAT GARANSI PEMASANGAN</div>
@@ -227,59 +227,45 @@
             {{-- TABEL TTD --}}
             <table style="width: 100%; position: relative;">
                 <tr>
-                    @foreach($ttds as $i => $ttd)
                     @php
-                        $ttdMedia  = $ttd->getFirstMedia('ttd');
+                        $ttds   = $surat->ttds;
+                        $ttd    = $ttds->first();  // ← hanya ambil TTD pertama
+
+                        $capMedia  = $surat->getFirstMedia('cap');
+                        $capBase64 = $capMedia && file_exists($capMedia->getPath())
+                            ? 'data:' . $capMedia->mime_type . ';base64,' . base64_encode(file_get_contents($capMedia->getPath()))
+                            : null;
+
+                        $ttdMedia  = $ttd?->getFirstMedia('ttd');
                         $ttdBase64 = $ttdMedia && file_exists($ttdMedia->getPath())
                             ? 'data:' . $ttdMedia->mime_type . ';base64,' . base64_encode(file_get_contents($ttdMedia->getPath()))
                             : null;
-
-                        // Cap hanya di kolom paling kanan (penandatangan terakhir)
-                        $showCap = $capBase64 && ($i === $ttds->count() - 1);
                     @endphp
-                    <td style="
-                        text-align: left;
-                        width: {{ round(100 / $jumlah) }}%;
-                        vertical-align: bottom;
-                        padding: 0 15px 5px 0;
-                        position: relative;
-                    ">
-                        {{-- Label --}}
+
+                    @if($ttd)
+                    <div style="margin-top: 20px; text-align: left;">
                         {{ $ttd->label }}<br><br>
 
-                        {{-- Cap rata kiri --}}
-                        @if($showCap)
-                        <img src="{{ $capBase64 }}" style="
-                            position: absolute;
-                            bottom: 52px;
-                            left: 0px;
-                            width: 110px;
-                            opacity: 0.84;
-                            z-index: 1;
-                        "/>
-                        @endif
+                        <div style="position: relative; width: 140px; height: 80px;">
+                            @if($capBase64)
+                            <img src="{{ $capBase64 }}" style="
+                                position: absolute; top: 0; left: 0;
+                                width: 110px; height: 80px;
+                                opacity: 0.84; z-index: 1;
+                            "/>
+                            @endif
+                            @if($ttdBase64)
+                            <img src="{{ $ttdBase64 }}" style="
+                                position: absolute; top: 5px; left: 15px;
+                                width: 90px; height: 70px;
+                                opacity: 0.95; z-index: 2;
+                            "/>
+                            @endif
+                        </div>
 
-                        {{-- TTD rata kiri --}}
-                        @if($ttdBase64)
-                        <img src="{{ $ttdBase64 }}" style="
-                            position: relative;
-                            bottom: 10px;
-                            left: 0;
-                            width: 90px;
-                            height: auto;
-                            opacity: 0.95;
-                            z-index: 2;
-                        "/><br>
-                        @else
-                        <br><br><br><br>
-                        @endif
-
-                        {{-- Nama & Jabatan --}}
-                        <strong style="position: relative; text-decoration: underline; left: 10px; z-index: 3;">
-                            {{ $ttd->nama_penandatangan }}
-                        </strong><br>
-                    </td>
-                    @endforeach
+                        <strong style="text-decoration: underline;">{{ $ttd->nama_penandatangan }}</strong><br>
+                    </div>
+                    @endif
                 </tr>
             </table>
 

@@ -262,7 +262,7 @@
                         @if($ttdBase64)
                         <img src="{{ $ttdBase64 }}" style="
                             position: absolute;
-                            top: 30px;
+                            top: 20px;
                             left: 95%;
                             transform: translateX(-100%);
                             width: 100px;
