@@ -29,6 +29,13 @@ export default function PreviewBRM1({ surat }: Props) {
             Download PDF
           </a>
 
+         <a
+            href={route('filing.surat.downloadBRM1-docx', surat.id)}
+            className="bg-blue-700 text-white px-4 py-2 rounded-full font-semibold"
+          >
+            Download Word
+          </a>
+
           <button
             onClick={() => window.open(surat.pdf_url, '_blank')}
             className="bg-green-700 px-4 py-2 rounded-full text-white font-semibold"

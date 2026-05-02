@@ -5,19 +5,15 @@ namespace App\Services;
 use App\Models\Surat;
 use Carbon\Carbon;
 use PhpOffice\PhpWord\SimpleType\Jc;
-use PhpOffice\PhpWord\Style\ListItem;
 
-class GenerateSKPDocx extends BaseDocxGenerator
+class GenerateGRSDocx extends BaseDocxGenerator
 {
     public function handle(Surat $surat): string
     {
         $this->setup();
         $tgl = Carbon::parse($surat->tanggal_surat)->locale('id')->translatedFormat('d F Y');
 
-        // ── KOP ───────────────────────────────────────
         $this->addKop();
-
-        // ── Email & Phone center ─────────────────────
         $this->section->addText(
             'e-mail : bumirekayasa.mandiri@gmail.com Phone : 0267-8639-837 / Fax: 0267-8639-837',
             ['size' => 10, 'name' => $this->fontName],
@@ -27,87 +23,49 @@ class GenerateSKPDocx extends BaseDocxGenerator
         // ── JUDUL ─────────────────────────────────────
         $this->section->addTextRun([
             'alignment' => Jc::CENTER, 'spaceBefore' => 100, 'spaceAfter' => 200,
-        ])->addText('SURAT PEMBERITAHUAN', [
+        ])->addText('SURAT PENGAJUAN GARANSI', [
             'bold' => true, 'size' => 14,
             'name' => $this->fontName, 'underline' => 'single',
         ]);
 
-        // ── NOMOR & TANGGAL ───────────────────────────
         $this->addNomorTanggal($surat);
 
-        // ── Pembuka ───────────────────────────────────
-        $this->addParagraf('Yang bertanda tangan di bawah ini :');
+        $this->addParagraf('Yang bertanda tangan di bawah ini:');
 
-        // ── Identitas penandatangan (bold label) ─────
+        // ── Identitas penandatangan ───────────────────
         $this->addIdentitasTable([
-            ['Nama',        'Ilman Sunaryo'],
-            ['Jabatan',     'Direktur'],
-            ['Perusahaan',  'PT. Bumi Rekayasa Mandiri'],
-            ['Alamat',      'Ruko Grand Taruma Blok D8/DC, Telukjambe Timur, Karawang, Indonesia'],
-        ], 1418);
+            ['Nama',       'Ilman Sunaryo'],
+            ['Jabatan',    'Direktur'],
+            ['Perusahaan', 'PT. Bumi Rekayasa Mandiri'],
+        ], 2400);
 
         $this->addSpacing();
-        $this->addParagraf('Dengan ini menerangkan bahwa :');
+        $this->addParagraf('Dengan ini mengajukan garansi material untuk:');
 
-        // ── Identitas karyawan ────────────────────────
+        // ── Detail Garansi ────────────────────────────
         $this->addIdentitasTable([
-            ['Nama',                $surat->nama             ?? '—'],
-            ['Jabatan Terakhir',    $surat->jabatan_terakhir ?? '—'],
-            ['Departemen / Bagian', $surat->departemen       ?? '—'],
+            ['Project',      $surat->project      ?? '—'],
+            ['Material',     $surat->material     ?? '—'],
+            ['Masa Garansi', $surat->masa_garansi ?? '—'],
+            ['Alamat',       $surat->alamat       ?? '—'],
         ], 2400);
 
         $this->addSpacing();
 
-        // ── Paragraf 1 — bold sebagian ────────────────
-        $p = $this->section->addTextRun([
-            'alignment' => Jc::BOTH, 'spaceBefore' => 80, 'spaceAfter' => 80,
-        ]);
-        $p->addText('Telah ', ['size' => $this->fontSize, 'name' => $this->fontName]);
-        $p->addText(
-            "tidak lagi bekerja di PT. Bumi Rekayasa Mandiri terhitung sejak tanggal {$tgl}",
-            ['bold' => true, 'size' => $this->fontSize, 'name' => $this->fontName]
-        );
-        $p->addText(', dengan alasan mengundurkan diri.',
-            ['size' => $this->fontSize, 'name' => $this->fontName]);
-
         $this->addParagraf(
-            'Segala tindakan yang dilakukan setelah berakhirnya hubungan kerja sepenuhnya menjadi ' .
-            'tanggung jawab pribadi yang bersangkutan dan tidak menjadi tanggung jawab perusahaan.'
-        );
-
-        $this->addParagraf(
-            'Apabila terdapat hal-hal yang perlu dikonfirmasi atau terkait dengan pekerjaan yang ' .
-            'bersangkutan, dapat menghubungi Ilman Sunaryo di nomor +62811964060 atau email berikut:'
-        );
-
-        // ── Bullet email ──────────────────────────────
-        $listStyle = ['listType' => ListItem::TYPE_BULLET_FILLED];
-        foreach ([
-            'bumirekayasa.mandiri@gmail.com',
-            'info@bumirekayasamandiri.co.id',
-            'info@bumirekamandiri.id',
-        ] as $email) {
-            $this->section->addListItem(
-                $email, 0,
-                ['size' => $this->fontSize, 'name' => $this->fontName],
-                $listStyle
-            );
-        }
-
-        $this->addParagraf(
-            'Demikian surat pemberitahuan ini dibuat dengan sebenar-benarnya. ' .
-            'Atas perhatian dan kerja samanya, kami ucapkan terima kasih.'
+            'Demikian surat pengajuan garansi material ini kami buat untuk dapat dipergunakan ' .
+            'sebagaimana mestinya.'
         );
 
         $this->addSpacing();
 
-        // ── TTD rata kanan dengan tanggal di atas ────
-        $this->addTtdRataKananSKP($surat, $tgl);
+        // ── TTD rata kanan ────────────────────────────
+        $this->addTtdRataKananGRS($surat, $tgl);
 
-        return $this->save('SKP', $surat->id);
+        return $this->save('GRS', $surat->id);
     }
 
-    private function addTtdRataKananSKP(Surat $surat, string $tgl): void
+    private function addTtdRataKananGRS(Surat $surat, string $tgl): void
     {
         $ttd     = $surat->ttds->first();
         $nama    = $ttd?->nama_penandatangan ?? 'Ilman Sunaryo';
@@ -125,7 +83,7 @@ class GenerateSKPDocx extends BaseDocxGenerator
         $cellStyle = ['borderSize' => 0, 'borderColor' => 'FFFFFF'];
         $table = $this->section->addTable($style);
 
-        // Tanggal — row pertama, kolom kanan
+        // Tanggal
         $row = $table->addRow();
         $row->addCell(5670, $cellStyle)->addText('');
         $row->addCell(4513, $cellStyle)
@@ -133,11 +91,11 @@ class GenerateSKPDocx extends BaseDocxGenerator
                 ['size' => $this->fontSize, 'name' => $this->fontName],
                 ['alignment' => Jc::CENTER]);
 
-        // "Hormat Kami"
+        // "Yang Membuat Pernyataan"
         $row = $table->addRow();
         $row->addCell(5670, $cellStyle)->addText('');
         $row->addCell(4513, $cellStyle)
-            ->addText('Hormat Kami',
+            ->addText('Yang Membuat Pernyataan',
                 ['size' => $this->fontSize, 'name' => $this->fontName],
                 ['alignment' => Jc::CENTER]);
 

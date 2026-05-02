@@ -25,6 +25,7 @@ class Surat extends Model implements HasMedia
      protected $casts = [
         'status' => SuratStatus::class,
         'meta'   => 'array',
+        'archived_at' => 'datetime', 
     ];
 
     protected $fillable = [
@@ -100,5 +101,22 @@ class Surat extends Model implements HasMedia
 
         $this->status = 'approved';
         $this->save();
+    }
+
+    public function scopeNotArchived($query)
+    {
+        return $query->whereNull('archived_at');
+    }
+    
+    
+    public function scopeArchived($query)
+    {
+        return $query->whereNotNull('archived_at');
+    }
+    
+   
+    public function arsip(): HasOne
+    {
+        return $this->hasOne(ArsipSurat::class);
     }
 }

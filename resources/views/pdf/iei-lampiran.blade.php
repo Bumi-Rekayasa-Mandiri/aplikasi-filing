@@ -165,7 +165,7 @@
 
                     {{-- Label kiri — align left --}}
 
-                    <div style="text-align: left; font-weight: bold;">PT. BUMI REKAYASA MANDIRI</div>
+                    <div style="text-align: left;">PT. BUMI REKAYASA MANDIRI</div>
 
                     {{-- Gambar TTD + Cap kiri --}}
                     <table style="border-collapse: collapse; width: 140px; height: 80px; margin: 6px 0;">
@@ -191,7 +191,7 @@
 
                     {{-- Nama kiri — align left + margin-left 15px --}}
                     @if($ttdKiri)
-                    <div style="font-weight: bold; text-decoration: underline; text-align: left; margin-left: 25px;">
+                    <div style="font-weight: bold; text-align: left; margin-left: 25px;">
                         {{ $ttdKiri->nama_penandatangan }}
                     </div>
                     {{-- Jabatan kiri — center di bawah nama --}}
@@ -214,7 +214,7 @@
                             <td style="position: relative; padding: 0; width: 140px; height: 80px;">
                                 @if($ttdImgKanan)
                                 <img src="{{ $ttdImgKanan }}" style="
-                                    position: absolute; top: 5px; right: 50px;
+                                    position: absolute; top: 5px; right: 70px;
                                     width: 90px; height: 70px;
                                     opacity: 0.95; z-index: 2;
                                 "/>

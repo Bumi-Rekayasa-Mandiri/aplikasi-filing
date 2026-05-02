@@ -8,6 +8,7 @@ use App\Http\Controllers\Filing\ArsipSuratController;
 use App\Http\Controllers\Filing\ArsipSertifikatController;
 use App\Http\Controllers\Filing\DashboardController;
 use App\Http\Controllers\RolePermissionController;
+use App\Services\SuratArchiveService;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -70,6 +71,9 @@ Route::middleware(['auth'])->prefix('filing')->name('filing.')->group(function (
     Route::post('/surat/{surat}/generateBRM2-pdf', [SuratController::class, 'generateBRM2Pdf'])->name('surat.generateBRM2-pdf');
     Route::get('/surat/{surat}/preview/brm2',       [SuratController::class, 'previewBRM2'])->name('surat.previewBRM2')->whereNumber('surat');
 
+    // ── Archive Tahunan (harus sebelum resource agar tidak terambig dengan {surat}) ──
+    Route::post('/surat/archive-year', [SuratController::class, 'archiveYear'])->name('surat.archive-year');
+
     // Resource Surat
     Route::resource('surat', SuratController::class)
         ->except(['create'])
@@ -89,8 +93,10 @@ Route::middleware(['auth'])->prefix('filing')->name('filing.')->group(function (
     Route::patch('/surat/{surat}/revert-draft', [SuratApprovalController::class, 'revertDraft'])->name('surat.revert-draft');
 
     // Arsip Surat
-    Route::post('/arsip/{arsip}/upload', [ArsipSuratController::class, 'uploadFile'])->name('arsip.upload');
-    Route::get('/arsip/{arsip}/download', [ArsipSuratController::class, 'download'])->name('arsip.download');
+    Route::post('/arsip/{arsip}/upload',    [ArsipSuratController::class, 'uploadFile'])->name('arsip.upload');
+    Route::get('/arsip/{arsip}/download',   [ArsipSuratController::class, 'download'])->name('arsip.download');
+    // ── Restore dari arsip ke manajemen ──────────────────────────────────
+    Route::delete('/arsip/{arsip}/restore', [ArsipSuratController::class, 'restore'])->name('arsip.restore');
     Route::resource('arsip', ArsipSuratController::class);
 
     // Sertifikat

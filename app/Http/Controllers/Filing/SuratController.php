@@ -24,6 +24,7 @@ use App\Services\Surat\IEI\GenerateIEIPdf;
 use App\Services\Surat\GRS\GenerateGRSPdf;
 use App\Services\Surat\BRM1\GenerateBRM1Pdf;
 use App\Services\Surat\BRM2\GenerateBRM2Pdf;
+use App\Services\SuratArchiveService;
 use Inertia\Inertia;
 use Carbon\Carbon;
 
@@ -1176,5 +1177,33 @@ public function generateBRM2Pdf(Request $request, Surat $surat)
                 'pdf_url' => $pdfUrl,
             ],
         ]);
+    }
+
+    public function archiveYear(Request $request, SuratArchiveService $service)
+    {
+        $this->authorize('create', Surat::class); // hanya admin/authorized
+ 
+        $validated = $request->validate([
+            'tahun' => ['required', 'integer', 'min:2000', 'max:' . now()->year],
+        ]);
+ 
+        $tahun = (int) $validated['tahun'];
+ 
+        // Cegah arsip tahun berjalan
+        if ($tahun >= now()->year) {
+            return back()->with('error', 'Tidak dapat mengarsipkan tahun berjalan. Pilih tahun sebelumnya.');
+        }
+ 
+        try {
+            $count = $service->archiveYear($tahun);
+ 
+            $message = $count > 0
+                ? "Berhasil mengarsipkan {$count} surat tahun {$tahun}."
+                : "Tidak ada surat baru yang perlu diarsipkan untuk tahun {$tahun}.";
+ 
+            return back()->with('success', $message);
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Gagal mengarsipkan: ' . $e->getMessage());
+        }
     }
 }

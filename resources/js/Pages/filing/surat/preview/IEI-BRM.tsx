@@ -28,6 +28,13 @@ export default function PreviewIEI({ surat }: Props) {
           >
             Download PDF
           </a>
+          
+          <a
+            href={route('filing.surat.downloadIEI-docx', surat.id)}
+            className="bg-blue-700 text-white px-4 py-2 rounded-full font-semibold"
+          >
+            Download Word
+          </a>
 
           <button
             onClick={() => window.open(surat.pdf_url, '_blank')}

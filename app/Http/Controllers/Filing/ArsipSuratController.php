@@ -4,20 +4,52 @@ namespace App\Http\Controllers\Filing;
 
 use App\Http\Controllers\Controller;
 use App\Models\ArsipSurat;
+use App\Services\SuratArchiveService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ArsipSuratController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, SuratArchiveService $service)
     {
 
     $this->authorize('viewAny', ArsipSurat::class);
 
+    $search    = $request->input('search', '');
+    $tahun     = $request->input('tahun');
+    $jenis     = $request->input('jenis');
+    $perPage   = (int) $request->input('per_page', 15);
+    $sort      = $request->input('sortField', 'archived_at');
+    $direction = $request->input('sortDirection', 'desc');
+
     $sortField = $request->input('sortField', 'nomor_surat');
     $sortDirection = $request->input('sortDirection', 'desc');
 
+    $allowedSorts = ['judul', 'nomor_surat', 'jenis_surat', 'tahun', 'archived_at'];
+        if (!in_array($sort, $allowedSorts)) {
+            $sort = 'archived_at';
+        }
+
     $query = ArsipSurat::query();
+
+    // Filter search
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('judul',       'like', "%{$search}%")
+                  ->orWhere('nomor_surat','like', "%{$search}%")
+                  ->orWhere('tujuan',    'like', "%{$search}%");
+            });
+        }
+ 
+        // Filter tahun
+        if ($tahun) {
+            $query->where('tahun', (int) $tahun);
+        }
+ 
+        // Filter jenis surat
+        if ($jenis) {
+            $query->where('jenis_surat', $jenis);
+        }
 
     if ($request->filled('search')) {
         $query->where(function ($q) use ($request) {
@@ -56,7 +88,9 @@ class ArsipSuratController extends Controller
         'sort'      => $sortField,
         'direction' => $sortDirection,
         'filters'   => $request->only(['search', 'status']),
-        'per_page'  => $perPage
+        'per_page'  => $perPage,
+        'availableYears'  => $service->availableYears(),
+        'statsByYear'     => $service->statsByYear(),
         ]);
     }
 
@@ -142,5 +176,25 @@ class ArsipSuratController extends Controller
                 'file_mime'   => optional($arsip->getFirstMedia('arsip_surat_files'))->mime_type,
             ],
         ]);
+    }
+
+    public function restore(ArsipSurat $arsip, SuratArchiveService $service)
+    {
+        $this->authorize('delete', $arsip);
+ 
+        if (is_null($arsip->surat_id)) {
+            return back()->with('error',
+                'Arsip ini tidak memiliki referensi ke surat asli dan tidak dapat di-restore otomatis.'
+            );
+        }
+ 
+        $success = $service->restore($arsip);
+ 
+        return back()->with(
+            $success ? 'success' : 'error',
+            $success
+                ? "Surat \"{$arsip->judul}\" berhasil di-restore ke manajemen."
+                : 'Gagal me-restore surat.'
+        );
     }
 }

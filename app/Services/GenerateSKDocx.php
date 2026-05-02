@@ -5,9 +5,8 @@ namespace App\Services;
 use App\Models\Surat;
 use Carbon\Carbon;
 use PhpOffice\PhpWord\SimpleType\Jc;
-use PhpOffice\PhpWord\Style\ListItem;
 
-class GenerateSKPDocx extends BaseDocxGenerator
+class GenerateSKDocx extends BaseDocxGenerator
 {
     public function handle(Surat $surat): string
     {
@@ -17,7 +16,6 @@ class GenerateSKPDocx extends BaseDocxGenerator
         // ── KOP ───────────────────────────────────────
         $this->addKop();
 
-        // ── Email & Phone center ─────────────────────
         $this->section->addText(
             'e-mail : bumirekayasa.mandiri@gmail.com Phone : 0267-8639-837 / Fax: 0267-8639-837',
             ['size' => 10, 'name' => $this->fontName],
@@ -27,7 +25,7 @@ class GenerateSKPDocx extends BaseDocxGenerator
         // ── JUDUL ─────────────────────────────────────
         $this->section->addTextRun([
             'alignment' => Jc::CENTER, 'spaceBefore' => 100, 'spaceAfter' => 200,
-        ])->addText('SURAT PEMBERITAHUAN', [
+        ])->addText('PERMOHONAN KERINGANAN DENDA', [
             'bold' => true, 'size' => 14,
             'name' => $this->fontName, 'underline' => 'single',
         ]);
@@ -35,79 +33,63 @@ class GenerateSKPDocx extends BaseDocxGenerator
         // ── NOMOR & TANGGAL ───────────────────────────
         $this->addNomorTanggal($surat);
 
-        // ── Pembuka ───────────────────────────────────
-        $this->addParagraf('Yang bertanda tangan di bawah ini :');
-
-        // ── Identitas penandatangan (bold label) ─────
-        $this->addIdentitasTable([
-            ['Nama',        'Ilman Sunaryo'],
-            ['Jabatan',     'Direktur'],
-            ['Perusahaan',  'PT. Bumi Rekayasa Mandiri'],
-            ['Alamat',      'Ruko Grand Taruma Blok D8/DC, Telukjambe Timur, Karawang, Indonesia'],
-        ], 1418);
-
-        $this->addSpacing();
-        $this->addParagraf('Dengan ini menerangkan bahwa :');
-
-        // ── Identitas karyawan ────────────────────────
-        $this->addIdentitasTable([
-            ['Nama',                $surat->nama             ?? '—'],
-            ['Jabatan Terakhir',    $surat->jabatan_terakhir ?? '—'],
-            ['Departemen / Bagian', $surat->departemen       ?? '—'],
-        ], 2400);
-
-        $this->addSpacing();
-
-        // ── Paragraf 1 — bold sebagian ────────────────
-        $p = $this->section->addTextRun([
-            'alignment' => Jc::BOTH, 'spaceBefore' => 80, 'spaceAfter' => 80,
-        ]);
-        $p->addText('Telah ', ['size' => $this->fontSize, 'name' => $this->fontName]);
-        $p->addText(
-            "tidak lagi bekerja di PT. Bumi Rekayasa Mandiri terhitung sejak tanggal {$tgl}",
-            ['bold' => true, 'size' => $this->fontSize, 'name' => $this->fontName]
+        // ── Kepada Yth ────────────────────────────────
+        $this->section->addText(
+            'Kepada Yth. ' . ($surat->tujuan ?? '—'),
+            ['size' => $this->fontSize, 'name' => $this->fontName],
+            ['spaceAfter' => 80]
         );
-        $p->addText(', dengan alasan mengundurkan diri.',
-            ['size' => $this->fontSize, 'name' => $this->fontName]);
+
+        $this->section->addText('Dengan hormat,', [
+            'size' => $this->fontSize, 'name' => $this->fontName,
+        ], ['spaceAfter' => 80]);
 
         $this->addParagraf(
-            'Segala tindakan yang dilakukan setelah berakhirnya hubungan kerja sepenuhnya menjadi ' .
-            'tanggung jawab pribadi yang bersangkutan dan tidak menjadi tanggung jawab perusahaan.'
+            'Sehubungan dengan adanya evaluasi atas progres pekerjaan dan pengajuan tambahan pekerjaan ' .
+            'yang telah kami sampaikan sebelumnya, bersama ini kami dari PT Bumi Rekayasa Mandiri ' .
+            'mengajukan permohonan agar nilai denda yang dikenakan dapat disesuaikan.'
+        );
+
+        $this->addParagraf('Adapun berdasarkan hasil perhitungan awal, total nilai denda sebesar:');
+
+        // ── Hasil denda — bold ───────────────────────
+        $this->section->addText(
+            $surat->hasil_denda ?? '—',
+            ['bold' => true, 'size' => $this->fontSize, 'name' => $this->fontName],
+            ['alignment' => Jc::BOTH, 'spaceBefore' => 80, 'spaceAfter' => 80]
+        );
+
+        $this->addParagraf('Kami memohon keringanan denda agar nilai denda dikenakan sebesar :');
+
+        // ── Keringanan denda — bold ───────────────────
+        $this->section->addText(
+            $surat->keringanan_denda ?? '—',
+            ['bold' => true, 'size' => $this->fontSize, 'name' => $this->fontName],
+            ['alignment' => Jc::BOTH, 'spaceBefore' => 80, 'spaceAfter' => 80]
         );
 
         $this->addParagraf(
-            'Apabila terdapat hal-hal yang perlu dikonfirmasi atau terkait dengan pekerjaan yang ' .
-            'bersangkutan, dapat menghubungi Ilman Sunaryo di nomor +62811964060 atau email berikut:'
+            'yang mana jumlah tersebut akan langsung dipotong dari nilai tagihan kami, sesuai dengan ' .
+            'usulan dan pertimbangan nilai pekerjaan tambahan yang telah kami laksanakan di luar ' .
+            'addendum awal.'
         );
-
-        // ── Bullet email ──────────────────────────────
-        $listStyle = ['listType' => ListItem::TYPE_BULLET_FILLED];
-        foreach ([
-            'bumirekayasa.mandiri@gmail.com',
-            'info@bumirekayasamandiri.co.id',
-            'info@bumirekamandiri.id',
-        ] as $email) {
-            $this->section->addListItem(
-                $email, 0,
-                ['size' => $this->fontSize, 'name' => $this->fontName],
-                $listStyle
-            );
-        }
 
         $this->addParagraf(
-            'Demikian surat pemberitahuan ini dibuat dengan sebenar-benarnya. ' .
-            'Atas perhatian dan kerja samanya, kami ucapkan terima kasih.'
+            'Demikian surat ini kami sampaikan. Besar harapan kami agar permohonan ini dapat diterima ' .
+            'demi kelancaran kerja sama antara kedua belah pihak.'
         );
+
+        $this->addParagraf('Atas perhatian dan kerja samanya, kami ucapkan terima kasih.');
 
         $this->addSpacing();
 
-        // ── TTD rata kanan dengan tanggal di atas ────
-        $this->addTtdRataKananSKP($surat, $tgl);
+        // ── TTD rata kanan dengan tanggal + Hormat Kami ─
+        $this->addTtdRataKananSK($surat, $tgl);
 
-        return $this->save('SKP', $surat->id);
+        return $this->save('SK', $surat->id);
     }
 
-    private function addTtdRataKananSKP(Surat $surat, string $tgl): void
+    private function addTtdRataKananSK(Surat $surat, string $tgl): void
     {
         $ttd     = $surat->ttds->first();
         $nama    = $ttd?->nama_penandatangan ?? 'Ilman Sunaryo';
@@ -125,17 +107,17 @@ class GenerateSKPDocx extends BaseDocxGenerator
         $cellStyle = ['borderSize' => 0, 'borderColor' => 'FFFFFF'];
         $table = $this->section->addTable($style);
 
-        // Tanggal — row pertama, kolom kanan
+        // Tanggal
         $row = $table->addRow();
-        $row->addCell(5670, $cellStyle)->addText('');
+        $row->addCell(5812, $cellStyle)->addText('');
         $row->addCell(4513, $cellStyle)
             ->addText("Karawang, {$tgl}",
                 ['size' => $this->fontSize, 'name' => $this->fontName],
                 ['alignment' => Jc::CENTER]);
 
-        // "Hormat Kami"
+        // Hormat Kami
         $row = $table->addRow();
-        $row->addCell(5670, $cellStyle)->addText('');
+        $row->addCell(5812, $cellStyle)->addText('');
         $row->addCell(4513, $cellStyle)
             ->addText('Hormat Kami',
                 ['size' => $this->fontSize, 'name' => $this->fontName],
@@ -143,7 +125,7 @@ class GenerateSKPDocx extends BaseDocxGenerator
 
         // Gambar
         $row = $table->addRow();
-        $row->addCell(5670, $cellStyle)->addText('');
+        $row->addCell(5812, $cellStyle)->addText('');
         $imgCell = $row->addCell(4513, $cellStyle);
 
         $imgAdded = false;
@@ -171,10 +153,10 @@ class GenerateSKPDocx extends BaseDocxGenerator
         if (!$imgAdded) {
             $imgCell->addText('');
         }
-
+        
         // Nama
         $row = $table->addRow();
-        $row->addCell(5670, $cellStyle)->addText('');
+        $row->addCell(5812, $cellStyle)->addText('');
         $row->addCell(4513, $cellStyle)
             ->addText($nama, [
                 'bold' => true, 'size' => $this->fontSize,
@@ -183,7 +165,7 @@ class GenerateSKPDocx extends BaseDocxGenerator
 
         // Jabatan
         $row = $table->addRow();
-        $row->addCell(5670, $cellStyle)->addText('');
+        $row->addCell(5812, $cellStyle)->addText('');
         $row->addCell(4513, $cellStyle)
             ->addText($jabatan,
                 ['size' => $this->fontSize, 'name' => $this->fontName],
