@@ -64,16 +64,10 @@ export default function Preview() {
           </div>
 
           <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '0.5px solid rgba(0,0,0,0.07)', display: 'flex', gap: '8px' }}>
-            <Link href={route('filing.arsip.index')} className="act-btn act-detail"
+            <Link href={route('filing.arsip.index')} className="bg-red-700 px-4 py-2 rounded-full text-white"
               style={{ textDecoration: 'none' }}>
               ← Kembali
             </Link>
-            {arsip.file_url && (
-              <a href={route('filing.arsip.download', arsip.id)}
-                className="act-btn act-preview" target="_blank" rel="noopener noreferrer">
-                Download file
-              </a>
-            )}
           </div>
         </div>
 
@@ -106,12 +100,16 @@ export default function Preview() {
           {arsip.file_url && !isPdf && !isImage && (
             <div className="detail-empty">
               <p style={{ marginBottom: '12px' }}>Preview tidak tersedia untuk format ini.</p>
-              <a href={route('filing.arsip.download', arsip.id)}
-                className="act-btn act-preview">
-                Download file
-              </a>
             </div>
           )}
+
+          <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '0.5px solid rgba(0,0,0,0.07)', display: 'flex', gap: '8px' }}>
+            {arsip.file_url && (
+              <Link href={route('filing.arsip.download', arsip.id)} className="bg-blue-700 px-4 py-2 rounded-full text-white">
+                + Download File
+              </Link>
+            )}
+          </div>
         </div>
 
       </div>

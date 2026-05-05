@@ -26,6 +26,7 @@ class Surat extends Model implements HasMedia
         'status' => SuratStatus::class,
         'meta'   => 'array',
         'archived_at' => 'datetime', 
+        'last_regenerated_at' => 'datetime',
     ];
 
     protected $fillable = [

@@ -3,21 +3,19 @@ import { Link } from '@inertiajs/react'
 import Pagination from '@/components/Pagination'
 import { Head, router, usePage } from '@inertiajs/react'
 import { useEffect, useState } from 'react'
-import { AppPageProps } from '@/types/filing/inertia'
 import SortIcon from '@/components/SortIcon'
 import '../../../../css/surat-table.css'
-import '@/components/PerPageSelect'
 import PerPageSelect from '@/components/PerPageSelect'
 import RestoreButton from '@/components/filing/RestoreButton'
 
 interface Arsip {
   id: number
-  surat_id: number | null   // ← tambahan: FK ke surat asli (null = arsip lama)
+  surat_id: number | null
   nomor_surat: string
   judul: string
   tujuan: string
   jenis_surat: string
-  tahun: number | null      // ← tambahan: tahun arsip
+  tahun: number | null
   archived_at: string | null
   file_url: string | null
   file_name: string | null
@@ -29,8 +27,36 @@ interface PageProps {
   sort: string
   direction: 'asc' | 'desc'
   per_page: number
-  availableYears: number[]  // ← daftar tahun untuk filter dropdown
+  availableYears: number[]
   [key: string]: unknown
+}
+
+// ── Mapping jenis_surat → nama route preview surat asli ─────────────────────
+// Sesuaikan dengan route names di web.php
+const PREVIEW_ROUTE_MAP: Record<string, string> = {
+  'BRM-1':   'filing.surat.previewBRM1',
+  'BRM-2':   'filing.surat.previewBRM2',
+  'SKP-BRM': 'filing.surat.previewSKP',
+  'GRS-BRM': 'filing.surat.previewGRS',
+  'SPD-BRM': 'filing.surat.previewSPD',
+  'SPI-BRM': 'filing.surat.previewSPI',
+  'IEI-BRM': 'filing.surat.previewIEI',
+  'SK-BRM':  'filing.surat.previewSK',
+}
+
+/** Resolve URL preview: prioritas file arsip sendiri, fallback ke surat asli */
+function resolvePreviewUrl(item: Arsip): string | null {
+  if (item.file_url) return route('filing.arsip.show', item.id)
+  if (!item.surat_id) return null
+  const routeName = PREVIEW_ROUTE_MAP[item.jenis_surat]
+  return routeName ? route(routeName, item.surat_id) : null
+}
+
+/** Resolve URL download: prioritas file arsip sendiri, fallback ke PDF surat asli */
+function resolveDownloadUrl(item: Arsip): string | null {
+  if (item.file_url) return route('filing.arsip.download', item.id)
+  if (!item.surat_id) return null
+  return route('filing.surat.download', item.surat_id)
 }
 
 export default function Index() {
@@ -41,7 +67,6 @@ export default function Index() {
   const [tahun, setTahun]     = useState<number | ''>(filters.tahun ?? '')
   const [perPage, setPerPage] = useState<number>(Number(per_page) || 10)
 
-  // Debounce search
   useEffect(() => {
     const timeout = setTimeout(() => navigate({ search, page: 1 }), 400)
     return () => clearTimeout(timeout)
@@ -101,7 +126,6 @@ export default function Index() {
 
         {/* Filter bar */}
         <div className="surat-filter-bar">
-          {/* Search */}
           <div className="surat-search-wrap">
             <svg className="surat-search-icon" width="14" height="14" viewBox="0 0 16 16" fill="none">
               <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" strokeWidth="1.3"/>
@@ -115,7 +139,6 @@ export default function Index() {
             />
           </div>
 
-          {/* Filter tahun */}
           {availableYears.length > 0 && (
             <select
               className="surat-filter-select"
@@ -163,66 +186,75 @@ export default function Index() {
                   </td>
                 </tr>
               )}
-              {arsip.data.map(item => (
-                <tr key={item.id}>
-                  <td><span className="surat-nomor">{item.nomor_surat}</span></td>
-                  <td><div className="surat-judul">{item.judul}</div></td>
-                  <td>
-                    {item.jenis_surat
-                      ? <span className="surat-jenis-badge">{item.jenis_surat}</span>
-                      : <span style={{ color: '#9ca3af' }}>—</span>}
-                  </td>
-                  <td className="surat-tujuan">{item.tujuan || '—'}</td>
-                  <td className="center">
-                    {item.tahun
-                      ? <span className="surat-jenis-badge">{item.tahun}</span>
-                      : <span style={{ color: '#9ca3af' }}>—</span>}
-                  </td>
-                  <td className="center">
-                    <div className="surat-actions">
-                      {item.file_url && (
-                        <a
-                          href={route('filing.arsip.show', item.id)}
-                          className="act-btn act-detail"
+              {arsip.data.map(item => {
+                const previewUrl  = resolvePreviewUrl(item)
+                const downloadUrl = resolveDownloadUrl(item)
+
+                return (
+                  <tr key={item.id}>
+                    <td><span className="surat-nomor">{item.nomor_surat}</span></td>
+                    <td><div className="surat-judul">{item.judul}</div></td>
+                    <td>
+                      {item.jenis_surat
+                        ? <span className="surat-jenis-badge">{item.jenis_surat}</span>
+                        : <span style={{ color: '#9ca3af' }}>—</span>}
+                    </td>
+                    <td className="surat-tujuan">{item.tujuan || '—'}</td>
+                    <td className="center">
+                      {item.tahun
+                        ? <span className="surat-jenis-badge">{item.tahun}</span>
+                        : <span style={{ color: '#9ca3af' }}>—</span>}
+                    </td>
+                    <td className="center">
+                      <div className="surat-actions">
+
+                        {previewUrl && (
+                          <a
+                            href={previewUrl}
+                            className="act-btn act-detail"
+                            // File arsip buka di tab sama; preview surat asli buka tab baru
+                            target={item.file_url ? '_self' : '_blank'}
+                            rel="noopener noreferrer"
+                          >
+                            Preview
+                          </a>
+                        )}
+
+                        {downloadUrl && (
+                          <a
+                            href={downloadUrl}
+                            className="act-btn act-preview"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Download
+                          </a>
+                        )}
+
+                        <button
+                          className="act-btn act-delete"
+                          onClick={() => {
+                            if (confirm('Yakin ingin menghapus arsip ini?')) {
+                              router.delete(route('filing.arsip.destroy', item.id), {
+                                preserveScroll: true,
+                              })
+                            }
+                          }}
                         >
-                          Preview
-                        </a>
-                      )}
-                      {item.file_url && (
-                        <a
-                          href={route('filing.arsip.download', item.id)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="act-btn act-preview"
-                        >
-                          Download
-                        </a>
-                      )}
+                          Hapus
+                        </button>
 
-                      <button
-                        className="act-btn act-delete"
-                        onClick={() => {
-                          if (confirm('Yakin ingin menghapus arsip ini?')) {
-                            router.delete(route('filing.arsip.destroy', item.id), {
-                              preserveScroll: true,
-                            })
-                          }
-                        }}
-                      >
-                        Hapus
-                      </button>
+                        <RestoreButton
+                          arsipId={item.id}
+                          judul={item.judul}
+                          canRestore={item.surat_id !== null}
+                        />
 
-                      {/* ── Restore Button ── */}
-                      <RestoreButton
-                        arsipId={item.id}
-                        judul={item.judul}
-                        canRestore={item.surat_id !== null}
-                      />
-
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
