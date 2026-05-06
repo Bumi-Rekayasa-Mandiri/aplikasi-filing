@@ -9,14 +9,18 @@ use App\Models\SuratTtd;
 use App\Models\FileUpload;
 use App\Models\NomorSuratLog;
 use App\Models\SuratRecentView;
-use App\Services\NomorSuratGenerator;
-use App\Services\RegenerateSuratFiles;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
+
 use Barryvdh\DomPDF\Facade\Pdf;
+
+use App\Services\NomorSuratGenerator;
+use App\Services\RegenerateSuratFiles;
 use App\Services\Surat\SKP\GenerateSKPPdf;
 use App\Services\Surat\SK\GenerateSKPdf;
 use App\Services\Surat\SPD\GenerateSPDPdf;
@@ -26,6 +30,7 @@ use App\Services\Surat\GRS\GenerateGRSPdf;
 use App\Services\Surat\BRM1\GenerateBRM1Pdf;
 use App\Services\Surat\BRM2\GenerateBRM2Pdf;
 use App\Services\SuratArchiveService;
+
 use Inertia\Inertia;
 use Carbon\Carbon;
 
@@ -282,7 +287,7 @@ class SuratController extends Controller
             }
     
             // ── VALIDATION ───────────────────────────────────────────────────
-            $rules = $this->buildValidationRules($surat->jenis);
+            $rules = $this->buildValidationRules($surat->jenis, $surat);
             $validated = $request->validate($rules);
     
             // ── TRANSACTIONAL UPDATE ─────────────────────────────────────────
@@ -332,7 +337,7 @@ class SuratController extends Controller
                 ->with($messageKey, $message);
         }
     
-        private function buildValidationRules(string $jenis): array
+        private function buildValidationRules(string $jenis, ?Surat $surat = null): array
         {
             $base = [
                 'judul'         => 'required|string|max:255',
@@ -345,8 +350,13 @@ class SuratController extends Controller
                 'cap'           => 'nullable|file|image|max:2048',
     
                 // TTDs array
-                'ttds'                       => 'nullable|array',
-                'ttds.*.id'                  => 'nullable|integer|exists:ttds,id',
+                'ttds.*.id' => [
+                    'nullable',
+                    'integer',
+                    $surat
+                        ? Rule::exists(SuratTtd::class, 'id')->where('surat_id', $surat->id)
+                        : Rule::exists(SuratTtd::class, 'id'),
+                ],
                 'ttds.*.label'               => 'nullable|string|max:100',
                 'ttds.*.nama_penandatangan'  => 'nullable|string|max:255',
                 'ttds.*.jabatan'             => 'nullable|string|max:255',
@@ -464,9 +474,9 @@ class SuratController extends Controller
             // Upsert
             foreach ($ttdsInput as $idx => $ttdData) {
                 $payload = [
-                    'label'              => $ttdData['label']              ?? null,
-                    'nama_penandatangan' => $ttdData['nama_penandatangan'] ?? null,
-                    'jabatan'            => $ttdData['jabatan']            ?? null,
+                    'label'              => (string) ($ttdData['label']              ?? ''),
+                    'nama_penandatangan' => (string) ($ttdData['nama_penandatangan'] ?? ''),
+                    'jabatan'            => (string) ($ttdData['jabatan']            ?? ''),
                     'urutan'             => (int) ($ttdData['urutan'] ?? ($idx + 1)),
                 ];
     
@@ -499,7 +509,7 @@ class SuratController extends Controller
             if ($request->has('jsa')) {
                 $meta['jsa'] = collect($request->input('jsa', []))
                     ->map(fn($item) => [
-                        'urutan_kerja'       => $item['urutan_kerja']       ?? '',
+                        'urutan_kerja'       => (string)    $item['urutan_kerja']       ?? '',
                         'potensi_bahaya'     => $item['potensi_bahaya']     ?? '',
                         'upaya_pengendalian' => $item['upaya_pengendalian'] ?? '',
                     ])
