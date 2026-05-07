@@ -9,38 +9,39 @@ type Props = {
   canApprove: boolean
 }
 
+type confirmAction = 'approve' | 'revert' | null  
+
 export default function StatusToggle({ suratId, status, canApprove }: Props) {
   const isApproved = status === 'approved'
-  const [showConfirm, setShowConfirm] = useState(false)
+  const [confirmAction, setConfirmAction] = useState<confirmAction>(null)
   const [processing, setProcessing] = useState(false)
 
   // Tidak tampilkan toggle jika user tidak punya hak
   if (!canApprove) return null
 
   const handleToggle = () => {
-    if (isApproved) {
-      // Langsung revert ke draft tanpa konfirmasi
-      setProcessing(true)
-      router.patch(
-        route('filing.surat.revert-draft', suratId),
-        {},
-        { onFinish: () => setProcessing(false) }
-      )
-    } else {
-      // Tampilkan dialog konfirmasi sebelum approve
-      setShowConfirm(true)
-    }
+    setConfirmAction(isApproved ? 'revert' : 'approve')
   }
 
-  const handleConfirmApprove = () => {
+  const handleConfirm = () => {
+    if (!confirmAction) return
+
+    const routeName =
+      confirmAction === 'approve'
+        ? 'filing.surat.approve'
+        : 'filing.surat.revert-draft'
+
     setProcessing(true)
-    setShowConfirm(false)
+    setConfirmAction(null)
+
     router.patch(
-      route('filing.surat.approve', suratId),
+      route(routeName, suratId),
       {},
       { onFinish: () => setProcessing(false) }
     )
   }
+
+  const handleCancel = () => setConfirmAction(null)
 
   return (
     <>
@@ -63,7 +64,7 @@ export default function StatusToggle({ suratId, status, canApprove }: Props) {
       </div>
 
       {/* Dialog konfirmasi */}
-      {showConfirm && (
+      {confirmAction && (
         <div className="confirm-backdrop">
           <div className="confirm-dialog">
             <div className="confirm-icon">
@@ -80,16 +81,55 @@ export default function StatusToggle({ suratId, status, canApprove }: Props) {
               <button
                 type="button"
                 className="confirm-btn-cancel"
-                onClick={() => setShowConfirm(false)}
+                onClick={handleCancel}
               >
                 Batal
               </button>
               <button
                 type="button"
                 className="confirm-btn-approve"
-                onClick={handleConfirmApprove}
+                onClick={handleConfirm}
               >
                 Ya, approve
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dialog konfirmasi — REVERT */}
+      {confirmAction === 'revert' && (
+        <div className="confirm-backdrop">
+          <div className="confirm-dialog">
+            <div
+              className="confirm-icon"
+              style={{ background: '#FEF3C7', borderColor: '#FDE68A' }}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                stroke="#92400E" strokeWidth="2"
+                strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="1 4 1 10 7 10" />
+                <path d="M3.51 15a9 9 0 1 0 .49-3.47" />
+              </svg>
+            </div>
+            <div className="confirm-title">Revert ke draft?</div>
+            <div className="confirm-desc">
+              Surat akan kembali ke status <strong>draft</strong> sehingga bisa diedit ulang.
+              Lanjutkan?
+            </div>
+            <div className="confirm-actions">
+              <button type="button" className="confirm-btn-cancel" onClick={handleCancel}>
+                Batal
+              </button>
+              <button
+                type="button"
+                className="confirm-btn-approve"
+                style={{ background: '#D97706' }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#B45309')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = '#D97706')}
+                onClick={handleConfirm}
+              >
+                Ya, revert
               </button>
             </div>
           </div>

@@ -1,15 +1,19 @@
 import { useForm, Head, router } from '@inertiajs/react'
+import { useState, useEffect } from 'react'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout'
 import '../../../../css/create-surat.css'
 import StatusToggle from '@/components/filing/surat/StatusToggle'
 import '../../../../css/status-toggle.css'
- 
+
+import { FormFieldProvider, Field, TextArea } from '@/components/filing/surat/editors/FormFieldContext'
 import CapEditor from '@/components/filing/surat/editors/CapEditor'
 import TtdEditor, { TtdItem } from '@/components/filing/surat/editors/TtdEditor'
 import JsaEditor, { JsaItem } from '@/components/filing/surat/editors/JsaEditor'
 import PekerjaEditor, { PekerjaItem } from '@/components/filing/surat/editors/PekerjaEditor'
 import DokumenEditor from '@/components/filing/surat/editors/DokumenEditor'
 import RegeneratedBanner from '@/components/filing/surat/RegeneratedBanner'
+import ApprovedErrorModal from '@/components/filing/surat/ApprovedErrorModal'
+import ApprovedReadOnlyNotice from '@/components/filing/surat/ApprovedReadOnlyNotice'
  
 type SuratData = {
     id: number
@@ -197,9 +201,19 @@ export default function Edit({
         pekerja:          initialPekerja,
         dokumen:          initialDokumen,
     })
+
+    const isReadOnly = surat.status === 'approved'
+
+    const [statusError, setStatusError] = useState<string | null>(null)
+
+    useEffect(() => {
+        const statusErr = (errors as Record<string, string | undefined>).status
+        if (statusErr) setStatusError(statusErr)
+    }, [errors]) 
  
     const submit = (e: React.FormEvent) => {
         e.preventDefault()
+        if (isReadOnly) return
         // Pakai POST + _method=PUT karena perlu kirim files
         router.post(
             route('filing.surat.update', { surat: surat.id, jenis }),
@@ -208,52 +222,18 @@ export default function Edit({
         )
     }
  
-    // Helper input components
-    const Field = ({
-        label, field, type = 'text', placeholder = '', fullWidth = false,
-    }: {
-        label: string
-        field: keyof typeof data
-        type?: string
-        placeholder?: string
-        fullWidth?: boolean
-    }) => (
-        <div className={`field ${fullWidth ? 'col-span-2' : ''}`}>
-            <label className="field-label">{label}</label>
-            <input
-                type={type}
-                className="field-input"
-                value={(data[field] as string) ?? ''}
-                placeholder={placeholder}
-                onChange={e => setData(field, e.target.value as any)}
-            />
-            {errors[field] && <span className="field-error">{errors[field]}</span>}
-        </div>
-    )
- 
-    const TextArea = ({
-        label, field, fullWidth = true,
-    }: {
-        label: string
-        field: keyof typeof data
-        fullWidth?: boolean
-    }) => (
-        <div className={`field ${fullWidth ? 'col-span-2' : ''}`}>
-            <label className="field-label">{label}</label>
-            <textarea
-                className="field-input"
-                value={(data[field] as string) ?? ''}
-                onChange={e => setData(field, e.target.value as any)}
-            />
-            {errors[field] && <span className="field-error">{errors[field]}</span>}
-        </div>
-    )
- 
     return (
         <AuthenticatedLayout>
             <Head title={`Edit ${judulJenis[jenis] ?? 'Surat'}`} />
  
             <form onSubmit={submit} className="create-form">
+
+                {isReadOnly && (
+                    <ApprovedReadOnlyNotice
+                        suratId={surat.id}
+                        canRevertDraft={can.revertDraft}
+                    />
+                )}
 
               <RegeneratedBanner
                 lastRegeneratedAt={surat.last_regenerated_at ?? null}
@@ -263,7 +243,10 @@ export default function Edit({
                 <div className="create-form-heading">
                     <h1 className="create-form-title">Edit {judulJenis[jenis] ?? 'surat'}</h1>
                     <p className="create-form-subtitle">
-                        Perbarui field yang diperlukan lalu klik Simpan Perubahan
+                        {isReadOnly
+                            ? 'Surat ini hanya dapat dilihat (mode read-only)'
+                            : 'Perbarui field yang diperlukan lalu klik Simpan Perubahan'
+                        }
                     </p>
                 </div>
  
@@ -275,6 +258,26 @@ export default function Edit({
                         ))}
                     </div>
                 )}
+
+            <FormFieldProvider
+                data={data}
+                setData={setData}
+                errors={errors as Record<string, string | undefined>}
+                disabled={isReadOnly}
+            >
+
+                <fieldset
+                    disabled={isReadOnly}
+                    style={{
+                        border:        'none',
+                        padding:       0,
+                        margin:        0,
+                        // ✅ Visual feedback saat read-only
+                        opacity:       isReadOnly ? 0.7 : 1,
+                        pointerEvents: isReadOnly ? 'none' : 'auto',
+                        transition:    'opacity 0.2s ease',
+                    }}
+                >
  
                 {/* Informasi Umum */}
                 <div className="form-card">
@@ -289,15 +292,6 @@ export default function Edit({
                         <Field label="Tanggal surat" field="tanggal_surat" type="date" />
                     </div>
  
-                    {(can.approve || can.revertDraft) && (
-                        <div className="status-toggle-section">
-                            <StatusToggle
-                                suratId={surat.id}
-                                status={surat.status as 'draft' | 'approved'}
-                                canApprove={can.approve || can.revertDraft}
-                            />
-                        </div>
-                    )}
                 </div>
  
                 {/* BRM-1: Detail pekerjaan */}
@@ -392,7 +386,7 @@ export default function Edit({
                         <div className="form-card">
                             <div className="form-card-header">
                                 <div className="form-icon icon-purple">{IconDetail()}</div>
-                                <span className="form-card-title">Detail kendaraan</span>
+                                <span className="form-card-title">Detail surat</span>
                             </div>
                             <div className="form-grid">
                                 <Field label="Merk / jenis"   field="merk"   placeholder="Contoh: Honda Vario" />
@@ -569,12 +563,22 @@ export default function Edit({
                         />
                     </>
                 )}
+                </fieldset>
+            </FormFieldProvider>
  
-                {/* Submit */}
-                <button type="submit" className="btn-submit" disabled={processing}>
-                    {processing ? 'Menyimpan…' : 'Simpan perubahan'}
-                </button>
+                {!isReadOnly && (
+                    <button type="submit" className="btn-submit" disabled={processing}>
+                        {processing ? 'Menyimpan…' : 'Simpan perubahan'}
+                    </button>
+                )}
             </form>
+
+            <ApprovedErrorModal
+                error={statusError}
+                onDismiss={() => setStatusError(null)}
+                redirectUrl={route('filing.surat.show', surat.id)}
+            />
+            
         </AuthenticatedLayout>
     )
 }

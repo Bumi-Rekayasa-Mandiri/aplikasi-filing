@@ -5,41 +5,34 @@ namespace App\Policies;
 use App\Models\Surat;
 use App\Models\User;
 use App\Enums\SuratStatus;
-use Illuminate\Auth\Access\Response;
 
 class SuratPolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
     public function viewAny(User $user): bool
     {
-        //dd('POLICY DIPANGGIL', $user);
         return true;
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
     public function view(User $user, Surat $surat): bool
     {
         return true;
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
     public function create(User $user): bool
     {
         return true;
     }
 
     /**
-     * Determine whether the user can update the model.
+     * Allow membuka halaman Edit untuk DRAFT (full edit) dan APPROVED
+     * (read-only mode — actual save tetap diblok di controller@update).
      */
     public function update(User $user, Surat $surat): bool
     {
-        return in_array($surat->status, [SuratStatus::DRAFT, SuratStatus::SUBMITTED]);
+        return in_array($surat->status, [
+            SuratStatus::DRAFT,
+            SuratStatus::APPROVED,
+        ]);
     }
 
     public function uploadPdf(User $user, Surat $surat): bool
@@ -47,40 +40,36 @@ class SuratPolicy
         return $surat->status === SuratStatus::DRAFT;
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(User $user, Surat $surat)
+    public function delete(User $user, Surat $surat): bool
     {
         return true;
     }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
     public function restore(User $user, Surat $surat): bool
     {
         return true;
     }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
     public function forceDelete(User $user, Surat $surat): bool
     {
         return true;
     }
 
-    public function revertDraft(User $user, Surat $surat): bool
-    {
-        return $user->hasAnyRole(['super-admin', 'admin'])
-            && $surat->status === SuratStatus::APPROVED;
-    }
-
-    // Update method approve — tambahkan role check
+    /**
+     * Single-user workflow: tidak ada role check.
+     * Approve hanya valid kalau status DRAFT (mencegah double-approve).
+     */
     public function approve(User $user, Surat $surat): bool
     {
-        return $user->hasAnyRole(['super-admin', 'admin'])
-            && $surat->status === SuratStatus::SUBMITTED;
+        return $surat->status === SuratStatus::DRAFT;
+    }
+
+    /**
+     * Single-user workflow: tidak ada role check.
+     * Revert hanya valid kalau status APPROVED.
+     */
+    public function revertDraft(User $user, Surat $surat): bool
+    {
+        return $surat->status === SuratStatus::APPROVED;
     }
 }

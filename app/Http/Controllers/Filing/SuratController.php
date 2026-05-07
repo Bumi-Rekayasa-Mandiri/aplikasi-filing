@@ -139,6 +139,11 @@ class SuratController extends Controller
                     'url'     => $ttd->getFirstMediaUrl('ttd'),
                 ]),
             ],
+
+             'can' => [
+                        'approve'     => Gate::allows('approve', $surat),
+                        'revertDraft' => Gate::allows('revertDraft', $surat),
+                    ],
         ]);
     }
         
