@@ -107,7 +107,6 @@
 
     table.content td.colon {
         width: 10px;
-        mar
     }
 
     .signature-wrapper {

@@ -35,7 +35,7 @@ abstract class BaseDocxGenerator
 
         $this->section = $this->phpWord->addSection([
             'paperSize'    => 'A4',
-            'marginTop'    => Converter::cmToTwip(1.27),
+            'marginTop'    => Converter::cmToTwip(1),
             'marginRight'  => Converter::cmToTwip(2.3),
             'marginBottom' => Converter::cmToTwip(2.3),
             'marginLeft'   => Converter::cmToTwip(2.3),
@@ -56,20 +56,47 @@ abstract class BaseDocxGenerator
     }
 
     /**
-     * ✅ Helper untuk add image yang aman — track temp files
-     * Gunakan ini di semua generator agar konsisten
+     * Tambahkan image ke container (cell/section/header/textRun) dengan style image saja.
+     * Untuk mengatur spacing/alignment paragraf pembungkus, pakai safeAddImageWithParagraph().
      */
     protected function safeAddImage($container, ?string $path, array $style): bool
     {
         if (!$path || !file_exists($path) || filesize($path) === 0) {
             return false;
         }
-
         try {
             $container->addImage($path, $style);
             return true;
         } catch (\Throwable $e) {
             \Log::warning('Failed to add image to docx: ' . $e->getMessage(), [
+                'path' => $path,
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Tambahkan image dengan kontrol paragraph style (spacing/alignment).
+     * Image dibungkus TextRun dulu — caranya PHPWord untuk attach paragraph properties ke image.
+     *
+     * Catatan: container HARUS bertipe yang punya method addTextRun() (Cell, Section, Header, Footer, dll).
+     * JANGAN dipanggil dengan container = TextRun (karena nested TextRun tidak didukung).
+     */
+    protected function safeAddImageWithParagraph(
+        $container,
+        ?string $path,
+        array $imageStyle,
+        array $paragraphStyle
+    ): bool {
+        if (!$path || !file_exists($path) || filesize($path) === 0) {
+            return false;
+        }
+        try {
+            $textRun = $container->addTextRun($paragraphStyle);
+            $textRun->addImage($path, $imageStyle);
+            return true;
+        } catch (\Throwable $e) {
+            \Log::warning('Failed to add image (with paragraph) to docx: ' . $e->getMessage(), [
                 'path' => $path,
             ]);
             return false;
@@ -151,14 +178,24 @@ abstract class BaseDocxGenerator
     protected function addKop(): void
     {
         $kopPath = public_path('assets/kop.jpeg');
-        if (!file_exists($kopPath)) $kopPath = public_path('assets/kop.png');
+        if (!file_exists($kopPath)) {
+            $kopPath = public_path('assets/kop.png');
+        }
 
-        $this->safeAddImage($this->section, $kopPath, [
-            'width'         => 450,
-            'height'        => 100,
-            'alignment'     => Jc::CENTER,
-            'wrappingStyle' => 'inline',
-        ]);
+        $this->safeAddImageWithParagraph(
+            $this->section,
+            $kopPath,
+            [
+                'width'         => 450,
+                'height'        => 100,
+                'wrappingStyle' => 'inline',
+            ],
+            [
+                'alignment'   => Jc::CENTER,
+                'spaceBefore' => 0,
+                'spaceAfter'  => 0,
+            ]
+        );
     }
 
     protected function addParagraf(string $text, bool $justify = true): void
@@ -231,7 +268,7 @@ abstract class BaseDocxGenerator
         $row = $table->addRow();
         $row->addCell(4513, ['borderSize' => 0, 'borderColor' => 'FFFFFF'])->addText('');
         $row->addCell(4513, ['borderSize' => 0, 'borderColor' => 'FFFFFF'])
-            ->addText($label, ['size' => $this->fontSize, 'name' => $this->fontName], ['alignment' => $align]);
+            ->addText($label, ['size' => $this->fontSize, 'name' => $this->fontName], ['alignment' => $align, 'spaceBefore' => 200,'spaceAfter' => 200]);
 
         // Gambar
         $row = $table->addRow();
@@ -266,13 +303,18 @@ abstract class BaseDocxGenerator
         $row = $table->addRow();
         $row->addCell(4513, ['borderSize' => 0, 'borderColor' => 'FFFFFF'])->addText('');
         $row->addCell(4513, ['borderSize' => 0, 'borderColor' => 'FFFFFF'])
-            ->addText($nama, ['bold' => true, 'size' => $this->fontSize, 'name' => $this->fontName, 'underline' => 'single'], ['alignment' => $align]);
+            ->addText($nama, ['bold' => true, 'size' => $this->fontSize, 'name' => $this->fontName, 'underline' => 'single'], ['alignment' => $align, 'spaceBefore' => 200,'spaceAfter' => 200]);
 
         // Jabatan
         $row = $table->addRow();
         $row->addCell(4513, ['borderSize' => 0, 'borderColor' => 'FFFFFF'])->addText('');
         $row->addCell(4513, ['borderSize' => 0, 'borderColor' => 'FFFFFF'])
-            ->addText($jabatan, ['size' => $this->fontSize, 'name' => $this->fontName], ['alignment' => $align]);
+            ->addText($jabatan, ['size' => $this->fontSize, 'name' => $this->fontName], ['alignment' => $align, 'spaceBefore' => 200,'spaceAfter' => 200]);
+    }
+
+    protected function addNewSectionWithStyle(array $style = []): void
+    {
+        $this->section = $this->phpWord->addSection($style);
     }
 
     /**

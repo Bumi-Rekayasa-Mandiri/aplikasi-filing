@@ -12,30 +12,84 @@ class GenerateBRM1Docx extends BaseDocxGenerator
     {
         $this->setup();
 
-        // ── Section 1: Surat Utama ────────────────
+        // ── Section 1: Surat Utama (default margins, kop inline di body) ──
         $this->buildSuratUtama($surat);
 
-        // ── Section 2: Lampiran A — JSA ───────────
-        $this->addNewSection();
+        // ── Section 2: Lampiran A — JSA (margin atas besar untuk header) ──
+        $this->section = $this->phpWord->addSection([
+            'marginTop'    => 2000,  // ~4.2cm — cukup untuk kop 100pt + buffer
+            'marginBottom' => 1440,  // default
+            'marginLeft'   => 1440,
+            'marginRight'  => 1440,
+            'headerHeight' => 360,   // header mulai 0.6cm dari atas page
+        ]);
         $this->buildLampiranJSA($surat);
 
-        // ── Section 3: Lampiran B — Daftar Pekerja ─
-        $this->addNewSection();
+        // ── Section 3: Lampiran B — Daftar Pekerja ──
+        $this->section = $this->phpWord->addSection([
+            'marginTop'    => 2800,
+            'marginBottom' => 1440,
+            'marginLeft'   => 1440,
+            'marginRight'  => 1440,
+            'headerHeight' => 360,
+        ]);
         $this->buildLampiranPekerja($surat);
 
         return $this->save('BRM1', $surat->id);
     }
 
-    // ══════════════════════════════════════════════
-    // BAGIAN 1: SURAT UTAMA
-    // ══════════════════════════════════════════════
     private function buildSuratUtama(Surat $surat): void
     {
         $tgl = Carbon::parse($surat->tanggal_surat)->locale('id')->translatedFormat('d F Y');
 
         // ── KOP ───────────────────────────────────
-        $this->addKop();
-        $this->addSpacing();
+        $kopCandidates = [
+            public_path('assets/kop.png'),
+            public_path('assets/koplampiran.png'),
+            public_path('assets/lampiran.png'),
+        ];
+
+        $kopPath = null;
+        foreach ($kopCandidates as $candidate) {
+            $candidate = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $candidate);
+            if (file_exists($candidate) && filesize($candidate) > 0) {
+                $kopPath = $candidate;
+                \Log::info('BRM-1: kop found', ['path' => $candidate, 'size' => filesize($candidate)]);
+                break;
+            }
+        }
+
+        if ($kopPath) {
+            // pakai safeAddImage agar exception ditangkap dan dilog
+            $added = $this->safeAddImage(
+                $this->section,
+                $kopPath,
+                [
+                    'width'         => 450,
+                    'height'        => 120,
+                    'alignment'     => Jc::CENTER,
+                    'wrappingStyle' => 'inline',
+                ],
+                ['spaceBefore' => 0, 'spaceAfter' => 0]
+            );
+            if (!$added) {
+                \Log::warning('BRM-1: kop addImage returned false', ['path' => $kopPath]);
+            }
+        } else {
+            \Log::warning('BRM-1: tidak ada kop yang ditemukan di kandidat path', [
+                'candidates' => $kopCandidates,
+            ]);
+        }
+
+        $this->section->addText(
+            'e-mail : bumirekayasa.mandiri@gmail.com Phone : 0267-8639-837 / Fax: 0267-8639-837',
+            ['size' => 10, 'name' => $this->fontName],
+            [
+                'alignment'   => Jc::CENTER,
+                'spaceBefore' => 0,        // ✅ pasangan: email text juga 0
+                'spaceAfter'  => 400,
+            ]
+        );
 
         // ── JUDUL ─────────────────────────────────
         $this->section->addTextRun([
@@ -76,10 +130,10 @@ class GenerateBRM1Docx extends BaseDocxGenerator
         // ── PEMBUKA ───────────────────────────────
         $this->section->addText('Dengan Hormat,', [
             'size' => $this->fontSize, 'name' => $this->fontName,
-        ], ['spaceAfter' => 0]);
+        ], ['spaceAfter' => 100]);
         $this->section->addText('Bersama ini kami mengajukan pelaksanaan kerja :', [
             'size' => $this->fontSize, 'name' => $this->fontName,
-        ], ['spaceAfter' => 80]);
+        ], ['spaceAfter' => 400 ]);
 
         // ── DETAIL PEKERJAAN (col widths dari DOCX: 2268 | 200 | 7326) ──
         $this->addIdentitasTable([
@@ -87,22 +141,20 @@ class GenerateBRM1Docx extends BaseDocxGenerator
             ['Jenis Pekerjaan', $surat->jenis_pekerjaan ?? '—'],
             ['Waktu',           $surat->waktu           ?? '—'],
             ['Jam Kerja',       $surat->jam_kerja       ?? '—'],
-        ], 1500);
+        ], 2200);
 
         $this->addSpacing();
 
         $this->addIdentitasTable([
             ['Penanggung Jawab', 'Ilman Sunaryo'],
             ['Jumlah Pekerja',   $surat->jumlah_pekerja ?? '—'],
-        ], 1500);
-
-        $this->addSpacing();
+        ], 2200);
 
         // ── PENUTUP ───────────────────────────────
         $this->section->addText(
             'Atas kerja samanya, kami mengucapkan terima kasih.',
             ['size' => $this->fontSize, 'name' => $this->fontName],
-            ['spaceBefore' => 150, 'spaceAfter' => 80]
+            ['spaceBefore' => 400, 'spaceAfter' => 400]
         );
 
         $this->section->addText("Karawang, {$tgl}", [
@@ -157,7 +209,7 @@ class GenerateBRM1Docx extends BaseDocxGenerator
                 if ($merged) {
                     // ✅ Fix: $cell bukan $this->section
                     $this->safeAddImage($cell, $merged, [
-                        'width' => 113, 'height' => 113, // 3cm × 3cm @ 96 DPI
+                        'width' => 90, 'height' => 90, // 3cm × 3cm @ 96 DPI
                         'alignment' => Jc::CENTER, 'wrappingStyle' => 'inline',
                     ]);
                 } else {
@@ -188,7 +240,7 @@ class GenerateBRM1Docx extends BaseDocxGenerator
         $row = $table->addRow();
         foreach ($ttds as $ttd) {
             $row->addCell($colWidth, ['borderSize' => 0, 'borderColor' => 'FFFFFF'])
-                ->addText('(' . ($ttd->nama_penandatangan ?? '—') . ')', [
+                ->addText($ttd->nama_penandatangan ?? '—', [
                     'bold' => true, 'size' => $this->fontSize, 'name' => $this->fontName,
                 ], ['alignment' => Jc::CENTER]);
         }
@@ -199,19 +251,27 @@ class GenerateBRM1Docx extends BaseDocxGenerator
     // ══════════════════════════════════════════════
     private function buildLampiranJSA(Surat $surat): void
     {
-        // KOP lampiran
+        // ── KOP LAMPIRAN di header section ────────
+        // Muncul otomatis di setiap halaman Section 2 (termasuk page break)
         $kopLampiran = public_path('assets/koplampiran.png');
         if (file_exists($kopLampiran)) {
-            $this->section->addImage($kopLampiran, [
-                'width' => 450, 'height' => 80,
-                'alignment' => Jc::CENTER, 'wrappingStyle' => 'inline',
-            ]);
+            $header = $this->section->addHeader();
+            $header->addImage(
+                $kopLampiran,
+                [
+                    'width'         => 450,
+                    'height'        => 100,
+                    'alignment'     => Jc::CENTER,
+                    'wrappingStyle' => 'inline',
+                ],
+                ['spaceBefore' => 0, 'spaceAfter' => 0]
+            );
         }
-        $this->addSpacing();
 
+        // Body langsung mulai dari judul — kop sudah di header
         $this->section->addText('A. JSA', [
             'bold' => true, 'size' => 12, 'name' => $this->fontName,
-        ], ['spaceAfter' => 80]);
+        ], ['spaceAfter' => 200]);
 
         $meta          = $surat->meta ?? [];
         $jsaItems      = $meta['jsa']     ?? [];
@@ -219,7 +279,6 @@ class GenerateBRM1Docx extends BaseDocxGenerator
         $pengawas      = collect($pekerjaDaftar)->firstWhere('role', 'Pengawas');
         $namaPengawas  = $pengawas['nama'] ?? ($surat->nama ?? '—');
 
-        // Meta table JSA
         $this->addIdentitasTable([
             ['No JSA',           $surat->no_pekerja      ?? '—'],
             ['Nama Pekerjaan',   $surat->jenis_pekerjaan ?? '—'],
@@ -227,16 +286,11 @@ class GenerateBRM1Docx extends BaseDocxGenerator
             ['APD',              $surat->apd             ?? '—'],
             ['Lokasi Pekerjaan', $surat->lokasi_kerja    ?? '—'],
             ['Periode',          $surat->periode         ?? '—'],
-        ], 1400);
+        ], 2000);
 
         $this->addSpacing();
-
-        // ── Tabel JSA dengan border ────────────────
         $this->buildJsaTable($jsaItems);
-
         $this->addSpacing();
-
-        // ── Tabel TTD kosong (4 kolom) ────────────
         $this->buildTtdKosong();
     }
 
@@ -258,7 +312,7 @@ class GenerateBRM1Docx extends BaseDocxGenerator
         $headerBg   = array_merge($cellBorder, ['bgColor' => 'f0f0f0']);
 
         // Header: lebar dari DOCX asli — 400 | 1800 | 3413 | 3413
-        $row = $table->addRow();
+        $row = $table->addRow(null, ['tblHeader' => true]);
         foreach ([
             [400,  'NO'],
             [1800, 'Urutan Kerja'],
@@ -321,6 +375,8 @@ class GenerateBRM1Docx extends BaseDocxGenerator
 
     private function buildTtdKosong(): void
     {
+        $this->addSpacing();
+
         $table = $this->section->addTable([
             'borderSize'  => 6,
             'borderColor' => '000000',
@@ -355,18 +411,26 @@ class GenerateBRM1Docx extends BaseDocxGenerator
     // ══════════════════════════════════════════════
     private function buildLampiranPekerja(Surat $surat): void
     {
+        // ── KOP LAMPIRAN di header section ────────
         $kopLampiran = public_path('assets/koplampiran.png');
         if (file_exists($kopLampiran)) {
-            $this->section->addImage($kopLampiran, [
-                'width' => 450, 'height' => 80,
-                'alignment' => Jc::CENTER, 'wrappingStyle' => 'inline',
-            ]);
+            $header = $this->section->addHeader();
+            $header->addImage(
+                $kopLampiran,
+                [
+                    'width'         => 450,
+                    'height'        => 100,
+                    'alignment'     => Jc::CENTER,
+                    'wrappingStyle' => 'inline',
+                ],
+                ['spaceBefore' => 0, 'spaceAfter' => 0]
+            );
         }
-        $this->addSpacing();
 
+        // Body langsung mulai dari judul
         $this->section->addText('B. Daftar Pekerja', [
             'bold' => true, 'size' => 12, 'name' => $this->fontName,
-        ], ['spaceAfter' => 80]);
+        ], ['spaceAfter' => 200]);
 
         $meta          = $surat->meta ?? [];
         $pekerjaDaftar = $meta['pekerja'] ?? [];
@@ -379,10 +443,9 @@ class GenerateBRM1Docx extends BaseDocxGenerator
             ['Pengawas',          $namaPengawas],
             ['Lokasi Pekerjaan',  $surat->lokasi_kerja    ?? '—'],
             ['Periode',           $surat->periode         ?? '—'],
-        ], 1600);
+        ], 2000);
 
         $this->addSpacing();
-
         $this->buildPekerjaTable($surat, $pekerjaDaftar);
     }
 
@@ -404,7 +467,7 @@ class GenerateBRM1Docx extends BaseDocxGenerator
         $headerBg   = array_merge($cellBorder, ['bgColor' => 'f0f0f0']);
 
         // Header: lebar dari DOCX asli — 400 | 2706 | 5920
-        $row = $table->addRow();
+        $row = $table->addRow(null, ['tblHeader' => true]);
         foreach ([
             [400,  'NO'],
             [2706, 'NAMA PEKERJA'],

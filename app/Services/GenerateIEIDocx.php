@@ -20,10 +20,6 @@ class GenerateIEIDocx extends BaseDocxGenerator
         $this->addNewSection();
         $this->buildGuaranteeLetter($surat);
 
-        // ── Section 3: Lampiran.png ────────────────────────────
-        $this->addNewSection();
-        $this->buildLampiranPng();
-
         return $this->save('IEI', $surat->id);
     }
 
@@ -48,8 +44,6 @@ class GenerateIEIDocx extends BaseDocxGenerator
             ]);
         }
 
-        $this->addSpacing();
-
         // ── JUDUL ─────────────────────────────────
         $this->section->addTextRun([
             'alignment' => Jc::CENTER, 'spaceBefore' => 200, 'spaceAfter' => 0,
@@ -71,8 +65,6 @@ class GenerateIEIDocx extends BaseDocxGenerator
             ['Jabatan', 'Direktur'],
         ], 800);
 
-        $this->addSpacing();
-
         // ── DETAIL PEKERJAAN ──────────────────────
         $this->addParagraf('Bersama ini memberikan jaminan garansi untuk:');
         $this->addIdentitasTable([
@@ -80,13 +72,11 @@ class GenerateIEIDocx extends BaseDocxGenerator
             ['Lokasi',  $surat->lokasi_kerja ?? '—'],
         ], 800);
 
-        $this->addSpacing();
-
         // ── PERIODE & JENIS PEKERJAAN ─────────────
         $this->section->addText(
             'Garansi berlaku mulai ' . ($surat->isi_surat ?? '—') . ', meliputi :',
             ['size' => $this->fontSize, 'name' => $this->fontName, 'underline' => 'single'],
-            ['alignment' => Jc::CENTER, 'spaceBefore' => 80, 'spaceAfter' => 80]
+            ['alignment' => Jc::CENTER, 'spaceBefore' => 80, 'spaceAfter' => 240]
         );
 
         $jenisPekerjaan = json_decode($surat->jenis_pekerjaan ?? '[]', true) ?? [];
@@ -114,8 +104,6 @@ class GenerateIEIDocx extends BaseDocxGenerator
                 'indentation' => ['left' => Converter::cmToTwip(1)]]);
         }
 
-        $this->addSpacing();
-
         $this->addParagraf('Demikian Garansi ini kami buat untuk dapat dipergunakan sebagaimana mestinya.');
 
         // ── TANGGAL & TTD RATA KIRI ───────────────
@@ -123,7 +111,6 @@ class GenerateIEIDocx extends BaseDocxGenerator
             'size' => $this->fontSize, 'name' => $this->fontName,
         ], ['spaceBefore' => 400, 'spaceAfter' => 0]);
 
-        $this->addSpacing();
         $this->addTtdRataKiri($surat);
     }
 
@@ -133,7 +120,7 @@ class GenerateIEIDocx extends BaseDocxGenerator
         if (!$ttd) return;
 
         $nama    = $ttd->nama_penandatangan ?? 'Ilman Sunaryo';
-        $jabatan = $ttd->jabatan ?? 'Direktur';
+
         // Dari DOCX asli: label "PT. BUMI REKAYASA MANDIRI"
         $label   = $ttd->label ?? 'PT. BUMI REKAYASA MANDIRI';
 
@@ -156,7 +143,7 @@ class GenerateIEIDocx extends BaseDocxGenerator
             if ($merged) {
                 // ✅ $this->section valid karena TTD ini tidak dalam tabel
                 $this->safeAddImage($this->section, $merged, [
-                    'width'         => 113, 'height' => 113, // 3cm × 3cm
+                    'width'         => 90, 'height' => 90, // 3cm × 3cm
                     'alignment'     => Jc::LEFT,
                     'wrappingStyle' => 'inline',
                 ]);
@@ -190,10 +177,6 @@ class GenerateIEIDocx extends BaseDocxGenerator
             'name' => $this->fontName, 'underline' => 'single',
         ], ['alignment' => Jc::LEFT, 'spaceAfter' => 0]);
 
-        // Jabatan
-        $this->section->addText($jabatan, [
-            'size' => $this->fontSize, 'name' => $this->fontName,
-        ], ['alignment' => Jc::LEFT]);
     }
 
     // ══════════════════════════════════════════════
@@ -206,12 +189,11 @@ class GenerateIEIDocx extends BaseDocxGenerator
         if (file_exists($kopLampiran)) {
             $this->section->addImage($kopLampiran, [
                 'width'         => 450,
-                'height'        => 80,
+                'height'        => 100,
                 'alignment'     => Jc::CENTER,
                 'wrappingStyle' => 'inline',
             ]);
         }
-        $this->addSpacing();
 
         $ttds     = $surat->ttds;
         $ttdKiri  = $ttds->get(0); // PT BRM (index 0)
@@ -264,13 +246,13 @@ class GenerateIEIDocx extends BaseDocxGenerator
             "full co-operation and support in the achievement of the completed project and the " .
             "official handing over on {$tglHandingOver}.",
             ['size' => $this->fontSize, 'name' => $this->fontName],
-            ['alignment' => Jc::BOTH, 'spaceAfter' => 80]
+            ['alignment' => Jc::BOTH, 'spaceAfter' => 200]
         );
 
         $this->section->addText(
             'We have the pleasure to submit below document for your perusal and acceptance.',
             ['size' => $this->fontSize, 'name' => $this->fontName],
-            ['alignment' => Jc::BOTH, 'spaceAfter' => 80]
+            ['alignment' => Jc::BOTH, 'spaceAfter' => 400]
         );
 
         foreach ($dokumenList as $idx => $dok) {
@@ -280,18 +262,18 @@ class GenerateIEIDocx extends BaseDocxGenerator
                 ['indentation' => ['left' => 360], 'spaceAfter' => 40]
             );
         }
+        
+        $this->addSpacing();
 
         $this->section->addText(
             'Henceforth, once again, thank you for your precious time to be with me at the handing over. thank you.',
             ['size' => $this->fontSize, 'name' => $this->fontName],
-            ['alignment' => Jc::BOTH, 'spaceBefore' => 80, 'spaceAfter' => 160]
+            ['alignment' => Jc::BOTH, 'spaceBefore' => 80, 'spaceAfter' => 400]
         );
 
         $this->section->addText('Your faithfully', [
             'size' => $this->fontSize, 'name' => $this->fontName,
         ], ['spaceAfter' => 0]);
-
-        $this->addSpacing();
 
         // ── TTD 2 KOLOM ───────────────────────────
         $this->addTtdDuaKolomLampiran($surat, $ttdKiri, $ttdKanan);
@@ -311,59 +293,62 @@ class GenerateIEIDocx extends BaseDocxGenerator
         $ttdKananPath  = $ttdKananMedia
             ? str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $ttdKananMedia->getPath()) : null;
 
-        // Lebar dari DOCX asli: 4513 | 4513
-        $style = ['borderSize' => 0, 'borderColor' => 'FFFFFF'];
-        $table = $this->section->addTable($style);
+        // ✅ definisi tunggal — dipakai di seluruh method
+        $borderless = ['borderSize' => 0, 'borderColor' => 'FFFFFF'];
+        $table      = $this->section->addTable($borderless);
 
         // ── Baris Label ────────────────────────────
         $row = $table->addRow();
-        $row->addCell(4513, ['borderSize' => 0, 'borderColor' => 'FFFFFF'])
+        $row->addCell(4513, $borderless)
             ->addText('PT. BUMI REKAYASA MANDIRI', [
-                'bold' => true, 'size' => $this->fontSize, 'name' => $this->fontName,
+                'size' => $this->fontSize, 'name' => $this->fontName,
             ], ['alignment' => Jc::LEFT]);
-        $row->addCell(4513, ['borderSize' => 0, 'borderColor' => 'FFFFFF'])
+        $row->addCell(4513, $borderless)
             ->addText($surat->tujuan ?? '—', [
                 'size' => $this->fontSize, 'name' => $this->fontName,
             ], ['alignment' => Jc::RIGHT]);
 
         // ── Baris Gambar ───────────────────────────
         $row      = $table->addRow();
-        $cellKiri = $row->addCell(4513, ['borderSize' => 0, 'borderColor' => 'FFFFFF']);
+        $cellKiri = $row->addCell(4513, $borderless);
 
-        // Kiri: PT BRM — cap + TTD direktur
         if ($capPath && $ttdKiriPath && file_exists($capPath) && file_exists($ttdKiriPath)) {
-            $merged = $this->mergeCapTtd($capPath, $ttdKiriPath);
-            if ($merged) {
-                // ✅ $cellKiri bukan $this->section
-                $this->safeAddImage($cellKiri, $merged, [
-                    'width'         => 113, 'height' => 113, // 3cm × 3cm
-                    'alignment'     => Jc::LEFT,
-                    'wrappingStyle' => 'inline',
-                ]);
-            } else {
-                $this->safeAddImage($cellKiri, $ttdKiriPath, [
-                    'width' => 90, 'height' => 90,
-                    'alignment' => Jc::LEFT, 'wrappingStyle' => 'inline',
-                ]);
-            }
-        } elseif ($ttdKiriPath && file_exists($ttdKiriPath)) {
-            $this->safeAddImage($cellKiri, $ttdKiriPath, [
+            $merged    = $this->mergeCapTtd($capPath, $ttdKiriPath);
+            $imagePath = $merged ?: $ttdKiriPath;
+
+            $trKiri = $cellKiri->addTextRun([
+                'alignment'   => Jc::LEFT,
+                'indentation' => ['left' => 540],
+            ]);
+            $this->safeAddImage($trKiri, $imagePath, [
                 'width'         => 90,
                 'height'        => 90,
-                'alignment'     => Jc::LEFT,
+                'wrappingStyle' => 'inline',
+            ]);
+        } elseif ($ttdKiriPath && file_exists($ttdKiriPath)) {
+            $trKiri = $cellKiri->addTextRun([
+                'alignment'   => Jc::LEFT,
+                'indentation' => ['left' => 540],
+            ]);
+            $this->safeAddImage($trKiri, $ttdKiriPath, [
+                'width'         => 90,
+                'height'        => 90,
                 'wrappingStyle' => 'inline',
             ]);
         } else {
             $cellKiri->addText('');
         }
 
-        // Kanan: Penerima — TTD saja (tanpa cap)
-        $cellKanan = $row->addCell(4513, ['borderSize' => 0, 'borderColor' => 'FFFFFF']);
+        // Kanan: Penerima — TTD saja
+        $cellKanan = $row->addCell(4513, $borderless);
         if ($ttdKananPath && file_exists($ttdKananPath)) {
-            $this->safeAddImage($cellKanan, $ttdKananPath, [
+            $trKanan = $cellKanan->addTextRun([
+                'alignment'   => Jc::RIGHT,
+                'indentation' => ['right' => 1000],
+            ]);
+            $this->safeAddImage($trKanan, $ttdKananPath, [
                 'width'         => 90,
                 'height'        => 90,
-                'alignment'     => Jc::RIGHT,
                 'wrappingStyle' => 'inline',
             ]);
         } else {
@@ -372,12 +357,12 @@ class GenerateIEIDocx extends BaseDocxGenerator
 
         // ── Baris Nama ─────────────────────────────
         $row = $table->addRow();
-        $row->addCell(4513, ['borderSize' => 0, 'borderColor' => 'FFFFFF'])
+        $row->addCell(4513, $borderless)
             ->addText($ttdKiri?->nama_penandatangan ?? '—', [
                 'bold' => true, 'size' => $this->fontSize,
                 'name' => $this->fontName, 'underline' => 'single',
-            ], ['alignment' => Jc::LEFT, 'indentation' => ['left' => 360]]);
-        $row->addCell(4513, ['borderSize' => 0, 'borderColor' => 'FFFFFF'])
+            ], ['alignment' => Jc::LEFT, 'indentation' => ['left' => 500]]);
+        $row->addCell(4513, $borderless)
             ->addText($ttdKanan?->nama_penandatangan ?? '—', [
                 'bold' => true, 'size' => $this->fontSize,
                 'name' => $this->fontName, 'underline' => 'single',
@@ -385,34 +370,13 @@ class GenerateIEIDocx extends BaseDocxGenerator
 
         // ── Baris Jabatan ──────────────────────────
         $row = $table->addRow();
-        $row->addCell(4513, ['borderSize' => 0, 'borderColor' => 'FFFFFF'])
+        $row->addCell(4513, $borderless)
             ->addText($ttdKiri?->jabatan ?? '—', [
                 'size' => $this->fontSize, 'name' => $this->fontName,
-            ], ['alignment' => Jc::LEFT, 'indentation' => ['left' => 560]]);
-        $row->addCell(4513, ['borderSize' => 0, 'borderColor' => 'FFFFFF'])
+            ], ['alignment' => Jc::LEFT, 'indentation' => ['left' => 1200]]);
+        $row->addCell(4513, $borderless)
             ->addText($ttdKanan?->jabatan ?? '—', [
                 'size' => $this->fontSize, 'name' => $this->fontName,
-            ], ['alignment' => Jc::RIGHT, 'indentation' => ['right' => 560]]);
-    }
-
-    // ══════════════════════════════════════════════
-    // SECTION 3: LAMPIRAN.PNG (halaman penuh)
-    // ══════════════════════════════════════════════
-    private function buildLampiranPng(): void
-    {
-        $lampiranPath = public_path('assets/lampiran.png');
-
-        if (file_exists($lampiranPath)) {
-            $this->section->addImage($lampiranPath, [
-                'width'         => 450,
-                'height'        => 550,
-                'alignment'     => Jc::CENTER,
-                'wrappingStyle' => 'inline',
-            ]);
-        } else {
-            $this->section->addText('[File lampiran.png tidak ditemukan]', [
-                'size' => $this->fontSize, 'name' => $this->fontName,
-            ], ['alignment' => Jc::CENTER]);
-        }
+            ], ['alignment' => Jc::RIGHT, 'indentation' => ['right' => 1000]]);
     }
 }

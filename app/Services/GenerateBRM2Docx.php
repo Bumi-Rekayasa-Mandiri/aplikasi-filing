@@ -15,13 +15,21 @@ class GenerateBRM2Docx extends BaseDocxGenerator
 
         // ── KOP ───────────────────────────────────────
         $this->addKop();
-        $this->addSpacing();
+        $this->section->addText(
+            'e-mail : bumirekayasa.mandiri@gmail.com Phone : 0267-8639-837 / Fax: 0267-8639-837',
+            ['size' => 10, 'name' => $this->fontName],
+            [
+                'alignment'   => Jc::CENTER,
+                'spaceBefore' => 0,        // ✅ pasangan: email text juga 0
+                'spaceAfter'  => 300,
+            ]
+        );
 
         // ── JUDUL ─────────────────────────────────────
         $this->section->addTextRun([
             'alignment'   => Jc::CENTER,
-            'spaceBefore' => 200,
-            'spaceAfter'  => 200,
+            'spaceBefore' => 0,
+            'spaceAfter'  => 300,
         ])->addText('SURAT PELEPASAN HAK', [
             'bold'      => true,
             'size'      => 14,
@@ -42,9 +50,7 @@ class GenerateBRM2Docx extends BaseDocxGenerator
             ['NIK',                  '3215030103870006'],
             ['Tempat/Tanggal Lahir', 'Karawang, 01 Maret 1987'],
             ['Alamat',               'Dusun Bobojong RT 005 RW 003, Purwadana, Telukjambe Timur, Karawang'],
-        ], 1800);
-
-        $this->addSpacing();
+        ], 2500);
 
         // ── KETERANGAN KENDARAAN ──────────────────────
         $this->addParagraf('Dengan ini menerangkan bahwa data kendaraan tersebut di bawah ini :');
@@ -53,23 +59,17 @@ class GenerateBRM2Docx extends BaseDocxGenerator
             ['Merk/Jenis',   $surat->merk   ?? '—'],
             ['Warna/Tahun',  $surat->warna  ?? '—'],
             ['Rangka/Mesin', $surat->rangka ?? '—'],
-        ], 1800);
-
-        $this->addSpacing();
+        ], 2500);
 
         // ── ISI ───────────────────────────────────────
         $this->addParagraf('Dan telah melepaskan haknya atas kendaraan tersebut di atas.');
         $this->addParagraf('Demikian Surat Pelepasan Hak ini dibuat untuk dipergunakan sebagaimana mestinya.');
 
-        $this->addSpacing();
-
         // ── TANGGAL KANAN ─────────────────────────────
         $this->section->addText("Karawang, {$tgl}", [
             'size' => $this->fontSize,
             'name' => $this->fontName,
-        ], ['alignment' => Jc::RIGHT, 'spaceBefore' => 200]);
-
-        $this->addSpacing();
+        ], ['alignment' => Jc::RIGHT, 'spaceBefore' => 400]);
 
         // ── TTD RATA KANAN ────────────────────────────
         $this->addTtdRataKanan($surat);
@@ -95,82 +95,86 @@ class GenerateBRM2Docx extends BaseDocxGenerator
             ? str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $ttdMedia->getPath())
             : null;
 
-        // ✅ Hapus 'cellMargin' => 0 — properti tidak valid di PHPWord
-        $style = ['borderSize' => 0, 'borderColor' => 'FFFFFF'];
-        $table = $this->section->addTable($style);
+        // ── Style reusable ─────────────────────────────
+        $fontPlain = ['size' => $this->fontSize, 'name' => $this->fontName];
+        $fontNama  = $fontPlain + ['bold' => true, 'underline' => 'single'];
 
-        // ── Baris label ────────────────────────────────
-        $row = $table->addRow();
-        $row->addCell(4513, ['borderSize' => 0, 'borderColor' => 'FFFFFF'])
-            ->addText('');
-        $row->addCell(4513, ['borderSize' => 0, 'borderColor' => 'FFFFFF'])
-            ->addText($label, [
-                'size' => $this->fontSize,
-                'name' => $this->fontName,
-            ], ['alignment' => Jc::CENTER]);
+        // No-gap paragraph untuk teks center
+        $pNoGap = [
+            'alignment'   => Jc::CENTER,
+            'spaceBefore' => 0,
+            'spaceAfter'  => 0,
+        ];
+        // No-gap paragraph untuk cell kiri kosong (left-aligned default)
+        $pNoGapLeft = ['spaceBefore' => 0, 'spaceAfter' => 0];
 
-        // ── Baris gambar ───────────────────────────────
-        $row    = $table->addRow();
-        $row->addCell(4513, ['borderSize' => 0, 'borderColor' => 'FFFFFF'])
-            ->addText('');
+        $cellStyle = ['borderSize' => 0, 'borderColor' => 'FFFFFF'];
 
-        $imgCell = $row->addCell(4513, ['borderSize' => 0, 'borderColor' => 'FFFFFF']);
+        // Lebar 70/30
+        $leftWidth  = 6318;
+        $rightWidth = 2708;
 
-        if ($capPath && $ttdPath && file_exists($capPath) && file_exists($ttdPath)) {
-            $merged = $this->mergeCapTtd($capPath, $ttdPath);
-            if ($merged) {
-                // ✅ Fix: $imgCell bukan $this->section
-                $this->safeAddImage($imgCell, $merged, [
-                    'width'         => 113, 'height' => 113, // 3cm × 3cm
-                    'alignment'     => Jc::CENTER,
-                    'wrappingStyle' => 'inline',
-                ]);
-            } else {
-                $this->safeAddImage($imgCell, $ttdPath, [
-                    'width' => 90, 'height' => 90,
-                    'alignment' => Jc::CENTER, 'wrappingStyle' => 'inline',
-                ]);
-            }
-        } elseif ($ttdPath && file_exists($ttdPath)) {
-            $imgCell->addImage($ttdPath, [
+        $table = $this->section->addTable(['borderSize' => 0, 'borderColor' => 'FFFFFF']);
+
+        // Helper closure: row dengan cell kiri kosong + cell kanan diisi callback
+        $addRow = function ($table, callable $fillRight)
+            use ($cellStyle, $leftWidth, $rightWidth, $fontPlain, $pNoGapLeft)
+        {
+            $row = $table->addRow();
+            $row->addCell($leftWidth, $cellStyle)->addText('', $fontPlain, $pNoGapLeft);
+            $right = $row->addCell($rightWidth, $cellStyle);
+            $fillRight($right);
+        };
+
+        // Baris label
+        $addRow($table, function ($cell) use ($label, $fontPlain, $pNoGap) {
+            $cell->addText($label, $fontPlain, $pNoGap);
+        });
+
+        // Baris gambar — image WAJIB dibungkus TextRun supaya paragraph style berlaku
+        $addRow($table, function ($imgCell) use ($capPath, $ttdPath, $fontPlain, $pNoGap) {
+            // CATATAN: tidak ada 'alignment' di image style.
+            // Alignment image di-handle oleh paragraph wrapper (TextRun) → sumber tunggal.
+            $imgStyle = [
                 'width'         => 90,
                 'height'        => 90,
-                'alignment'     => Jc::CENTER,
                 'wrappingStyle' => 'inline',
-            ]);
-        } elseif ($capPath && file_exists($capPath)) {
-            $imgCell->addImage($capPath, [
-                'width'         => 100,
-                'height'        => 100,
-                'alignment'     => Jc::CENTER,
-                'wrappingStyle' => 'inline',
-            ]);
-        } else {
-            for ($i = 0; $i < 4; $i++) {
-                $imgCell->addText('');
+            ];
+
+            $placed = false;
+
+            if ($capPath && $ttdPath && file_exists($capPath) && file_exists($ttdPath)) {
+                $merged = $this->mergeCapTtd($capPath, $ttdPath);
+                if ($merged) {
+                    $placed = $this->safeAddImageWithParagraph($imgCell, $merged, $imgStyle, $pNoGap);
+                }
+                if (!$placed) {
+                    $placed = $this->safeAddImageWithParagraph($imgCell, $ttdPath, $imgStyle, $pNoGap);
+                }
+            } elseif ($ttdPath && file_exists($ttdPath)) {
+                $placed = $this->safeAddImageWithParagraph($imgCell, $ttdPath, $imgStyle, $pNoGap);
+            } elseif ($capPath && file_exists($capPath)) {
+                $placed = $this->safeAddImageWithParagraph(
+                    $imgCell,
+                    $capPath,
+                    ['width' => 100, 'height' => 100, 'wrappingStyle' => 'inline'],
+                    $pNoGap
+                );
             }
-        }
 
-        // ── Baris nama ─────────────────────────────────
-        $row = $table->addRow();
-        $row->addCell(4513, ['borderSize' => 0, 'borderColor' => 'FFFFFF'])
-            ->addText('');
-        $row->addCell(4513, ['borderSize' => 0, 'borderColor' => 'FFFFFF'])
-            ->addText($nama, [
-                'bold'      => true,
-                'size'      => $this->fontSize,
-                'name'      => $this->fontName,
-                'underline' => 'single',
-            ], ['alignment' => Jc::CENTER]);
+            if (!$placed) {
+                $imgCell->addText('', $fontPlain, $pNoGap);
+            }
+        });
 
-        // ── Baris jabatan ──────────────────────────────
-        $row = $table->addRow();
-        $row->addCell(4513, ['borderSize' => 0, 'borderColor' => 'FFFFFF'])
-            ->addText('');
-        $row->addCell(4513, ['borderSize' => 0, 'borderColor' => 'FFFFFF'])
-            ->addText($jabatan, [
-                'size' => $this->fontSize,
-                'name' => $this->fontName,
-            ], ['alignment' => Jc::CENTER]);
+        // Baris nama
+        $addRow($table, function ($cell) use ($nama, $fontNama, $pNoGap) {
+            $cell->addText($nama, $fontNama, $pNoGap);
+        });
+
+        // Baris jabatan
+        $addRow($table, function ($cell) use ($jabatan, $fontPlain, $pNoGap) {
+            $cell->addText($jabatan, $fontPlain, $pNoGap);
+        });
     }
 }
