@@ -1,9 +1,8 @@
+import IconInput from '@/components/Iconinput'
 import InputError from '@/components/InputError'
-import InputLabel from '@/components/InputLabel'
-import PrimaryButton from '@/components/PrimaryButton'
-import TextInput from '@/components/TextInput'
 import GuestLayout from '@/layouts/GuestLayout'
 import { Head, Link, useForm } from '@inertiajs/react'
+import { Loader2, Lock, Mail, User } from 'lucide-react'
 import React from 'react'
 
 interface RegisterForm {
@@ -14,20 +13,17 @@ interface RegisterForm {
 }
 
 export default function Register() {
-    const { data, setData, post, processing, errors, reset } =
-        useForm<RegisterForm>({
-            name: '',
-            email: '',
-            password: '',
-            password_confirmation: '',
-        })
+    const { data, setData, post, processing, errors, reset } = useForm<RegisterForm>({
+        name: '',
+        email: '',
+        password: '',
+        password_confirmation: '',
+    })
 
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-
         post(route('register'), {
-            onFinish: () =>
-                reset('password', 'password_confirmation'),
+            onFinish: () => reset('password', 'password_confirmation'),
         })
     }
 
@@ -35,111 +31,132 @@ export default function Register() {
         <GuestLayout>
             <Head title="Register" />
 
-            <form onSubmit={submit}>
-                <div>
-                    <InputLabel htmlFor="name" value="Name" />
+            <div className="mb-6">
+                <h2 className="text-xl font-semibold tracking-tight text-gray-900">
+                    Create your account
+                </h2>
+                <p className="mt-1 text-sm text-gray-500">
+                    Join the filing system to start managing documents.
+                </p>
+            </div>
 
-                    <TextInput
+            <form onSubmit={submit} className="space-y-4">
+                <div>
+                    <label
+                        htmlFor="name"
+                        className="mb-1.5 block text-xs font-medium text-gray-700"
+                    >
+                        Full name
+                    </label>
+                    <IconInput
                         id="name"
                         name="name"
+                        icon={User}
                         value={data.name}
-                        className="mt-1 block w-full"
                         autoComplete="name"
-                        isFocused
-                        onChange={(e) =>
-                            setData('name', e.target.value)
-                        }
+                        autoFocus
+                        placeholder="John Doe"
+                        onChange={e => setData('name', e.target.value)}
+                        error={Boolean(errors.name)}
                         required
                     />
-
-                    <InputError message={errors.name} className="mt-2" />
+                    <InputError message={errors.name} className="mt-1.5" />
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="email" value="Email" />
-
-                    <TextInput
+                <div>
+                    <label
+                        htmlFor="email"
+                        className="mb-1.5 block text-xs font-medium text-gray-700"
+                    >
+                        Email address
+                    </label>
+                    <IconInput
                         id="email"
-                        type="email"
                         name="email"
+                        type="email"
+                        icon={Mail}
                         value={data.email}
-                        className="mt-1 block w-full"
                         autoComplete="username"
-                        onChange={(e) =>
-                            setData('email', e.target.value)
-                        }
+                        placeholder="you@example.com"
+                        onChange={e => setData('email', e.target.value)}
+                        error={Boolean(errors.email)}
                         required
                     />
-
-                    <InputError message={errors.email} className="mt-2" />
+                    <InputError message={errors.email} className="mt-1.5" />
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
-
-                    <TextInput
+                <div>
+                    <label
+                        htmlFor="password"
+                        className="mb-1.5 block text-xs font-medium text-gray-700"
+                    >
+                        Password
+                    </label>
+                    <IconInput
                         id="password"
-                        type="password"
                         name="password"
+                        type="password"
+                        icon={Lock}
                         value={data.password}
-                        className="mt-1 block w-full"
                         autoComplete="new-password"
-                        onChange={(e) =>
-                            setData('password', e.target.value)
-                        }
+                        placeholder="At least 8 characters"
+                        onChange={e => setData('password', e.target.value)}
+                        error={Boolean(errors.password)}
                         required
                     />
-
-                    <InputError message={errors.password} className="mt-2" />
+                    <InputError message={errors.password} className="mt-1.5" />
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel
+                <div>
+                    <label
                         htmlFor="password_confirmation"
-                        value="Confirm Password"
-                    />
-
-                    <TextInput
+                        className="mb-1.5 block text-xs font-medium text-gray-700"
+                    >
+                        Confirm password
+                    </label>
+                    <IconInput
                         id="password_confirmation"
-                        type="password"
                         name="password_confirmation"
+                        type="password"
+                        icon={Lock}
                         value={data.password_confirmation}
-                        className="mt-1 block w-full"
                         autoComplete="new-password"
-                        onChange={(e) =>
-                            setData(
-                                'password_confirmation',
-                                e.target.value,
-                            )
-                        }
+                        placeholder="Repeat your password"
+                        onChange={e => setData('password_confirmation', e.target.value)}
+                        error={Boolean(errors.password_confirmation)}
                         required
                     />
-
                     <InputError
                         message={errors.password_confirmation}
-                        className="mt-2"
+                        className="mt-1.5"
                     />
                 </div>
 
-                <div className="flex justify-center">
-                    <button
+                <button
                     type="submit"
-                    className="bg-green-700 mt-6 text-sm text-white w-full max-w-sm object-contain py-2 rounded-full font-semibold"
                     disabled={processing}
-                    >
-                        Register
-                    </button>
-                </div>
-
-                <div className="mt-3 flex justify-center text-sm">
-                    <Link
-                        href={route('login')}
-                        className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                        Already registered?
-                    </Link>
-                </div>
+                    className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-red-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-red-900 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                    {processing ? (
+                        <>
+                            <Loader2 size={16} className="animate-spin" />
+                            <span>Creating account...</span>
+                        </>
+                    ) : (
+                        <span>Create account</span>
+                    )}
+                </button>
             </form>
+
+            <p className="mt-6 text-center text-sm text-gray-500">
+                Already have an account?{' '}
+                <Link
+                    href={route('login')}
+                    className="font-medium text-red-800 hover:text-red-900 hover:underline"
+                >
+                    Sign in
+                </Link>
+            </p>
         </GuestLayout>
     )
 }
